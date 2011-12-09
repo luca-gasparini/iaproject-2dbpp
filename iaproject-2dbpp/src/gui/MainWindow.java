@@ -4,20 +4,111 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.border.TitledBorder;
 
+import core.CoreDescriptor;
+import core.CoreManager;
+
 public class MainWindow extends AbstractFrame {
 
 	private static final long serialVersionUID = 3500944474175026838L;
+	
+	private class CoreItem {
+		private final String name;
+		private final Class<? extends CoreDescriptor> descClass;
+		private CoreDescriptor descriptor;
+		
+		public CoreItem(String name, Class<? extends CoreDescriptor> descClass) {
+			this.name = name;
+			this.descClass = descClass;
+		}
+		
+		@Override
+		public String toString() {
+			return this.name;
+		}
+		
+		public CoreDescriptor getDescriptor() throws Exception {
+			if (descriptor == null) {
+				descriptor = descClass.newInstance();
+			}
+			
+			return descriptor;
+		}
+	}
+	
+	private class EngineConfPanel extends JPanel {
+		
+		private static final long serialVersionUID = -3124313336856598663L;
+		
+		private final Color defaultColor; 
+		private JComponent prevComponent;
+		
+		public EngineConfPanel() {
+			super(new BorderLayout(0, 5));
+			defaultColor = this.getBackground();
+			
+			TitledBorder titleBorder = BorderFactory.createTitledBorder("CORE CONFIGURATION");
+			titleBorder.setTitleFont(GUIUtils.TITLE_FONT);
+			titleBorder.setTitleJustification(TitledBorder.LEFT);
+			this.setBorder(titleBorder);
+			
+			JComboBox coresCmb = new JComboBox();
+			Map<String, Class<? extends CoreDescriptor>> cores = CoreManager.getCores();
+			for (Entry<String, Class<? extends CoreDescriptor>> entity : cores.entrySet()) {
+				coresCmb.addItem(new CoreItem(entity.getKey(), entity.getValue()));
+			}
+			coresCmb.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					JComboBox box = (JComboBox) e.getSource();
+					CoreItem item = (CoreItem) box.getSelectedItem();
+					JComponent panel;
+					try {
+						panel = item.getDescriptor().getConfigurationComponent();
+					} catch (Exception e1) {
+						updateCorePanel(new JLabel(e1.toString()));
+						EngineConfPanel.this.setBackground(Color.RED);
+						return;
+					}
+					
+					EngineConfPanel.this.setBackground(defaultColor);
+					updateCorePanel(panel);
+				}
+			});
+			
+			JLabel initLabel = new JLabel("Select a CORE before starting");
+			initLabel.setVerticalAlignment(JLabel.TOP);
+			prevComponent = initLabel;
+			
+			this.add(coresCmb, BorderLayout.PAGE_START);
+			this.add(prevComponent, BorderLayout.CENTER);
+		}
+		
+		private void updateCorePanel(JComponent newComp) {
+			this.remove(prevComponent);
+			this.add(newComp, BorderLayout.CENTER);
+			prevComponent = newComp;
+			
+			this.validate();
+		}
+	}
 	
 	public MainWindow() {
 		super("IA Project - 2D Bin Packing Problem");
@@ -37,12 +128,6 @@ public class MainWindow extends AbstractFrame {
 		// empty
 		
 		//****** LINE_START *********//
-		JPanel engineConfPanel = new JPanel();
-		TitledBorder titleBorder = BorderFactory.createTitledBorder("CORE CONFIGURATION");
-		titleBorder.setTitleFont(GUIUtils.TITLE_FONT);
-		titleBorder.setTitleJustification(TitledBorder.LEFT);
-		engineConfPanel.setBorder(titleBorder);
-		engineConfPanel.setBackground(Color.RED);
 		
 		JButton confInputBtn = new JButton("CONFIGURE INPUT");
 		confInputBtn.setFont(GUIUtils.BUTTON_FONT);
@@ -58,7 +143,7 @@ public class MainWindow extends AbstractFrame {
 		
 		// lay them out in their panels
 		JPanel enginePanel = new JPanel(new BorderLayout(0, 5));
-		enginePanel.add(engineConfPanel, BorderLayout.CENTER);
+		enginePanel.add(new EngineConfPanel(), BorderLayout.CENTER);
 		
 		JPanel buttonPanel = new JPanel(new GridBagLayout());
 		GridBagConstraints con = new GridBagConstraints();
