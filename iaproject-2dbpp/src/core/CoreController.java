@@ -2,7 +2,7 @@ package core;
 
 public interface CoreController {
 	
-	public void execute();
+	public void start();
 	
 	public void pause();
 	

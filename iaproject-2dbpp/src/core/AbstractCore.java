@@ -14,7 +14,7 @@ public abstract class AbstractCore<T> extends SwingWorker<Void, CoreResult<T>> {
 	private class Controller implements CoreController {
 
 		@Override
-		public void execute() {
+		public void start() {
 			AbstractCore.this.execute();
 		}
 
@@ -84,7 +84,7 @@ public abstract class AbstractCore<T> extends SwingWorker<Void, CoreResult<T>> {
 			
 			@Override
 			public int getNIterations() {
-				return this.getNIterations();
+				return AbstractCore.this.getNIterations();
 			}
 			
 			@Override
@@ -94,7 +94,7 @@ public abstract class AbstractCore<T> extends SwingWorker<Void, CoreResult<T>> {
 			
 			@Override
 			public long getElapsedTime() {
-				return this.getElapsedTime();
+				return AbstractCore.this.getElapsedTime();
 			}
 			
 			@Override
@@ -134,7 +134,7 @@ public abstract class AbstractCore<T> extends SwingWorker<Void, CoreResult<T>> {
 		}
 		
 		if (this.isCancelled()) {
-			return true;
+			return false;
 		} else {
 			/* this is the right place to put the iteration increment because, 
 			 * here, worker is not in pause and it is already in the new processing
@@ -143,7 +143,7 @@ public abstract class AbstractCore<T> extends SwingWorker<Void, CoreResult<T>> {
 			 * step ahead.
 			 */
 			nIterations.incrementAndGet();
-			return false;
+			return true;
 		}
 	}
 	

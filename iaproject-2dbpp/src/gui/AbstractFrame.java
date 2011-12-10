@@ -10,12 +10,12 @@ public abstract class AbstractFrame extends JFrame {
 		setTitle(title);
 		
 		// lay out all the components
-		initInterface();
+		init();
 		
 		// pack & validate composed frame
 		this.validate();
 	}
 	
-	protected abstract void initInterface();
+	protected abstract void init();
 	
 }
