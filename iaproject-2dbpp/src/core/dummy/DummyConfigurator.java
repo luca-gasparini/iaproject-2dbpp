@@ -1,27 +1,30 @@
 package core.dummy;
 
-import java.awt.FlowLayout;
-
 import gui.OptimumPainter;
+import gui.common.JIntegerTextField;
+
+import java.awt.FlowLayout;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
-import core.CoreController;
-import core.CoreDescriptor;
+import core.AbstractConfigurator;
+import core.AbstractCore;
+import core.CoreConfiguration;
 import core.DataParsingException;
 
-public class DummyConfigurator implements CoreDescriptor {
+public class DummyConfigurator extends AbstractConfigurator<Integer> {
 	
-	private final JTextField tf = new JTextField(10);
+	private final JIntegerTextField tf = new JIntegerTextField();
 	private final JPanel completePane;
 	
 	public DummyConfigurator() {
 //		throw new IllegalArgumentException("Test Exception");
+		
 		completePane = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		completePane.add(new JLabel("Max ms to wait"));
+		tf.setColumns(10);
 		completePane.add(tf);
 	}
 	
@@ -31,18 +34,25 @@ public class DummyConfigurator implements CoreDescriptor {
 	}
 
 	@Override
-	public CoreController getConfiguredInstance(OptimumPainter painter) throws DataParsingException {
+	protected AbstractCore<Integer, ?> getConfiguredCore(CoreConfiguration<Integer> conf, OptimumPainter painter)
+			throws DataParsingException {
+		return new DummyCore(conf, painter);
+	}
+
+	@Override
+	protected Integer createCoreConfiguration() throws DataParsingException {
 		// parse configuration panel in order to get desired input
-		int ms;
-		try {
-			ms = Integer.parseInt(tf.getText());
-		} catch (NumberFormatException nfe) {
-			throw new DataParsingException(nfe.getMessage());
+		Integer ms = tf.getValue();
+		
+		if (ms == null) {
+			throw new DataParsingException("No wait time specified");
 		}
 		
-		// create configured Core
-		DummyCore core = new DummyCore(painter, ms);
-		return core.getController();
+		if (ms.intValue() <= 0) {
+			throw new DataParsingException("Wait time should be strictly positive");
+		}
+		
+		return ms;
 	}
 
 }

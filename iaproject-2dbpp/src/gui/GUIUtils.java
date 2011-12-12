@@ -46,4 +46,5 @@ public final class GUIUtils {
 	public static final void showErrorMessage(Component parent, String message) {
 		JOptionPane.showMessageDialog(parent, message, "Error", JOptionPane.ERROR_MESSAGE);
 	}
+	
 }

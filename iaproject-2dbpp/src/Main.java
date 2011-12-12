@@ -17,6 +17,8 @@ public class Main {
 			public void run() {
 				MainWindow window = new MainWindow();
 				window.setVisible(true);
+				
+//				ProblemConfigurer pc = new ProblemConfigurer(null, null);
 			}
 			
 		});

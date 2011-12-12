@@ -1,4 +1,4 @@
-package gui;
+package gui.common;
 
 import javax.swing.JFrame;
 
@@ -6,14 +6,15 @@ public abstract class AbstractFrame extends JFrame {
 	
 	private static final long serialVersionUID = 6379062773201320543L;
 
-	public AbstractFrame(String title) {
+	public AbstractFrame(String title, int closeOperation) {
 		setTitle(title);
+		this.setDefaultCloseOperation(closeOperation);
 		
 		// lay out all the components
 		init();
 		
-		// pack & validate composed frame
-		this.validate();
+//		// validate composed frame
+//		this.validate();
 	}
 	
 	protected abstract void init();

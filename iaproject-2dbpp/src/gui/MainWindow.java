@@ -1,5 +1,7 @@
 package gui;
 
+import gui.common.AbstractFrame;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -28,6 +30,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
+import logic.ProblemConfiguration;
 import core.CoreController;
 import core.CoreDescriptor;
 import core.CoreManager;
@@ -162,7 +165,7 @@ public class MainWindow extends AbstractFrame {
 		private static final long serialVersionUID = -2130969442515268077L;
 		
 		private JList binList;
-		// use unmodifiable JTextField so text can be selected
+		// use unmodifiable JTextField so text can be selected but not modified
 		private JTextField nIteration;
 		private JTextField fitnessValue;
 		private JTextField nBins;
@@ -179,7 +182,7 @@ public class MainWindow extends AbstractFrame {
 			this.setBorder(optTitleBorder);
 			
 			// create components
-			binList = new JList(new String[] {"bin1", "bin2", "bin3"});
+			binList = new JList();
 			binList.setVisibleRowCount(7);
 			binList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 			JScrollPane listScroller = new JScrollPane(binList, 
@@ -189,7 +192,7 @@ public class MainWindow extends AbstractFrame {
 			TitledBorder binTitle = BorderFactory.createTitledBorder("Bin List");
 			listScroller.setBorder(binTitle);
 			
-			JLabel elapsedTimeLbl = new JLabel("elabsed time");
+			JLabel elapsedTimeLbl = new JLabel("elapsed time");
 			elapsedTimeLbl.setHorizontalAlignment(SwingConstants.RIGHT);
 			nIteration = new JTextField(10);
 			nIteration.setEditable(false);
@@ -267,28 +270,65 @@ public class MainWindow extends AbstractFrame {
 
 		@Override
 		public void paint(GUIOptimum newOptimum) {
+			// print only if core is running
+			if (actualState == State.READY || actualState == State.CONFIGURATION) {
+				return;
+			}
+			
 			this.elapsedTime.setText(newOptimum.getElapsedTime() + "ms");
 			this.fitnessValue.setText(Float.toString(newOptimum.getFitness()));
 			this.nIteration.setText(Integer.toString(newOptimum.getNIterations()));
 			this.nBins.setText(Integer.toString(newOptimum.getBins().size()));
 			// TODO display bins!!!
 		}
+		
+		public void reset() {
+			this.elapsedTime.setText(null);
+			this.fitnessValue.setText(null);
+			this.nIteration.setText(null);
+			this.nBins.setText(null);
+			this.binList.removeAll();
+			// TODO remove displayed bins!!!
+		}
+	}
+	
+	public enum State {
+		CONFIGURATION,
+		READY,
+		RUNNING,
+		PAUSED
 	}
 	
 	private OptimumPaintingPanel opp;
 	private EngineConfPanel ecp;
-	private CoreController coreController; 
+	
+	private JLabel stateLabel;
+	
+	private JButton confInputBtn;
+	private JButton loadConfBtn;
+	private JButton saveConfBtn;
+	private JButton startCoreBtn;
+	private JButton pauseBtn;
+	private JButton resetBtn;
+	
+	private CoreController coreController;
+	private ProblemConfiguration problemConf;
+	
+	private State actualState;
 	
 	public MainWindow() {
-		super("IA Project - 2D Bin Packing Problem");
+		super("IA Project - 2D Bin Packing Problem", JFrame.EXIT_ON_CLOSE);
+		
+		this.switchToState(State.CONFIGURATION);
 	}
 
 	@Override
 	public void init() {
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
 		this.setSize(1100, 700);
 		this.setLocationRelativeTo(null);
+		
+		ecp = new EngineConfPanel();
+		opp = new OptimumPaintingPanel();
 		
 		JPanel mainPanel = new JPanel(new BorderLayout());
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(3, 3, 2, 3));
@@ -296,18 +336,28 @@ public class MainWindow extends AbstractFrame {
 		//****** PAGE_START *********//
 		// empty
 		
-		//****** LINE_START (engine configuration) *********//
-		
-		JButton confInputBtn = new JButton("CONFIGURE INPUT");
+		//****** LINE_START (engine configuration) *********//		
+		confInputBtn = new JButton("CONFIGURE PROBLEM");
 		confInputBtn.setFont(GUIUtils.BUTTON_FONT);
+		confInputBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ProblemConfigurer pc = new ProblemConfigurer(MainWindow.this, problemConf);
+				problemConf = pc.getValue();
+				
+				if (problemConf != null) {
+					switchToState(State.READY);
+				}
+			}
+		});
 		
-		JButton loadConfBtn = new JButton("LOAD CONFIGURATION");
+		loadConfBtn = new JButton("LOAD CONFIGURATION");
 		loadConfBtn.setFont(GUIUtils.BUTTON_FONT);
 		
-		JButton saveConfBtn = new JButton("SAVE CONFIGURATION");
+		saveConfBtn = new JButton("SAVE CONFIGURATION");
 		saveConfBtn.setFont(GUIUtils.BUTTON_FONT);
 		
-		JButton startCoreBtn = new JButton("START");
+		startCoreBtn = new JButton("START");
 		startCoreBtn.setFont(GUIUtils.BUTTON_FONT);
 		startCoreBtn.addActionListener(new ActionListener() {
 			@Override
@@ -316,13 +366,26 @@ public class MainWindow extends AbstractFrame {
 					GUIUtils.showErrorMessage(MainWindow.this, "There's an already running core: reset it first");
 					return;
 				}
+				if (problemConf == null) {
+					GUIUtils.showErrorMessage(MainWindow.this, "Please CONFIGURE PROBLEM first");
+					return;
+				}
 				
 				try {
 					CoreDescriptor core = ecp.getChoosedCore();
-					coreController = core.getConfiguredInstance(opp);
+					coreController = core.getConfiguredInstance(problemConf, opp);
 				} catch (Exception e1) {
 					GUIUtils.showErrorMessage(MainWindow.this, e1.toString());
 					return;
+				}
+				
+				switch (actualState) {
+				case READY:
+					switchToState(State.RUNNING);
+					break;
+				default:
+					GUIUtils.showErrorMessage(MainWindow.this, "Wrong state: should be in READY state");
+					break;
 				}
 				
 				coreController.start();
@@ -331,7 +394,6 @@ public class MainWindow extends AbstractFrame {
 		
 		// lay them out in their panels
 		JPanel enginePanel = new JPanel(new BorderLayout(0, 5));
-		ecp = new EngineConfPanel();
 		enginePanel.add(ecp, BorderLayout.CENTER);
 		
 		JPanel buttonPanel = new JPanel(new GridBagLayout());
@@ -372,11 +434,58 @@ public class MainWindow extends AbstractFrame {
 		
 		//****** CENTER (optimum displayer) *********//
 		// create components
-		JButton pauseBtn = new JButton("PAUSE");
+		pauseBtn = new JButton("PAUSE");
 		pauseBtn.setFont(GUIUtils.BUTTON_FONT);
+		pauseBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (coreController == null) {
+					GUIUtils.showErrorMessage(MainWindow.this, "Core is not started yet");
+					return;
+				}
+				
+				switch (actualState) {
+				case CONFIGURATION:
+				case READY:
+					GUIUtils.showErrorMessage(MainWindow.this, "Wrong state");
+					break;
+				case PAUSED:
+					switchToState(State.RUNNING);
+					coreController.resume();
+					break;
+				case RUNNING:
+					switchToState(State.PAUSED);
+					coreController.pause();
+					break;
+				}
+			}
+		});
 		
-		JButton resetBtn = new JButton("NEW EXECUTION");
+		resetBtn = new JButton("NEW EXECUTION");
 		resetBtn.setFont(GUIUtils.BUTTON_FONT);
+		resetBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (coreController == null) {
+					GUIUtils.showErrorMessage(MainWindow.this, "Core is not started yet");
+					return;
+				}
+				
+				switch (actualState) {
+				case READY:
+				case CONFIGURATION:
+					GUIUtils.showErrorMessage(MainWindow.this, "Core is not running: START it first");
+					break;
+					
+				case RUNNING:
+				case PAUSED:
+					coreController.stop();
+					coreController = null;
+					switchToState(State.READY);
+					break;
+				}
+			}
+		});
 		
 		// add panels to the mainPanel
 		JPanel btnPanel = new JPanel(new GridLayout(1, 0));
@@ -387,7 +496,6 @@ public class MainWindow extends AbstractFrame {
 		btnPanel.add(Box.createGlue());
 		
 		JPanel tmpPanel = new JPanel(new BorderLayout(0, 5));
-		opp = new OptimumPaintingPanel();
 		tmpPanel.add(opp, BorderLayout.CENTER);
 		tmpPanel.add(btnPanel, BorderLayout.PAGE_END);
 		
@@ -400,7 +508,7 @@ public class MainWindow extends AbstractFrame {
 		// empty
 		
 		//****** PAGE_END (state bar) *********//
-		JLabel stateLabel = new JLabel("This is our state bar");
+		stateLabel = new JLabel("This is our state bar");
 		stateLabel.setFont(GUIUtils.STATE_BAR_FONT);
 		stateLabel.setAlignmentX(JLabel.LEFT_ALIGNMENT);
 		
@@ -413,6 +521,40 @@ public class MainWindow extends AbstractFrame {
 		//****** FINALLY... *********//
 		// ... add mainPanel to this frame
 		this.add(mainPanel, BorderLayout.CENTER);
+	}
+	
+	
+	public void switchToState(State newState) {
+		
+		switch (newState) {
+		case CONFIGURATION:
+			stateLabel.setText("Waiting for CONFIGURATION");
+			pauseBtn.setText("PAUSE");
+			opp.reset();
+			
+			break;
+			
+		case READY:
+			stateLabel.setText("Core READY");
+			pauseBtn.setText("PAUSE");
+			opp.reset();
+			
+			break;
+			
+		case RUNNING:
+			stateLabel.setText("Core RUNNING");
+			pauseBtn.setText("PAUSE");
+			
+			break;
+			
+		case PAUSED:
+			stateLabel.setText("Core PAUSED");
+			pauseBtn.setText("RESUME");
+			
+			break;
+		}
+		
+		this.actualState = newState;
 	}
 
 }

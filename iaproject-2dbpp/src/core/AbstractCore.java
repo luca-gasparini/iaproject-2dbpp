@@ -9,7 +9,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.SwingWorker;
 
-public abstract class AbstractCore<T> extends SwingWorker<Void, CoreResult<T>> {
+/**
+ * 
+ * @author socket
+ *
+ * @param <K> Core-specific configuration class
+ * @param <T> Core-specific result class
+ */
+public abstract class AbstractCore<K, T> extends SwingWorker<Void, CoreResult<T>> {
 	
 	private class Controller implements CoreController {
 
@@ -21,7 +28,7 @@ public abstract class AbstractCore<T> extends SwingWorker<Void, CoreResult<T>> {
 		@Override
 		public void pause() {
 			synchronized (mutex) {
-				isPaused = false;
+				isPaused = true;
 			}
 		}
 
@@ -61,9 +68,16 @@ public abstract class AbstractCore<T> extends SwingWorker<Void, CoreResult<T>> {
 	private final OptimumPainter displayer;
 	private final CoreController controller;
 	private final Core2GuiTranslator<T> c2gt;
-	private volatile long startTime;
 	
-	public AbstractCore(OptimumPainter painter, Core2GuiTranslator<T> translator) {
+	// volatile because can be accessed by different threads
+	private volatile long startTime = -1;
+	private volatile long lastPauseStart = -1;
+	private volatile long totPauseTime = 0;
+	
+	public AbstractCore(CoreConfiguration<K> configuration,
+			OptimumPainter painter, 
+			Core2GuiTranslator<T> translator) {
+		
 		this.displayer = painter;
 		this.c2gt = translator;
 		/* it's OK to instantiate the Controller here because the class is
@@ -105,20 +119,16 @@ public abstract class AbstractCore<T> extends SwingWorker<Void, CoreResult<T>> {
 	}
 	
 	protected final boolean canContinue() {
-		/* This is the place where we can add other constraints in Core
-		 * execution, for example maximum # of iterations.
-		 
-		if (getNIterations() > SOME_MAX_VALUE) {
+		if (reachedStoppingCondition()) {
 			return false;
 		}
-		
-		*/
 		
 		/* check if it's paused and, if so, send thread to sleep,
 		 * otherwise return true.
 		 */
 		synchronized (mutex) {
 			while(isPaused) {
+				this.lastPauseStart = System.currentTimeMillis();
 				try {
 					mutex.wait();
 				} catch (InterruptedException e) {
@@ -130,6 +140,7 @@ public abstract class AbstractCore<T> extends SwingWorker<Void, CoreResult<T>> {
 					// tells worker to exit
 					return false;
 				}
+				this.totPauseTime += System.currentTimeMillis() - this.lastPauseStart;
 			}
 		}
 		
@@ -158,9 +169,10 @@ public abstract class AbstractCore<T> extends SwingWorker<Void, CoreResult<T>> {
 	 * TODO: write an explanation of how this method should be implemented
 	 */
 	protected abstract void doWork();
+	protected abstract boolean reachedStoppingCondition();
 	
 	public final long getElapsedTime() {
-		return System.currentTimeMillis() - this.startTime;
+		return System.currentTimeMillis() - this.startTime - this.totPauseTime;
 	}
 	
 	public final int getNIterations() {
@@ -170,4 +182,5 @@ public abstract class AbstractCore<T> extends SwingWorker<Void, CoreResult<T>> {
 	public final CoreController getController() {
 		return this.controller;
 	}
+	
 }
