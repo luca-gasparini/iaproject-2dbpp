@@ -4,49 +4,110 @@ import gui.common.AbstractDialog;
 import gui.common.JIntegerTextField;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
-
-import core.DataParsingException;
 
 import logic.BinConfiguration;
 import logic.PacketConfiguration;
 import logic.ProblemConfiguration;
+import core.DataParsingException;
 
 public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 	
 	private static final long serialVersionUID = -1111598546169426454L;
+	
+	private class PacketGraphic extends JPanel {
+		private static final long serialVersionUID = -316443024628550817L;
 
-	private class PacketsPainter extends JScrollPane {
+		private static final int MAGNIFYING = 5;
 		
-		private static final long serialVersionUID = 3890016259055101406L;
-
-		public PacketsPainter() {
-			// TODO
+		private final PacketConfiguration pc;
+		private final Dimension rectDimension;
+		
+		public PacketGraphic(PacketConfiguration pc) {
+			this.pc = pc;
+			this.rectDimension = new Dimension(pc.getWidth() * MAGNIFYING, 
+					pc.getHeight() * MAGNIFYING);
 			
+			this.setPreferredSize(new Dimension(rectDimension.width + 4, rectDimension.height + 4));
+			this.setOpaque(false);
 		}
 		
-		public List<PacketConfiguration> getPackets() {
-			// TODO
-			return Collections.emptyList();
+		@Override
+		protected void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			
+			Graphics2D g2d = (Graphics2D) g;
+			
+			Rectangle rect = new Rectangle(new Point(2, 2), rectDimension);
+			
+			g2d.setColor(pc.getColor());
+			g2d.fill(rect);
+			
+			g2d.setColor(Color.BLACK);
+			g2d.draw(rect);
 		}
 		
-		public void paintPackets(List<PacketConfiguration> pkts) {
-			// TODO
+	}
+	
+	private class PacketListRended implements ListCellRenderer {
+		
+		@Override
+		public Component getListCellRendererComponent(JList list, Object value,
+				int index, boolean isSelected, boolean cellHasFocus) {
+			Box theBox = Box.createHorizontalBox();
+			
+			PacketConfiguration pc = (PacketConfiguration) value;
+			
+			JLabel dimensionLbl = new JLabel(pc.getWidth() + "x" + pc.getHeight());
+			JLabel numberLbl = new JLabel("#" + pc.getMolteplicity());
+			
+			JPanel packet = new PacketGraphic(pc);
+			
+			theBox.add(packet);
+			theBox.add(Box.createHorizontalStrut(20));
+			theBox.add(dimensionLbl);
+			theBox.add(Box.createHorizontalStrut(20));
+			theBox.add(numberLbl);
+			theBox.add(Box.createHorizontalGlue());
+			
+			if (isSelected) {
+				theBox.setBackground(list.getSelectionBackground());
+				theBox.setForeground(list.getSelectionForeground());
+			} else {
+				theBox.setBackground(list.getBackground());
+				theBox.setForeground(list.getForeground());
+			}
+			theBox.setEnabled(list.isEnabled());
+			theBox.setFont(list.getFont());
+			theBox.setOpaque(true);
+			
+			return theBox;
 		}
 		
 	}
@@ -56,7 +117,7 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		super(parent, "Problem configuration", oldValue);
 	}
 	
-	private PacketsPainter pktPainter;
+	private DefaultListModel packetList;
 	private JIntegerTextField binWidth;
 	private JIntegerTextField binHeight;
 	
@@ -65,7 +126,10 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		binWidth.setValue(Integer.valueOf(value.getBin().getWidth()));
 		binHeight.setValue(Integer.valueOf(value.getBin().getHeight()));
 		
-		pktPainter.paintPackets(value.getPackets());
+		packetList.removeAllElements();
+		for (PacketConfiguration pc : value.getPackets()) {
+			packetList.addElement(pc);
+		}
 	}
 
 	@Override
@@ -78,16 +142,17 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		}
 		BinConfiguration bc = new BinConfiguration(binW.intValue(), binH.intValue());
 		
-		List<PacketConfiguration> packets = pktPainter.getPackets();
-		if (packets == null) {
-			throw new DataParsingException("No packets inserted");
-		}
+		PacketConfiguration[] tmp = new PacketConfiguration[packetList.size()];
+		packetList.copyInto(tmp);
+		
+		List<PacketConfiguration> packets = Arrays.asList(tmp);
 		
 		return new ProblemConfiguration(bc, packets);
 	}
 
 	@Override
 	protected JComponent buildValuePainter() {
+		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		
 		// Packet configuration
 		JButton editBtn = new JButton("EDIT");
@@ -95,6 +160,12 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		
 		JButton dropAllBtn = new JButton("DROP ALL");
 		dropAllBtn.setFont(GUIUtils.BUTTON_FONT);
+		dropAllBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				packetList.removeAllElements();
+			}
+		});
 		
 		JPanel btnPanel = new JPanel(new GridLayout(1, 0));
 		btnPanel.add(Box.createHorizontalGlue());
@@ -103,7 +174,12 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		btnPanel.add(editBtn);
 		btnPanel.add(Box.createHorizontalGlue());
 		
-		pktPainter = new PacketsPainter();
+		packetList = new DefaultListModel();
+		JList pktList = new JList(packetList);
+		pktList.setCellRenderer(new PacketListRended());
+		JScrollPane pktPainter = new JScrollPane(pktList, 
+				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, 
+				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		
 		JPanel pktPane = new JPanel(new BorderLayout());
 		TitledBorder border = BorderFactory.createTitledBorder("Input packets");
@@ -132,15 +208,17 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		border = BorderFactory.createTitledBorder("Bin size");
 		binBox.setBorder(border);
 		binBox.add(binWLbl);
+		binBox.add(Box.createHorizontalStrut(5));
 		binBox.add(binWidth);
 		binBox.add(Box.createHorizontalStrut(20));
 		binBox.add(binHLbl);
+		binBox.add(Box.createHorizontalStrut(5));
 		binBox.add(binHeight);
 		
 		// add all together
-		JPanel pane = new JPanel(new GridLayout(0, 1));
-		pane.add(pktPane);
-		pane.add(binBox);
+		JPanel pane = new JPanel(new BorderLayout());
+		pane.add(pktPane, BorderLayout.CENTER);
+		pane.add(binBox, BorderLayout.PAGE_END);
 		
 		return pane;
 	}

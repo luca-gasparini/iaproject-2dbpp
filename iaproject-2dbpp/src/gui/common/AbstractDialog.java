@@ -37,6 +37,7 @@ public abstract class AbstractDialog<T> extends JDialog {
 		
 		this.setModal(true);
 		this.setTitle(title);
+		this.setSize(700, 600);
 		
 		this.setLayout(new BorderLayout(0, 10));
 		initContent();
@@ -46,7 +47,6 @@ public abstract class AbstractDialog<T> extends JDialog {
 			paintValue(value);
 		}
 		
-		this.pack();
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 	}
