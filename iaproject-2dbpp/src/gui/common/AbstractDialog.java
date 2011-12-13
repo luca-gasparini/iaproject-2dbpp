@@ -48,7 +48,6 @@ public abstract class AbstractDialog<T> extends JDialog {
 		}
 		
 		this.setLocationRelativeTo(null);
-		this.setVisible(true);
 	}
 	
 	/**
@@ -121,7 +120,8 @@ public abstract class AbstractDialog<T> extends JDialog {
 		this.dispose();
 	}
 	
-	public T getValue() {
+	public final T askUser() {
+		this.setVisible(true);
 		return value;
 	}
 	

@@ -15,6 +15,10 @@ import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.List;
 
@@ -117,7 +121,7 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		super(parent, "Problem configuration", oldValue);
 	}
 	
-	private DefaultListModel packetList;
+	private DefaultListModel packetListModel;
 	private JIntegerTextField binWidth;
 	private JIntegerTextField binHeight;
 	
@@ -126,9 +130,9 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		binWidth.setValue(Integer.valueOf(value.getBin().getWidth()));
 		binHeight.setValue(Integer.valueOf(value.getBin().getHeight()));
 		
-		packetList.removeAllElements();
+		packetListModel.removeAllElements();
 		for (PacketConfiguration pc : value.getPackets()) {
-			packetList.addElement(pc);
+			packetListModel.addElement(pc);
 		}
 	}
 
@@ -142,12 +146,32 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		}
 		BinConfiguration bc = new BinConfiguration(binW.intValue(), binH.intValue());
 		
-		PacketConfiguration[] tmp = new PacketConfiguration[packetList.size()];
-		packetList.copyInto(tmp);
+		PacketConfiguration[] tmp = new PacketConfiguration[packetListModel.size()];
+		packetListModel.copyInto(tmp);
 		
 		List<PacketConfiguration> packets = Arrays.asList(tmp);
 		
 		return new ProblemConfiguration(bc, packets);
+	}
+	
+	/**
+	 * 
+	 * @param selectedRow can be negative that means no selection.
+	 */
+	private void modifyPacketList(int selectedRow) {
+		PacketConfiguration[] tmp = new PacketConfiguration[packetListModel.size()];
+		packetListModel.copyInto(tmp);
+		
+		PacketsConfigurer packConf = new PacketsConfigurer(ProblemConfigurer.this, tmp);
+		if (selectedRow >= 0) {
+			packConf.ensureSelectedRow(selectedRow);
+		}
+		PacketConfiguration[] newPackets = packConf.askUser();
+		
+		packetListModel.removeAllElements();
+		for (PacketConfiguration pc : newPackets) {
+			packetListModel.addElement(pc);
+		}
 	}
 
 	@Override
@@ -160,15 +184,7 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		editBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				PacketConfiguration[] tmp = new PacketConfiguration[packetList.size()];
-				packetList.copyInto(tmp);
-				
-				PacketsConfigurer packConf = new PacketsConfigurer(ProblemConfigurer.this, tmp);
-				
-				packetList.removeAllElements();
-				for (PacketConfiguration pc : packConf.getValue()) {
-					packetList.addElement(pc);
-				}
+				modifyPacketList(-1);
 			}
 		});
 		
@@ -177,7 +193,7 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		dropAllBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				packetList.removeAllElements();
+				packetListModel.removeAllElements();
 			}
 		});
 		
@@ -188,9 +204,26 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		btnPanel.add(editBtn);
 		btnPanel.add(Box.createHorizontalGlue());
 		
-		packetList = new DefaultListModel();
-		JList pktList = new JList(packetList);
+		packetListModel = new DefaultListModel();
+		final JList pktList = new JList(packetListModel);
 		pktList.setCellRenderer(new PacketListRended());
+		pktList.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+					packetListModel.remove(pktList.getSelectedIndex());
+				}
+			}
+		});
+		pktList.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					modifyPacketList(pktList.getSelectedIndex());
+				}
+			}
+		});
+		
 		JScrollPane pktPainter = new JScrollPane(pktList, 
 				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, 
 				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);

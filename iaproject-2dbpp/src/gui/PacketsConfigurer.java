@@ -5,10 +5,16 @@ import gui.common.AbstractDialog;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Vector;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
@@ -20,8 +26,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
@@ -33,10 +40,11 @@ public class PacketsConfigurer extends AbstractDialog<PacketConfiguration[]> {
 	private static final long serialVersionUID = -5093906029953118604L;
 	
 	private enum Columns {
-		WIDTH("Width", 0, Integer.class),
-		HEIGHT("Height", 1, Integer.class),
-		MOLTEPLICITY("Molteplicity", 2, Integer.class),
-		COLOR("Color", 3, Color.class);
+		INDEX("#", 0, Integer.class),
+		WIDTH("Width", 1, Integer.class),
+		HEIGHT("Height", 2, Integer.class),
+		MOLTEPLICITY("Molteplicity", 3, Integer.class),
+		COLOR("Color", 4, Color.class);
 		
 		private final String columnName;
 		private final int colIndex;
@@ -138,6 +146,11 @@ public class PacketsConfigurer extends AbstractDialog<PacketConfiguration[]> {
 				Object value, boolean isSelected, boolean hasFocus, int row,
 				int column) {
 			
+			if (value == null) {
+				setBackground(table.getBackground());
+				return this;
+			}
+			
 			Color newColor = (Color) value;
 	        setBackground(newColor);
 	        
@@ -160,30 +173,128 @@ public class PacketsConfigurer extends AbstractDialog<PacketConfiguration[]> {
 						+ newColor.getBlue());
 			return this;
 		}
+		
 	}
 	
-	private class MyTableModel extends DefaultTableModel {
+	private class MyTableModel extends AbstractTableModel {
 		
 		private static final long serialVersionUID = 8300604930231863330L;
-
 		
-		public MyTableModel(Object[] columnNames, int rowCount) {
-			super(columnNames, rowCount);
+		private final Random rand = new Random(System.currentTimeMillis());
+		private final String[] columnNames;
+		private final Class<?>[] columnTypes;
+		private final ArrayList<List<Object>> dataRows;
+		
+		public MyTableModel() {
+			columnNames = new String[Columns.values().length];
+			columnTypes = new Class[Columns.values().length];
+			for (Columns col : Columns.values()) {
+				columnNames[col.getIndex()] = col.getName();
+				columnTypes[col.getIndex()] = col.getType();
+			}
+			this.dataRows = new ArrayList<List<Object>>();
+		}
+		
+		@Override
+		public String getColumnName(int column) {
+			return columnNames[column];
+		}
+		
+		@Override
+		public Class<?> getColumnClass(int columnIndex) {
+			return columnTypes[columnIndex];
+		}
+		
+		@Override
+		public boolean isCellEditable(int row, int column) {
+			if (column == Columns.INDEX.getIndex()) {
+				return false;
+			}
+			return true;
+		}
+		
+		@Override
+		public void setValueAt(Object aValue, int row, int column) {
+			if (row >= dataRows.size()) {
+				// user is inserting a new packet so...
+				// ...insert a new empty row in dataRows...
+				dataRows.add(Arrays.asList(new Object[columnNames.length]));
+				// ...set row index...
+				setValueAt(Integer.valueOf(dataRows.size() - 1), 
+						dataRows.size() - 1 , Columns.INDEX.getIndex());
+				// ...set a default color...
+				setValueAt(new Color(rand.nextInt()), 
+						dataRows.size() - 1 , Columns.COLOR.getIndex());
+				// ...fire the new-row events for the just inserted row
+				fireTableRowsInserted(dataRows.size() - 1, dataRows.size() - 1);
+			}
+			
+			List<Object> rowData = dataRows.get(row);
+			rowData.set(column, aValue);
+			fireTableCellUpdated(row, column);
+		}
+		
+		@Override
+		public Object getValueAt(int row, int column) {
+			if (row >= dataRows.size()) {
+				return null;
+			}
+			
+			List<Object> rowData = dataRows.get(row);
+			return rowData.get(column);
 		}
 
 		@Override
-		public Class<?> getColumnClass(int columnIndex) {
-			for (Columns col : Columns.values()) {
-				if (col.getIndex() == columnIndex) {
-					return col.getType();
-				}
+		public int getRowCount() {
+			return dataRows.size() + 1;
+		}
+
+		@Override
+		public int getColumnCount() {
+			return columnNames.length;
+		}
+		
+		public void removeRow(int row) {
+			if (row >= dataRows.size()) {
+				// do nothing
+				return;
 			}
 			
-			throw new IllegalStateException("Column is not present");
+			// remove row
+			dataRows.remove(row);
+			fireTableRowsDeleted(row, row);
+			
+			// update all indexes from removed row to the end
+			for (int i = row; i < dataRows.size(); i++) {
+				setValueAt(Integer.valueOf(i), i, Columns.INDEX.getIndex());
+			}
+		}
+		
+		public void addRow(PacketConfiguration pc) {
+			Object[] rowData = new Object[getColumnCount()];
+			
+			rowData[Columns.INDEX.getIndex()] = Integer.valueOf(dataRows.size());
+			rowData[Columns.WIDTH.getIndex()] = Integer.valueOf(pc.getWidth());
+			rowData[Columns.HEIGHT.getIndex()] = Integer.valueOf(pc.getHeight());
+			rowData[Columns.MOLTEPLICITY.getIndex()] = Integer.valueOf(pc.getMolteplicity());
+			rowData[Columns.COLOR.getIndex()] = pc.getColor();
+			
+			dataRows.add(Arrays.asList(rowData));
+			
+			fireTableRowsInserted(dataRows.size() - 1, dataRows.size() - 1);
+		}
+		
+		/**
+		 * YOU MUST NOT MODIFY RETURNED DATA!!
+		 * @return
+		 */
+		public ArrayList<List<Object>> getData() {
+			return this.dataRows;
 		}
 	}
 	
-	private DefaultTableModel packets;
+	private MyTableModel packets;
+	private JTable pktTable;
 	
 	public PacketsConfigurer(Window parent,	PacketConfiguration[] oldValue) {
 		super(parent, "Packets configuration", oldValue);
@@ -192,31 +303,29 @@ public class PacketsConfigurer extends AbstractDialog<PacketConfiguration[]> {
 	@Override
 	protected void paintValue(PacketConfiguration[] value) {
 		for (PacketConfiguration pc : value) {
-			Object[] rowData = new Object[Columns.values().length];
-			
-			rowData[Columns.WIDTH.getIndex()] = Integer.valueOf(pc.getWidth());
-			rowData[Columns.HEIGHT.getIndex()] = Integer.valueOf(pc.getHeight());
-			rowData[Columns.MOLTEPLICITY.getIndex()] = Integer.valueOf(pc.getMolteplicity());
-			rowData[Columns.COLOR.getIndex()] = pc.getColor();
-			
-			packets.addRow(rowData);
+			packets.addRow(pc);
 		}
 	}
 
 	@Override
 	protected PacketConfiguration[] getUIValue() throws DataParsingException {
-		PacketConfiguration[] pktArray = new PacketConfiguration[packets.getRowCount()];
+		List<List<Object>> dataVector = packets.getData();
 		
-		int i = 0;
-		for (Object rowObj : packets.getDataVector()) {
-			Vector<?> row = (Vector<?>) rowObj;
+		PacketConfiguration[] pktArray = new PacketConfiguration[dataVector.size()];
+		
+		for (int i = 0; i < dataVector.size(); i++) {
+			List<Object> row = dataVector.get(i);
 			
 			Integer width = (Integer) row.get(Columns.WIDTH.getIndex());
+			if (width == null) throw new DataParsingException("Invalid width on row " + i);
 			Integer height = (Integer) row.get(Columns.HEIGHT.getIndex());
+			if (height == null) throw new DataParsingException("Invalid height on row " + i);
 			Integer molteplicity = (Integer) row.get(Columns.MOLTEPLICITY.getIndex());
+			if (molteplicity == null) throw new DataParsingException("Invalid molteplicity on row " + i);
 			Color color = (Color) row.get(Columns.COLOR.getIndex());
+			if (color == null) throw new DataParsingException("Invalid color on row " + i);
 			
-			pktArray[i++] = new PacketConfiguration(width.intValue(), 
+			pktArray[i] = new PacketConfiguration(width.intValue(), 
 					height.intValue(), molteplicity.intValue(), color);
 		}
 				
@@ -226,16 +335,22 @@ public class PacketsConfigurer extends AbstractDialog<PacketConfiguration[]> {
 	@Override
 	protected JComponent buildValuePainter() {
 		
-		String[] columnNames = new String[Columns.values().length];
-		for (Columns col : Columns.values()) {
-			columnNames[col.getIndex()] = col.getName();
-		}
+		packets = new MyTableModel();
 		
-		packets = new MyTableModel(columnNames, 0);
-		
-		JTable pktTable = new JTable(packets);
+		pktTable = new JTable(packets);
 		pktTable.setDefaultEditor(Color.class, new ColorCellEditor());
 		pktTable.setDefaultRenderer(Color.class, new ColorCellRenderer());
+		pktTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		pktTable.setRowSelectionAllowed(true);
+		pktTable.setColumnSelectionAllowed(false);
+		pktTable.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+					packets.removeRow(pktTable.getSelectedRow());
+				}
+			}
+		});
 		
 		JScrollPane scroller = new JScrollPane(pktTable, 
 				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, 
@@ -246,6 +361,13 @@ public class PacketsConfigurer extends AbstractDialog<PacketConfiguration[]> {
 		pane.add(GUIUtils.getHorizontalSeparator(5, 0), BorderLayout.PAGE_END);
 		
 		return pane;
+	}
+	
+	public void ensureSelectedRow(int row) {
+		Rectangle rect = pktTable.getCellRect(row, 0, true);
+		pktTable.scrollRectToVisible(rect);
+		pktTable.setRowSelectionInterval(row, row);
+		pktTable.setColumnSelectionInterval(1, 1);
 	}
 
 }

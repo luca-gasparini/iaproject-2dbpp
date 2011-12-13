@@ -1,3 +1,4 @@
+import gui.MainWindow;
 import gui.ProblemConfigurer;
 
 import java.awt.Color;
@@ -24,19 +25,20 @@ public class Main {
 			
 			@Override
 			public void run() {
-//				MainWindow window = new MainWindow();
-//				window.setVisible(true);
+				MainWindow window = new MainWindow();
+				window.setVisible(true);
 				
-				BinConfiguration bc = new BinConfiguration(10, 12);
-				PacketConfiguration pkt1 = new PacketConfiguration(1, 1, 10, Color.RED);
-				PacketConfiguration pkt2 = new PacketConfiguration(100, 100, 9, Color.YELLOW);
-				
-				List<PacketConfiguration> pkts = new LinkedList<PacketConfiguration>();
-				Collections.addAll(pkts, pkt1, pkt2);
-				
-				ProblemConfiguration problemConf = new ProblemConfiguration(bc, pkts);
-				
-				ProblemConfigurer pc = new ProblemConfigurer(null, problemConf);
+//				BinConfiguration bc = new BinConfiguration(10, 12);
+//				PacketConfiguration pkt1 = new PacketConfiguration(1, 1, 10, Color.RED);
+//				PacketConfiguration pkt2 = new PacketConfiguration(100, 100, 9, Color.YELLOW);
+//				
+//				List<PacketConfiguration> pkts = new LinkedList<PacketConfiguration>();
+//				Collections.addAll(pkts, pkt1, pkt2);
+//				
+//				ProblemConfiguration problemConf = new ProblemConfiguration(bc, pkts);
+//				
+//				ProblemConfigurer pc = new ProblemConfigurer(null, problemConf);
+//				pc.askUser();
 			}
 			
 		});

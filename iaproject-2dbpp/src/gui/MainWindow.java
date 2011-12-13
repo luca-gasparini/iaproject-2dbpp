@@ -343,7 +343,7 @@ public class MainWindow extends AbstractFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				ProblemConfigurer pc = new ProblemConfigurer(MainWindow.this, problemConf);
-				problemConf = pc.getValue();
+				problemConf = pc.askUser();
 				
 				if (problemConf != null) {
 					switchToState(State.READY);
