@@ -157,6 +157,20 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		// Packet configuration
 		JButton editBtn = new JButton("EDIT");
 		editBtn.setFont(GUIUtils.BUTTON_FONT);
+		editBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				PacketConfiguration[] tmp = new PacketConfiguration[packetList.size()];
+				packetList.copyInto(tmp);
+				
+				PacketsConfigurer packConf = new PacketsConfigurer(ProblemConfigurer.this, tmp);
+				
+				packetList.removeAllElements();
+				for (PacketConfiguration pc : packConf.getValue()) {
+					packetList.addElement(pc);
+				}
+			}
+		});
 		
 		JButton dropAllBtn = new JButton("DROP ALL");
 		dropAllBtn.setFont(GUIUtils.BUTTON_FONT);
