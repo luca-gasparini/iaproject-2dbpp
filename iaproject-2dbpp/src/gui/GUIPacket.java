@@ -2,14 +2,16 @@ package gui;
 
 import java.awt.Color;
 import java.awt.Rectangle;
+//import java.awt.Point;
+import java.awt.Dimension;
 
 import logic.Packet;
 
 public class GUIPacket extends Packet {
 
-	private final Color color; // BLUE default color (only for debug use)
-	private final Rectangle rect;
-		
+	private final Color color; // BLUE default color (solo per debug)
+	private Rectangle rect;
+	
 	public GUIPacket(int id, int width, int height) {
 		this(id, width, height, Color.BLUE, 0, 0);
 	}
@@ -21,13 +23,7 @@ public class GUIPacket extends Packet {
 	public GUIPacket(int id, int width, int height, Color color, int x, int y) {
 		super(id, width, height, x, y);
 		this.color = color;
-		this.rect = new Rectangle(this.getWidth(), this.getHeight(), 0, this.getHeight());
-	}
-	
-	@Override
-	public void setPoint(int x, int y) {
-		super.setPoint(x, y);
-		this.rect.setLocation(x, y+this.getHeight());
+		this.rect = null;
 	}
 	
 	public Color getColor() {
@@ -35,7 +31,17 @@ public class GUIPacket extends Packet {
 	}
 	
 	public Rectangle getRectangle() {
-		return this.rect;
+		
+		//Point p = new Point(this.getPointX(), getPointY()+this.getHeight());
+		Dimension d = null;
+		
+		if (!(this.isRotate()))
+			d = new Dimension(this.getWidth(), this.getHeight());
+		else
+			d = new Dimension(this.getHeight(), this.getWidth());
+		
+		rect = new Rectangle(d);
+		return rect;
 	}
 	
 }

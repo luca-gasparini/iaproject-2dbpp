@@ -19,7 +19,7 @@ public class Packet extends AbstractPacket {
 		this.rotate = false;
 	}
 	
-	protected class Point {
+	private class Point {
 		private int x;
 		private int y;
 		
@@ -49,8 +49,12 @@ public class Packet extends AbstractPacket {
 		return this.id;
 	}
 	
-	public Point getPoint() {
-		return this.bottomLeftPoint;
+	public int getPointX() {
+		return this.bottomLeftPoint.getX();
+	}
+	
+	public int getPointY() {
+		return this.bottomLeftPoint.getY();
 	}
 	
 	public void setPoint(int x, int y) {
@@ -68,5 +72,12 @@ public class Packet extends AbstractPacket {
 	public void setRotate(boolean rot) {
 		this.rotate = rot;
 	}
-	
+
+	public boolean equals(Object p) {
+		if (!(p instanceof Packet))
+			return false;
+		
+		Packet pac = (Packet) p;
+		return this.id == pac.getId();
+	}
 }
