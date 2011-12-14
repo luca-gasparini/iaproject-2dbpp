@@ -30,6 +30,20 @@ public abstract class AbstractConfigurator<T> implements CoreDescriptor {
 		return core.getController();
 	}
 	
+	@Override
+	public final T getCoreConfiguration() throws DataParsingException {
+		return createCoreConfiguration();
+	}
+	
+	@Override
+	public final void setCoreConfiguration(Object conf) throws ClassCastException {
+		@SuppressWarnings("unchecked")
+		T specConf = (T) conf;
+		
+		setConfiguration(specConf);
+	}
+	
+	protected abstract void setConfiguration(T config);
 	protected abstract AbstractCore<T, ?> getConfiguredCore(CoreConfiguration<T> conf, OptimumPainter painter) throws DataParsingException;
 	protected abstract T createCoreConfiguration() throws DataParsingException;
 	

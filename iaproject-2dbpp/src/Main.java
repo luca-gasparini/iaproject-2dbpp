@@ -2,6 +2,7 @@ import gui.MainWindow;
 import gui.ProblemConfigurer;
 
 import java.awt.Color;
+import java.io.File;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,12 +21,18 @@ public class Main {
 	 * e basta fare solo "START" per avviare il tutto
 	 */
 	public static void main(String[] args) {
+		final File confFile;
+		if (args.length == 2) {
+			confFile = new File(args[1]);
+		} else {
+			confFile = null;
+		}
 		
 		SwingUtilities.invokeLater(new Runnable() {
 			
 			@Override
 			public void run() {
-				MainWindow window = new MainWindow();
+				MainWindow window = new MainWindow(confFile);
 				window.setVisible(true);
 				
 //				BinConfiguration bc = new BinConfiguration(10, 12);

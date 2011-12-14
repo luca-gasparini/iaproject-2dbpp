@@ -11,15 +11,19 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -30,46 +34,53 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
+import logic.ConfigurationManager;
 import logic.ProblemConfiguration;
+import util.Constants;
 import core.CoreController;
 import core.CoreDescriptor;
 import core.CoreManager;
+import core.DataParsingException;
 
 public class MainWindow extends AbstractFrame {
 
 	private static final long serialVersionUID = 3500944474175026838L;
 	
+	private class CoreItem {
+		private final String name;
+		private final Class<? extends CoreDescriptor> descClass;
+		private CoreDescriptor descriptor;
+		
+		public CoreItem(String name, Class<? extends CoreDescriptor> descClass) {
+			this.name = name;
+			this.descClass = descClass;
+		}
+		
+		@Override
+		public String toString() {
+			return getName();
+		}
+		
+		public String getName() {
+			return this.name;
+		}
+		
+		public CoreDescriptor getDescriptor() throws Exception {
+			/* if the application is well written, only EventDispatching
+			 * thread should access this area, so there's no concurrency
+			 * problem here (otherwise make the method synchronized)
+			 */
+			if (descriptor == null) {
+				descriptor = descClass.newInstance();
+			}
+			
+			return descriptor;
+		}
+	}
+	
 	private class EngineConfPanel extends JPanel {
 		
 		private static final long serialVersionUID = -3124313336856598663L;
-		
-		private class CoreItem {
-			private final String name;
-			private final Class<? extends CoreDescriptor> descClass;
-			private CoreDescriptor descriptor;
-			
-			public CoreItem(String name, Class<? extends CoreDescriptor> descClass) {
-				this.name = name;
-				this.descClass = descClass;
-			}
-			
-			@Override
-			public String toString() {
-				return this.name;
-			}
-			
-			public CoreDescriptor getDescriptor() throws Exception {
-				/* if the application is well written, only EventDispatching
-				 * thread should access this area, so there's no concurrency
-				 * problem here (otherwise make the method synchronized)
-				 */
-				if (descriptor == null) {
-					descriptor = descClass.newInstance();
-				}
-				
-				return descriptor;
-			}
-		}
 		
 		private final Color defaultColor; 
 		private JComponent prevComponent;
@@ -155,8 +166,27 @@ public class MainWindow extends AbstractFrame {
 			this.validate();
 		}
 		
-		public CoreDescriptor getChoosedCore() throws Exception {
-			return ((CoreItem)coresCmb.getSelectedItem()).getDescriptor();
+		public CoreItem getChoosedCore() {
+			return (CoreItem) coresCmb.getSelectedItem();
+		}
+		
+		/**
+		 * 
+		 * @param name
+		 * @throws IllegalArgumentException if specified core does not exist.
+		 */
+		public CoreItem setChoosedCore(String name) throws IllegalArgumentException {
+			ComboBoxModel dataModel = coresCmb.getModel();
+			
+			for (int i = 0; i < dataModel.getSize(); i++) {
+				CoreItem item = (CoreItem) dataModel.getElementAt(i);
+				if (name.equals(item.getName())) {
+					coresCmb.setSelectedIndex(i);
+					return item;
+				}
+			}
+			
+			throw new IllegalArgumentException("No CORE with given name");
 		}
 	}
 	
@@ -311,17 +341,31 @@ public class MainWindow extends AbstractFrame {
 	private JButton pauseBtn;
 	private JButton resetBtn;
 	
+	private final ConfigurationManager configManager;
+	
 	private CoreController coreController;
 	private ProblemConfiguration problemConf;
 	
 	private State actualState;
 	
-	public MainWindow() {
+	public MainWindow(File configFile) {
 		super("IA Project - 2D Bin Packing Problem", JFrame.EXIT_ON_CLOSE);
+		this.configManager = new ConfigurationManager();
 		
-		this.switchToState(State.CONFIGURATION);
+		if (configFile == null) {
+			this.switchToState(State.CONFIGURATION);
+			return;
+		}
+		
+		try {
+			loadConfiguration(configFile);
+		} catch (ClassCastException e) {
+			GUIUtils.showErrorMessage(MainWindow.this, e.toString());
+		} catch (Exception e) {
+			GUIUtils.showErrorMessage(MainWindow.this, e.toString());
+		}
 	}
-
+	
 	@Override
 	public void init() {
 		this.setSize(1100, 700);
@@ -351,11 +395,50 @@ public class MainWindow extends AbstractFrame {
 			}
 		});
 		
+		
+		final JFileChooser fileChooser = new JFileChooser(Constants.CURRENT_DIR);
+		
 		loadConfBtn = new JButton("LOAD CONFIGURATION");
 		loadConfBtn.setFont(GUIUtils.BUTTON_FONT);
+		loadConfBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int ret = fileChooser.showOpenDialog(MainWindow.this);
+				
+				if (ret != JFileChooser.APPROVE_OPTION) {
+					return;
+				}
+				
+				File configFile = fileChooser.getSelectedFile();
+				try {
+					loadConfiguration(configFile);
+				} catch (ClassCastException e1) {
+					GUIUtils.showErrorMessage(MainWindow.this, e1.toString());
+				} catch (Exception e1) {
+					GUIUtils.showErrorMessage(MainWindow.this, e1.toString());
+				}
+			}
+		});
 		
 		saveConfBtn = new JButton("SAVE CONFIGURATION");
 		saveConfBtn.setFont(GUIUtils.BUTTON_FONT);
+		saveConfBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int ret = fileChooser.showSaveDialog(MainWindow.this);
+				
+				if (ret != JFileChooser.APPROVE_OPTION) {
+					return;
+				}
+				
+				File confFile = fileChooser.getSelectedFile();
+				try {
+					saveConfiguration(confFile);
+				} catch (IOException e1) {
+					GUIUtils.showErrorMessage(MainWindow.this, e1.toString());
+				}
+			}
+		});
 		
 		startCoreBtn = new JButton("START");
 		startCoreBtn.setFont(GUIUtils.BUTTON_FONT);
@@ -372,7 +455,7 @@ public class MainWindow extends AbstractFrame {
 				}
 				
 				try {
-					CoreDescriptor core = ecp.getChoosedCore();
+					CoreDescriptor core = ecp.getChoosedCore().getDescriptor();
 					coreController = core.getConfiguredInstance(problemConf, opp);
 				} catch (Exception e1) {
 					GUIUtils.showErrorMessage(MainWindow.this, e1.toString());
@@ -523,8 +606,52 @@ public class MainWindow extends AbstractFrame {
 		this.add(mainPanel, BorderLayout.CENTER);
 	}
 	
+	private void loadConfiguration(File configFile) throws ClassCastException, Exception {
+		if (coreController != null) {
+			throw new Exception("There's a RUNNING core: please stop it first");
+		}
+		
+		this.configManager.loadFromFile(configFile);
+		
+		CoreItem item = this.ecp.setChoosedCore(configManager.getCoreName());
+		item.getDescriptor().setCoreConfiguration(configManager.getCoreConfiguration());
+		this.problemConf = this.configManager.getProblemConfiguration();
+		
+		this.switchToState(State.READY);
+	}
 	
-	public void switchToState(State newState) {
+	private void saveConfiguration(File configfile) throws IOException {
+		if (this.problemConf == null) {
+			throw new IOException("Problem configuration is still empty");
+		}
+		
+		CoreItem choosedCore = ecp.getChoosedCore();
+		if (choosedCore == null) {
+			throw new IOException("Haven't choosed a core yet");
+		}
+		
+		CoreDescriptor coreDesc;
+		try {
+			coreDesc = choosedCore.getDescriptor();
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
+		
+		Object coreConfig;
+		try {
+			coreConfig = coreDesc.getCoreConfiguration();
+		} catch (DataParsingException e) {
+			throw new IOException(e);
+		}
+		
+		this.configManager.setProblemConfiguration(problemConf);
+		this.configManager.setCoreName(choosedCore.getName());
+		this.configManager.setCoreConfiguration(coreConfig);
+		
+		this.configManager.saveToFile(configfile);
+	}
+	
+	private void switchToState(State newState) {
 		
 		switch (newState) {
 		case CONFIGURATION:

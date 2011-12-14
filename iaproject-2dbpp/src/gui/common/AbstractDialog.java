@@ -75,7 +75,7 @@ public abstract class AbstractDialog<T> extends JDialog {
 	}
 	
 	private void initButtons() {
-		cancelBtn = new JButton("ANNULLA");
+		cancelBtn = new JButton("CANCEL");
 		cancelBtn.setFont(GUIUtils.BUTTON_FONT);
 		cancelBtn.addActionListener(new ActionListener() {
 			@Override
@@ -84,7 +84,9 @@ public abstract class AbstractDialog<T> extends JDialog {
 			}
 		});
 		
-		saveBtn = new JButton("SALVA");
+		saveBtn = new JButton("SAVE" +
+				"" +
+				"");
 		saveBtn.setFont(GUIUtils.BUTTON_FONT);
 		saveBtn.addActionListener(new ActionListener() {
 			@Override

@@ -12,4 +12,15 @@ public interface CoreDescriptor {
 	
 	public CoreController getConfiguredInstance(ProblemConfiguration conf, OptimumPainter painter) throws DataParsingException;
 	
+	/**
+	 * 
+	 * @return can be null if core has no configuration
+	 */
+	public Object getCoreConfiguration() throws DataParsingException ;
+	
+	/**
+	 * 
+	 * @param conf can be null that means don't configure
+	 */
+	public void setCoreConfiguration(Object conf) throws ClassCastException;
 }

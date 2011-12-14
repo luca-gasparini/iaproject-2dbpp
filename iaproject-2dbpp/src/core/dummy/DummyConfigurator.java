@@ -16,7 +16,7 @@ import core.DataParsingException;
 
 public class DummyConfigurator extends AbstractConfigurator<Integer> {
 	
-	private final JIntegerTextField tf = new JIntegerTextField();
+	private final JIntegerTextField msTf = new JIntegerTextField();
 	private final JPanel completePane;
 	
 	public DummyConfigurator() {
@@ -24,8 +24,8 @@ public class DummyConfigurator extends AbstractConfigurator<Integer> {
 		
 		completePane = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		completePane.add(new JLabel("Max ms to wait"));
-		tf.setColumns(10);
-		completePane.add(tf);
+		msTf.setColumns(10);
+		completePane.add(msTf);
 	}
 	
 	@Override
@@ -42,7 +42,7 @@ public class DummyConfigurator extends AbstractConfigurator<Integer> {
 	@Override
 	protected Integer createCoreConfiguration() throws DataParsingException {
 		// parse configuration panel in order to get desired input
-		Integer ms = tf.getValue();
+		Integer ms = msTf.getValue();
 		
 		if (ms == null) {
 			throw new DataParsingException("No wait time specified");
@@ -53,6 +53,11 @@ public class DummyConfigurator extends AbstractConfigurator<Integer> {
 		}
 		
 		return ms;
+	}
+
+	@Override
+	protected void setConfiguration(Integer config) {
+		msTf.setValue(config);
 	}
 
 }
