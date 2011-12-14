@@ -22,8 +22,8 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		final File confFile;
-		if (args.length == 2) {
-			confFile = new File(args[1]);
+		if (args.length == 1) {
+			confFile = new File(args[0]);
 		} else {
 			confFile = null;
 		}
