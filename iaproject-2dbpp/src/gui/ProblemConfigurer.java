@@ -15,23 +15,23 @@ import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.KeyStroke;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
@@ -52,14 +52,30 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		
 		private final PacketConfiguration pc;
 		private final Dimension rectDimension;
+		private final Dimension preferredSize;
 		
 		public PacketGraphic(PacketConfiguration pc) {
 			this.pc = pc;
 			this.rectDimension = new Dimension(pc.getWidth() * MAGNIFYING, 
 					pc.getHeight() * MAGNIFYING);
 			
-			this.setPreferredSize(new Dimension(rectDimension.width + 4, rectDimension.height + 4));
+			this.preferredSize = new Dimension(rectDimension.width + 4, rectDimension.height + 4);
 			this.setOpaque(false);
+		}
+		
+		@Override
+		public Dimension getPreferredSize() {
+			return this.getSize();
+		}
+		
+		@Override
+		public Dimension getSize() {
+			return this.preferredSize;
+		}
+		
+		@Override
+		public Dimension getMaximumSize() {
+			return this.getSize();
 		}
 		
 		@Override
@@ -91,10 +107,10 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 			JLabel dimensionLbl = new JLabel(pc.getWidth() + "x" + pc.getHeight());
 			JLabel numberLbl = new JLabel("#" + pc.getMolteplicity());
 			
-			JPanel packet = new PacketGraphic(pc);
+			PacketGraphic packet = new PacketGraphic(pc);
 			
 			theBox.add(packet);
-			theBox.add(Box.createHorizontalStrut(20));
+			theBox.add(Box.createHorizontalStrut(100));
 			theBox.add(dimensionLbl);
 			theBox.add(Box.createHorizontalStrut(20));
 			theBox.add(numberLbl);
@@ -176,8 +192,6 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 
 	@Override
 	protected JComponent buildValuePainter() {
-		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		
 		// Packet configuration
 		JButton editBtn = new JButton("EDIT");
 		editBtn.setFont(GUIUtils.BUTTON_FONT);
@@ -207,12 +221,16 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		packetListModel = new DefaultListModel();
 		final JList pktList = new JList(packetListModel);
 		pktList.setCellRenderer(new PacketListRended());
-		pktList.addKeyListener(new KeyAdapter() {
+		pktList.getInputMap(JList.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).
+				put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "_deleteRow");
+		pktList.getActionMap().put("_deleteRow", new AbstractAction() {
+			private static final long serialVersionUID = -6997563795270827231L;
 			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-					packetListModel.remove(pktList.getSelectedIndex());
-				}
+			public void actionPerformed(ActionEvent e) {
+				int selIndex = pktList.getSelectedIndex();
+				if (selIndex < 0) return;
+				packetListModel.remove(selIndex);
+				pktList.setSelectedIndex(selIndex);
 			}
 		});
 		pktList.addMouseListener(new MouseAdapter() {

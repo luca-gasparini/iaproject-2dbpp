@@ -8,6 +8,7 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -35,11 +36,13 @@ public abstract class AbstractDialog<T> extends JDialog {
 		
 		this.value = oldValue;
 		
+		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.setModal(true);
 		this.setTitle(title);
-		this.setSize(700, 600);
+		this.setSize(500, 500);
 		
 		this.setLayout(new BorderLayout(0, 10));
+		this.getRootPane().setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
 		initContent();
 		initButtons();
 		
@@ -84,9 +87,7 @@ public abstract class AbstractDialog<T> extends JDialog {
 			}
 		});
 		
-		saveBtn = new JButton("SAVE" +
-				"" +
-				"");
+		saveBtn = new JButton("SAVE");
 		saveBtn.setFont(GUIUtils.BUTTON_FONT);
 		saveBtn.addActionListener(new ActionListener() {
 			@Override

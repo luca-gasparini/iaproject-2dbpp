@@ -9,6 +9,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.SwingWorker;
 
+import core.dummy.DummyCore;
+
 /**
  * 
  * @author socket
@@ -167,6 +169,7 @@ public abstract class AbstractCore<K, T> extends SwingWorker<Void, CoreResult<T>
 	
 	/**
 	 * TODO: write an explanation of how this method should be implemented
+	 * by now see {@link DummyCore}
 	 */
 	protected abstract void doWork();
 	protected abstract boolean reachedStoppingCondition();
