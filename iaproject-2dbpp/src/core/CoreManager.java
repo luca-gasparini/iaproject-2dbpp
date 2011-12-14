@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import core.dummy.DummyConfigurator;
+import core.genetic.GeneticConfigurator;
 
 public class CoreManager {
 	
@@ -18,7 +19,7 @@ public class CoreManager {
 		
 		// TODO add here all CoreDescriptors with their names
 		map.put("Dummy", DummyConfigurator.class);
-		
+		map.put("Genetic", GeneticConfigurator.class);
 		// ...
 		
 		CORES = Collections.unmodifiableMap(map);

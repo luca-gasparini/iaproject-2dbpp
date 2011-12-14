@@ -16,6 +16,10 @@ public class GUIPacket extends Packet {
 		this(id, width, height, Color.BLUE, 0, 0);
 	}
 	
+	public GUIPacket(int id, int width, int height, Color color) {
+		this(id, width, height, color, 0, 0);
+	}
+	
 	public GUIPacket(int id, int width, int height, int x, int y) {
 		this(id, width, height, Color.BLUE, x, y);
 	}

@@ -25,4 +25,14 @@ public final class Core2GuiTranslators {
 		};
 	}
 	
+	public static final Core2GuiTranslator<Void> getGeneticTranslator() {
+		return new Core2GuiTranslator<Void>() {
+			
+			@Override
+			public List<GUIBin> translate(Void coreOptimum) {
+				return Collections.emptyList();
+			}
+			
+		};
+	}
 }

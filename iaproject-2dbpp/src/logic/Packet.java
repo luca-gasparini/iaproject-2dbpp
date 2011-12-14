@@ -1,12 +1,14 @@
 package logic;
 
+import java.awt.Color;
+
 import logic.AbstractPacket;
 
 public class Packet extends AbstractPacket {
 
 	private final int id;
 	private Point bottomLeftPoint;
-	private boolean rotate;
+	private boolean rotate; 
 	
 	public Packet(int id, int width, int height) {
 		this(id, width, height, 0, 0);
