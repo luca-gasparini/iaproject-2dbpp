@@ -55,4 +55,11 @@ public class GeneticConfigurator extends AbstractConfigurator<Integer> {
 		return ps;
 	}
 
+	@Override
+	protected void setConfiguration(Integer config) {
+		populationField.setValue(config);
+		
+		
+	}
+
 }
