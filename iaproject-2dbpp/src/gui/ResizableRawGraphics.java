@@ -11,7 +11,7 @@ public abstract class ResizableRawGraphics extends JPanel {
 
 	private static final long serialVersionUID = -4256966040512380886L;
 	
-	private int magnificationFactor = 1;
+	private int magnificationFactor = 3;
 	private Dimension baseDimension;
 	private Dimension magnifiedDimension;
 	

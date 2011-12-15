@@ -56,7 +56,7 @@ public class DummyCore extends AbstractCore<Integer, List<Bin>> {
 					List<Bin> testList = new LinkedList<Bin>();
 					testList.add(new Bin(1, 100, 100));
 					testList.add(new Bin(2, 50, 50));
-					Packet id0 = new Packet(10, 15, 20, 20, 20, Color.BLUE);
+					Packet id0 = new Packet(10, 10, 10, 20, 20, Color.BLUE);
 					id0.setRotate(true);
 					testList.get(0).addPacket(id0);
 					testList.get(0).addPacket(new Packet(11, 15, 20, 40, 40, Color.green));
