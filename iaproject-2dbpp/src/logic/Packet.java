@@ -8,17 +8,19 @@ public class Packet extends AbstractPacket {
 
 	private final int id;
 	private Point bottomLeftPoint;
-	private boolean rotate; 
+	private boolean rotate;
+	private final Color color;
 	
-	public Packet(int id, int width, int height) {
-		this(id, width, height, 0, 0);
+	public Packet(int id, int width, int height, Color col) {
+		this(id, width, height, 0, 0, col);
 	}
 	
-	public Packet(int id, int width, int height, int x, int y) {
+	public Packet(int id, int width, int height, int x, int y, Color col) {
 		super(width, height);
 		this.id = id;
 		this.bottomLeftPoint = new Point(x, y);
 		this.rotate = false;
+		this.color = col;
 	}
 	
 	private class Point {
@@ -81,5 +83,9 @@ public class Packet extends AbstractPacket {
 		
 		Packet pac = (Packet) p;
 		return this.id == pac.getId();
+	}
+	
+	public Color getColor() {
+		return this.color;
 	}
 }

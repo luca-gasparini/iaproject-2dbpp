@@ -11,6 +11,8 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -200,6 +202,7 @@ public class MainWindow extends AbstractFrame {
 		private JTextField fitnessValue;
 		private JTextField nBins;
 		private JTextField elapsedTime;
+		private JPanel binDisplayer;
 		
 		public OptimumPaintingPanel() {
 			init();
@@ -242,7 +245,8 @@ public class MainWindow extends AbstractFrame {
 			nBins = new JTextField(10);
 			nBins.setEditable(false);
 			
-			JPanel binDisplayer = new JPanel(new BorderLayout());
+			//JPanel binDisplayer = new JPanel(new BorderLayout());
+			binDisplayer = new JPanel(new BorderLayout());
 			binDisplayer.add(GUIUtils.getHorizontalSeparator(5, 5), BorderLayout.PAGE_START);
 			
 			// lay out components
@@ -310,6 +314,13 @@ public class MainWindow extends AbstractFrame {
 			this.nIteration.setText(Integer.toString(newOptimum.getNIterations()));
 			this.nBins.setText(Integer.toString(newOptimum.getBins().size()));
 			// TODO display bins!!!
+			// Nicola C.: approccio per test
+			binList.setListData(newOptimum.getBins().toArray());
+			binDisplayer.add(newOptimum.getBins().get(0));
+			
+			binDisplayer.setBackground(Color.BLACK);
+			binDisplayer.validate();
+			
 		}
 		
 		public void reset() {
