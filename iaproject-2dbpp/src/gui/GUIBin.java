@@ -1,41 +1,33 @@
 package gui;
 
-import logic.Bin;
-import logic.Packet;
-
-import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Point;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
-
 import java.util.Iterator;
 
-import javax.swing.JApplet;
-import javax.swing.JPanel;
+import logic.Bin;
+import logic.Packet;
 
 /**
  * Da decidere con Nicola C.
  *
  */
-public class GUIBin extends JPanel {
+public class GUIBin extends ResizableRawGraphics {
 
 	private static final long serialVersionUID = -6647245677472183286L; 
 
-	private Bin singleBin;
+	private final Bin singleBin;
 			
 	public GUIBin (Bin s) {
+		super(new Dimension(s.getWidth(), s.getHeight()));
 		this.singleBin = s;
 	}
 	
-	protected void paintComponent(Graphics g) {
-	
-		super.paintComponent(g);
-		
-		Graphics2D g2d = (Graphics2D) g;
+	@Override
+	protected void doPaint(Graphics2D g2d, int factor) {
 		
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		
