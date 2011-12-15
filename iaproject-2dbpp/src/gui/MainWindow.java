@@ -4,6 +4,7 @@ import gui.common.AbstractFrame;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -243,9 +244,11 @@ public class MainWindow extends AbstractFrame {
 			nBins = new JTextField(10);
 			nBins.setEditable(false);
 			
-			//JPanel binDisplayer = new JPanel(new BorderLayout());
-			binDisplayer = new JPanel(new BorderLayout());
-			binDisplayer.add(GUIUtils.getHorizontalSeparator(5, 5), BorderLayout.PAGE_START);
+			binDisplayer = new JPanel();
+			
+			JPanel centerPane = new JPanel(new BorderLayout());
+			centerPane.add(GUIUtils.getHorizontalSeparator(5, 5), BorderLayout.PAGE_START);
+			centerPane.add(binDisplayer, BorderLayout.CENTER);
 			
 			// lay out components
 			this.setLayout(new BorderLayout());
@@ -296,7 +299,7 @@ public class MainWindow extends AbstractFrame {
 			topPanel.add(infoPanel, BorderLayout.CENTER);
 			this.add(topPanel, BorderLayout.PAGE_START);
 			
-			this.add(binDisplayer, BorderLayout.CENTER);
+			this.add(centerPane, BorderLayout.CENTER);
 			
 		}
 
@@ -313,12 +316,42 @@ public class MainWindow extends AbstractFrame {
 			this.nBins.setText(Integer.toString(newOptimum.getBins().size()));
 			// TODO display bins!!!
 			// Nicola C.: approccio per test
+			// add bins to the list
 			binList.setListData(newOptimum.getBins().toArray());
-			binDisplayer.add(newOptimum.getBins().get(0));
 			
-			binDisplayer.setBackground(Color.BLACK);
-			binDisplayer.validate();
+			// display bins...
+			binDisplayer.removeAll();
 			
+			// ---- cut out ----
+//			System.out.println("size: " + binDisplayer.getSize());
+//			System.out.println("pref size: " + binDisplayer.getSize());
+			// -----------------
+			
+			// calculate maximum bin per row...
+			int maxBinPerRow = 3; // TODO keep in mind space between components
+			// calculate magnification factor
+			int magnificationFactor = 3; // TODO as previous todo's
+			// set binDisplayer layout manager
+			binDisplayer.setLayout(new GridLayout(0, maxBinPerRow));
+			for (GUIBin bin : newOptimum.getBins()) {
+				bin.setMagnificationFactor(magnificationFactor);
+				
+				// build panel to print GUIBin
+				Box binPanel = Box.createVerticalBox();
+				bin.setAlignmentX(Component.CENTER_ALIGNMENT);
+				binPanel.add(bin);
+				binPanel.add(Box.createVerticalStrut(5));
+				JLabel label = new JLabel("Bin " + bin.toString());
+				label.setAlignmentX(Component.CENTER_ALIGNMENT);
+				binPanel.add(label);
+				binDisplayer.add(binPanel);
+			}
+			
+			/* revalidate & repaint binDisplayer (it's layout is changed and
+			 * maybe even it's content)
+			 */
+			binDisplayer.revalidate();
+			binDisplayer.repaint();
 		}
 		
 		public void reset() {
@@ -327,7 +360,10 @@ public class MainWindow extends AbstractFrame {
 			this.nIteration.setText(null);
 			this.nBins.setText(null);
 			this.binList.removeAll();
-			// TODO remove displayed bins!!!
+			
+			this.binDisplayer.removeAll();
+			this.binDisplayer.revalidate();
+			this.binDisplayer.repaint();
 		}
 	}
 	
