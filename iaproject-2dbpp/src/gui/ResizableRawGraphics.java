@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 import javax.swing.JPanel;
+import javax.swing.border.Border;
 
 public abstract class ResizableRawGraphics extends JPanel {
 
@@ -14,28 +15,33 @@ public abstract class ResizableRawGraphics extends JPanel {
 	private Dimension baseDimension;
 	private Dimension magnifiedDimension;
 	
+	/**
+	 * 
+	 * @param baseDimension the dimension used as base dimension; in fact
+	 * actual base dimension is 1px higher & wider because, otherwise, last
+	 * row & column's pixel won't be painted
+	 */
 	public ResizableRawGraphics(Dimension baseDimension) {
 		super();
 		
 		this.setOpaque(false);
-		this.baseDimension = new Dimension(baseDimension);
+		// the +1 is needed because, otherwise, the last pixel won't be painted
+		this.baseDimension = new Dimension(baseDimension.width + 1, baseDimension.height + 1);
 		this.magnifiedDimension = this.baseDimension;
-		
-		assert this.baseDimension != null : "baseDimension is null";
 	}
 	
 	@Override
-	public Dimension getPreferredSize() {
+	public final Dimension getPreferredSize() {
 		return this.getSize();
 	}
 	
 	@Override
-	public Dimension getMaximumSize() {
+	public final Dimension getMaximumSize() {
 		return this.getSize();
 	}
 	
 	@Override
-	public Dimension getMinimumSize() {
+	public final Dimension getMinimumSize() {
 		return this.getSize();
 	}
 	
@@ -66,6 +72,20 @@ public abstract class ResizableRawGraphics extends JPanel {
 	
 	public Dimension getBaseDimension() {
 		return new Dimension(this.baseDimension);
+	}
+	
+	@Override
+	@Deprecated
+	/**
+	 * Don't use this method!! If you want to add border to this grapic panel,
+	 * you better place it inside another panel and add border to it.
+	 * See http://leepoint.net/notes-java/GUI-appearance/borders/10borders.html
+	 * (shortly border has to be PAINTED by the doPaint method and this may be
+	 * not so intuitive - there would be the need of an horizontal and vertical
+	 * offset entirely managed by the doPaint implementation)
+	 */
+	public final void setBorder(Border border) {
+		// doNothing
 	}
 	
 	@Override

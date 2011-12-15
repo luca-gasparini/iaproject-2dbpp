@@ -1,5 +1,7 @@
 package logic;
 
+import java.awt.Dimension;
+
 
 public class BinConfiguration {
 	
@@ -23,4 +25,7 @@ public class BinConfiguration {
 		return height;
 	}
 	
+	public Dimension getSize() {
+		return new Dimension(this.width, this.height);
+	}
 }

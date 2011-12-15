@@ -6,11 +6,9 @@ import gui.common.JIntegerTextField;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.FlowLayout;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -45,46 +43,23 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 	
 	private static final long serialVersionUID = -1111598546169426454L;
 	
-	private class PacketGraphic extends JPanel {
+	private class PacketGraphic extends ResizableRawGraphics {
 		private static final long serialVersionUID = -316443024628550817L;
-
+		
 		private static final int MAGNIFYING = 5;
 		
 		private final PacketConfiguration pc;
-		private final Dimension rectDimension;
-		private final Dimension preferredSize;
 		
 		public PacketGraphic(PacketConfiguration pc) {
+			super(pc.getSize());
+			
 			this.pc = pc;
-			this.rectDimension = new Dimension(pc.getWidth() * MAGNIFYING, 
-					pc.getHeight() * MAGNIFYING);
-			
-			this.preferredSize = new Dimension(rectDimension.width + 4, rectDimension.height + 4);
-			this.setOpaque(false);
+			this.setMagnificationFactor(MAGNIFYING);
 		}
 		
 		@Override
-		public Dimension getPreferredSize() {
-			return this.getSize();
-		}
-		
-		@Override
-		public Dimension getSize() {
-			return this.preferredSize;
-		}
-		
-		@Override
-		public Dimension getMaximumSize() {
-			return this.getSize();
-		}
-		
-		@Override
-		protected void paintComponent(Graphics g) {
-			super.paintComponent(g);
-			
-			Graphics2D g2d = (Graphics2D) g;
-			
-			Rectangle rect = new Rectangle(new Point(2, 2), rectDimension);
+		protected void doPaint(Graphics2D g2d, int factor) {
+			Rectangle rect = new Rectangle(pc.getWidth() * factor, pc.getHeight() * factor);
 			
 			g2d.setColor(pc.getColor());
 			g2d.fill(rect);
@@ -92,10 +67,9 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 			g2d.setColor(Color.BLACK);
 			g2d.draw(rect);
 		}
-		
 	}
 	
-	private class PacketListRended implements ListCellRenderer {
+	private class PacketListRender implements ListCellRenderer {
 		
 		@Override
 		public Component getListCellRendererComponent(JList list, Object value,
@@ -107,9 +81,11 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 			JLabel dimensionLbl = new JLabel(pc.getWidth() + "x" + pc.getHeight());
 			JLabel numberLbl = new JLabel("#" + pc.getMolteplicity());
 			
-			PacketGraphic packet = new PacketGraphic(pc);
+			JPanel packetPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			packetPanel.setOpaque(false);
+			packetPanel.add(new PacketGraphic(pc));
 			
-			theBox.add(packet);
+			theBox.add(packetPanel);
 			theBox.add(Box.createHorizontalStrut(100));
 			theBox.add(dimensionLbl);
 			theBox.add(Box.createHorizontalStrut(20));
@@ -220,7 +196,7 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		
 		packetListModel = new DefaultListModel();
 		final JList pktList = new JList(packetListModel);
-		pktList.setCellRenderer(new PacketListRended());
+		pktList.setCellRenderer(new PacketListRender());
 		pktList.getInputMap(JList.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).
 				put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "_deleteRow");
 		pktList.getActionMap().put("_deleteRow", new AbstractAction() {

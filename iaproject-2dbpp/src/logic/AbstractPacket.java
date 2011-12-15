@@ -1,5 +1,7 @@
 package logic;
 
+import java.awt.Dimension;
+
 public abstract class AbstractPacket {
 
 	private final int width;
@@ -20,5 +22,8 @@ public abstract class AbstractPacket {
 	public int getHeight() {
 		return this.height;
 	}
-
+	
+	public Dimension getSize() {
+		return new Dimension(this.width, this.getHeight());
+	}
 }
