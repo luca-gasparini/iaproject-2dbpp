@@ -1,53 +1,68 @@
 package core.genetic;
 
-import gui.GUIPacket;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import logic.Bin;
+import logic.BinConfiguration;
 import logic.Packet;
 import logic.PacketConfiguration;
+
+import BLFCore.BlfLayout;
 
 class Individual {
 	
 	private List<Packet> sequence;
-	private float fitness;
+	private BlfLayout layout;
 	private final Random rand = new Random(System.currentTimeMillis());
 
-	public Individual(List<PacketConfiguration> packetList) {
+	public Individual(List<PacketConfiguration> packetsInfo, BinConfiguration binsInfo) {		
 		// translate input from List<PacketConfigutation> to List<Packet>
 		this.sequence = new ArrayList<Packet>();
-		for( int i=0; i < packetList.size(); i++ ) {
-			for( int j=0; j < packetList.get(i).getMolteplicity(); j++ ) {
+		for( int i=0; i < packetsInfo.size(); i++ ) {
+			for( int j=0; j < packetsInfo.get(i).getMolteplicity(); j++ ) {
 				// istantiate GUIPacket because i need to save color
-				this.sequence.add( new GUIPacket(
+				this.sequence.add( new Packet(
 						i + j,
-						packetList.get(i).getWidth(), 
-						packetList.get(i).getHeight(),
-						packetList.get(i).getColor()));
+						packetsInfo.get(i).getWidth(), 
+						packetsInfo.get(i).getHeight(),
+						packetsInfo.get(i).getColor()));
 			}
+		
 		} 
-		java.util.Collections.shuffle(sequence, rand);
+		java.util.Collections.shuffle(this.sequence, rand);
+		
+		// calculate blf layout and related fitness of the individual
+		this.calculateLayout(binsInfo);
+		
+	}
+
+	public Individual(List<Packet> sequence) {
+		this.sequence = sequence;
+		this.layout = null;
 	}
 
 	// apply mutation to the individual
 	protected Individual mutate() {
 		return null;
 	}
-
-	// caluculate and return the fitness of the individual
-	public float calculateFitness() {
-		return 0;
-	}
 	
-	// return the fitness of the individual.
-	public float getFitness() {
-		return 0;
+	// return the fitness of the individual
+	public float getFitness() {	
+		return this.layout.getFitness();
+	}	
+
+	public List<Bin> getBins() {
+		return this.layout.getBins();
 	}
 
-	// return the ordered packing sequence
+	public float calculateLayout(BinConfiguration binConfiguration) {
+		
+//		this.layout = classeUrban.getLayout(this.sequence,binConfiguration);
+		return this.layout.getFitness();
+	}
+
 	public List<Packet> getSequence() {
 		return this.sequence;
 	}
