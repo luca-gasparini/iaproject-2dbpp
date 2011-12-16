@@ -129,6 +129,19 @@ public class Edge {
 
 	}
 
+	public double length()
+	{
+		double diff = 0;
+		if(isVertical())
+			diff = p1.y - p2.y;
+		else
+			diff = p1.x - p2.x;
+		
+		if(diff>0)
+			return diff;
+		else return -diff;
+	}
+	
 	public static Point Intersection(Edge e1,Point x)
 	{
 		return e1.getLeftPoint().x <= x.x && e1.getRightPoint().x > x.x && 

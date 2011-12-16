@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class PackingProcedures {
+	
 	public static ArrayList<CandidatePoint> Placing(double h,
 			LinkedList<Point> Cp, LinkedList<Point> Dp) {
 		int i = 0;
@@ -237,4 +238,5 @@ public class PackingProcedures {
 
 		return D;
 	}
+
 }
