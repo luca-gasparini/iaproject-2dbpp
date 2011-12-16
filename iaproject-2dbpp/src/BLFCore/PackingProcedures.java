@@ -2,6 +2,8 @@ package BLFCore;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import logic.*;
+import java.util.List;
 
 public class PackingProcedures {
 	
@@ -239,4 +241,39 @@ public class PackingProcedures {
 		return D;
 	}
 
+	public static BlfLayout getLayout ( List<Packet> packets, BinConfiguration bins)
+	{
+		ArrayList<CoreBin> coreBins = new ArrayList<CoreBin>();
+		
+		for(int i = 0;i<packets.size();i++)
+		{
+			int j = 0;
+			boolean inserito = false;
+			while(!inserito && j<coreBins.size())
+			{
+				inserito = coreBins.get(j).insertPacket(packets.get(i));
+				j++;
+			}
+			if(!inserito)
+			{
+				coreBins.add(new CoreBin(bins.getWidth(),bins.getHeight()));
+				if(!coreBins.get(j).insertPacket(packets.get(i)))
+					return null;
+			}
+		}
+		
+		ArrayList<Bin> resultBins  = new ArrayList<Bin>();
+		for(int i = 0;i<coreBins.size();i++)
+		{
+			Bin appBin = new Bin(i,bins.getWidth(),bins.getHeight());
+			for(int j = 0; j < coreBins.get(i).packets.size();j++)
+			{
+				appBin.addPacket(coreBins.get(i).packets.get(j));
+			}
+			resultBins.add(appBin);
+		}
+		
+		return new BlfLayout(resultBins,0);
+	}
+	
 }

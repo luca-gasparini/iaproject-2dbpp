@@ -1,14 +1,15 @@
 package BLFCore;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import logic.Packet;
 
 public class CoreBin {
-	ArrayList<CoreRectangle> packets;
+	ArrayList<Packet> packets;
 	LinkedList<Hole> holes;
 	
 	CoreBin(double binWidth,double binHeigth)
 	{
-		packets = new ArrayList<CoreRectangle>();
+		packets = new ArrayList<Packet>();
 		holes = new LinkedList<Hole>();
 		ArrayList<Edge> edges = new ArrayList<Edge>();
 		edges.add(new Edge(new Point(0,0),new Point(0,binHeigth)));
@@ -20,15 +21,15 @@ public class CoreBin {
 	
 
 	
-	public ArrayList<CoreRectangle> getPackets()
+	public ArrayList<Packet> getPackets()
 	{
 		return packets;
 	}
 	
-	public boolean insertPacket(double width,double heigth)
+	public boolean insertPacket(Packet packet)
 	{
 		ArrayList<Point> app;
-		CoreRectangle  rect = new CoreRectangle(new Point(0,0),heigth,width);
+		CoreRectangle  rect = new CoreRectangle(new Point(0,0),packet.getHeight(),packet.getWidth());
 		int hole = -1;
 		Point p= null;
 		for(int i = 0;i< holes.size();i++)
@@ -43,11 +44,20 @@ public class CoreBin {
 				}
 			}
 		}
+		
 		if(p == null)
 			return false;
-		rect = new CoreRectangle(p,heigth,width);
-		packets.add(rect);
-		holes.get(hole).updateHoles(rect);
+		
+		
+		rect = new CoreRectangle(p,packet.getHeight(),packet.getWidth());
+		packet.setPoint((int)p.x, (int)p.y);
+		packets.add(packet);
+		
+		//aggiorno gli hole
+		ArrayList<Hole> newHoles = holes.get(hole).updateHoles(rect);
+		holes.remove(hole);
+		holes.addAll(newHoles);
+		
 		return true;
 	}
 }
