@@ -37,9 +37,11 @@ public class GUIBin extends ResizableRawGraphics {
 		
 		// impostazioni carattere
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2d.setFont(new Font("Arial", Font.TRUETYPE_FONT, this.getFontSize()));
-		Font font = g2d.getFont();
+		Font font = new Font("Arial", Font.TRUETYPE_FONT, this.getFontSize());
+		g2d.setFont(font);
+		
 		FontRenderContext frc = g2d.getFontRenderContext();
+		
 		// disegno bin
 		Dimension dimBorderBin = new Dimension(
 				singleBin.getWidth()*super.getMagnificationFactor(),
