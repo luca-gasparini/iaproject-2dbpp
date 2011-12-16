@@ -88,4 +88,10 @@ public class Packet extends AbstractPacket {
 	public Color getColor() {
 		return this.color;
 	}
+	
+	public Packet clone() {
+		Packet clo = new Packet(this.id, this.getWidth(), this.getHeight(), this.getPointX(), this.getPointY(), this.color);
+		clo.setRotate(this.rotate);
+		return clo;
+	}
 }
