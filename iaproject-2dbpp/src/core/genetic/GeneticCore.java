@@ -75,10 +75,16 @@ public class GeneticCore extends AbstractCore<Integer, List<Bin>> {
 		
 	}
 
-	// PMX crossover. Select a random breaking point p for the genome and
-	// copy q gene to 
+	
 	private Individual crossover(Individual father, Individual mother) {
-		List<Packet> childGenome = new ArrayList<Packet>();
+		
+		int genomeSize = father.getSequence().size();
+		List<Packet> childGenome = new ArrayList<Packet>(genomeSize);
+		boolean[] isGeneCopied = new boolean[genomeSize];
+		for ( int i = 0; i < genomeSize; i++ ) {
+			isGeneCopied[i] = false;
+		}
+		
 		
 		// set up father genome breaking point
 		int p = rand.nextInt() % problemConf.getPackets().size();
@@ -87,28 +93,18 @@ public class GeneticCore extends AbstractCore<Integer, List<Bin>> {
 		
 		// extract the genome portion of the father and add it to the child genome
 		for (Packet fatherGene: father.getSequence().subList(p, q)) {
-			childGenome.add(new Packet( fatherGene.getId(),
-										fatherGene.getWidth(),
-										fatherGene.getHeight(),
-										fatherGene.getPointX(),
-										fatherGene.getPointY(),
-										fatherGene.getColor()	));
+			childGenome.add( fatherGene.clone() );
+			isGeneCopied[fatherGene.getId()] = true;
 		}
 		
 		// complete with the genome of the mother
-/*		for (Packet motherGene: mother.getSequence()) {
-			
-			childGenome.add(new Packet( fatherGene.getId(),
-										fatherGene.getWidth(),
-										fatherGene.getHeight(),
-										fatherGene.getPointX(),
-										fatherGene.getPointY(),
-										fatherGene.getColor()	));
+		for (Packet motherGene: mother.getSequence()) {
+			if ( !isGeneCopied[ motherGene.getId() ] ) {
+				childGenome.add( motherGene.clone() );
+			}
 		}
-		
-		Individual child = new Individual(father.getSequence());*/
-		
-		return father; // per ora torno il padre senza fare crossover;
+
+		return new Individual(childGenome);
 	}
 
 	private Individual findBest() {
