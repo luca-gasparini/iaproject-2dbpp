@@ -15,10 +15,10 @@ public class BlfLayout {
 	}
 	
 	public List<Bin> getBins() {
-		return null;
+		return binConfiguration;
 	}
 
 	public float getFitness() {
-		return 0;
+		return fitness;
 	}
 }

@@ -115,10 +115,10 @@ public class Edge {
 		}
 		else if(e1.isVertical() && e2.isHorizontal())
 		{
-			if(e1.getUpperPoint().y > e2.p1.y && 
-					e1.getLowerPoint().y < e2.p1.y &&
-					e2.getLeftPoint().x < e1.p1.x &&
-					e2.getRightPoint().x > e1.p1.y)
+			if(e1.getUpperPoint().y >= e2.p1.y && 
+					e1.getLowerPoint().y <= e2.p1.y &&
+					e2.getLeftPoint().x <= e1.p1.x &&
+					e2.getRightPoint().x >= e1.p1.y)
 			{
 				Point app = new Point(e1.p1.x,e2.p1.y);
 				return new Edge(app,app);

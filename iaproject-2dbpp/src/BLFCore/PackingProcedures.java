@@ -6,14 +6,14 @@ import logic.*;
 import java.util.List;
 
 public class PackingProcedures {
-	
+
 	public static ArrayList<CandidatePoint> Placing(double h,
 			LinkedList<Point> Cp, LinkedList<Point> Dp) {
 		int i = 0;
 		int j = 0;
 		LinkedList<Edge> C = new LinkedList<Edge>();
 		LinkedList<Edge> D = new LinkedList<Edge>();
-
+		C.add(null); D.add(null); //gli indici nel paper partono da 1
 		// converto in liste di lati orizzontali
 		for (i = 0; i < Cp.size() - 1; i++) {
 			Edge app = new Edge(Cp.get(i), Cp.get(i + 1));
@@ -29,8 +29,8 @@ public class PackingProcedures {
 
 		i = 1;
 		j = 1;
-		int m = C.size();
-		int p = D.size();
+		int m = C.size()-1;
+		int p = D.size()-1;
 
 		ArrayList<CandidatePoint> E = new ArrayList<CandidatePoint>();
 		E.add(new CandidatePoint(C.get(1).getLeftPoint(), D.get(1)
@@ -83,30 +83,53 @@ public class PackingProcedures {
 			i++;
 		}
 
-		Edge b = new Edge(new Point(d.get(0).x - length, d.get(0).y),
-				new Point(d.get(0)));
 		LinkedList<Point> C = new LinkedList<Point>();
 		LinkedList<Edge> Q = new LinkedList<Edge>();
-		C.add(b.p1);
-		Point support = new Edge(Edge.Intersection(
-				new Edge(h.get(1), d.get(1)), new Edge(b.p1.x, false)))
-				.isPoint();
 
-		if (support == null) {
-			throw new IllegalStateException("support is null");
+		if (s.FB.size() > 4) {
+			Edge b = new Edge(new Point(d.get(0).x - length, d.get(0).y),
+					new Point(d.get(0)));
+			C.add(b.p1);
+
+			Edge lineb = new Edge(b.p1.y, false);
+			Edge h1d1 = new Edge(h.get(1), d.get(1));
+			Point support = Edge.Intersection(lineb, h1d1).isPoint();
+
+			if (support == null) {
+				throw new IllegalStateException("support is null");
+			}
+
+			slide(1, length, b, C, h, d, l, r, Q, support);
+		} else {
+			C.add(s.FB.get(1));
+			C.add(s.FB.get(2));
 		}
 
-		slide(1, length, b, C, h, d, l, r, Q, support);
+		while (C.size() > 0 && C.get(0).x < d.get(0).x) {
+			Point x = C.remove(0);
+			if (C.size() == 0 || C.getFirst().x > d.get(0).x) {
+				x = new Point(d.get(0).x, x.y);
+				C.addFirst(x);
+			}
+		}
 
-		i = 0;
-
-		while (i < C.size() && C.get(0).x < d.get(0).x)
-			C.remove(0);
-
-		i = C.size();
-		while (i > 0 && C.get(i).x > s.Q.x) {
-			C.remove(i);
-			i--;
+		if (s.Q != null)
+			while (C.size() > 0 && C.getLast().x > s.Q.x) {
+				Point x = C.removeLast();
+				if (C.size() <= 1 || C.getLast().x >= s.Q.x) {
+					x = new Point(s.Q.x - 1, x.y);
+					C.addLast(x);
+				}
+			}
+		else {
+			double limit = s.FB.get(s.FB.size() - 1).x - length;
+			while (C.size() > 0 && C.getLast().x > limit) {
+				Point x = C.removeLast();
+				if (C.size() <= 1 || C.getLast().x >= s.Q.x) {
+					x = new Point(limit, x.y);
+					C.addLast(x);
+				}
+			}
 		}
 
 		return C;
@@ -186,7 +209,6 @@ public class PackingProcedures {
 		LinkedList<Point> D = new LinkedList<Point>();
 		boolean fallingC = false;
 
-
 		// converto FT nel formato (hi,di) che sono lati verticali con hi.y >
 		// di.y
 		ArrayList<Point> h = new ArrayList<Point>();
@@ -198,82 +220,99 @@ public class PackingProcedures {
 			if (appEdge.isVertical()) {
 				h.add(appEdge.getUpperPoint());
 				d.add(appEdge.getLowerPoint());
-				if(appEdge.p1.y > appEdge.p2.y)
+				if (appEdge.p1.y > appEdge.p2.y && i != s.FT.size() - 2) {
 					fallingC = true;
+				}
 			}
 			i++;
 		}
-		
+
 		if (!fallingC) {
-			for (i = 0; i < s.FT.size(); i++)
+			for (i = 1; i < s.FT.size(); i++)
 				D.add(s.FT.get(i));
-			return D;
+		} else {
+			int p = h.size() - 1;
+
+			D.add(new Point(h.get(0).x - length, h.get(0).y));
+			i = 1;
+			while (i < p) {
+				if (d.get(p - 1).y <= d.get(i).y
+						&& d.get(p - 1).x <= d.get(i).x + length) {
+					Point u = new Point(d.get(p - 1).x - length, d.get(i).y);
+					Point v = new Point(d.get(p - 1).x - length, d.get(p - 1).y);
+					Point z = new Point(h.get(p).x - length, h.get(p).y);
+					D.add(u);
+					D.add(v);
+					D.add(z);
+					return D;
+				}
+				D.add(d.get(i));
+				if (d.get(i).y <= d.get(p - 1).y
+						&& d.get(p - 1).y <= h.get(i).y
+						&& d.get(p - 1).x <= d.get(i).x + length) {
+					Point u = new Point(d.get(i).x, d.get(p - 1).y);
+					Point v = new Point(h.get(p).x - length, h.get(p).y);
+					D.add(d.get(i));
+					D.add(u);
+					D.add(v);
+					return D;
+				}
+				D.add(d.get(i));
+				D.add(h.get(i));
+				i++;
+			}
 		}
-		
-		int p = h.size() - 1;
-		
-		D.add(new Point(h.get(0).x-length,h.get(0).y));
-		i = 1;
-		while(i < p)
-		{
-			if(d.get(p-1).y <= d.get(i).y && d.get(p-1).x <= d.get(i).x + length)
-			{
-				Point u = new Point(d.get(p-1).x - length,d.get(i).y);
-				Point v = new Point(d.get(p-1).x - length,d.get(p-1).y);
-				Point z = new Point(h.get(p).x - length,h.get(p).y);
-				D.add(u); D.add(v); D.add(z);
-				return D;
+
+		while (D.size() > 1 && D.getFirst().x < 0) {
+			D.removeFirst();
+			Point p = D.getFirst();
+			if (p.x > 0) {
+				p = new Point(0, p.y);
+				D.addFirst(p);
 			}
-			D.add(d.get(i));
-			if(d.get(i).y <= d.get(p-1).y && d.get(p-1).y <= h.get(i).y &&
-					d.get(p-1).x <= d.get(i).x + length)
-			{
-				Point u = new Point(d.get(i).x,d.get(p-1).y);
-				Point v = new Point(h.get(p).x - length,h.get(p).y);
-				D.add(d.get(i)); D.add(u); D.add(v);
-				return D;
+		}
+
+		double xLimit = s.FT.getLast().x - length;
+		while (D.size() > 1 && D.getLast().x > xLimit) {
+			D.removeLast();
+			Point p = D.getLast();
+			if (p.x < xLimit) {
+				p = new Point(xLimit, p.y);
+				D.addLast(p);
 			}
-			D.add(d.get(i));
-			D.add(h.get(i));
-			i++;
 		}
 
 		return D;
 	}
 
-	public static BlfLayout getLayout ( List<Packet> packets, BinConfiguration bins)
-	{
+	public static BlfLayout getLayout(List<Packet> packets,
+			BinConfiguration bins) {
 		ArrayList<CoreBin> coreBins = new ArrayList<CoreBin>();
-		
-		for(int i = 0;i<packets.size();i++)
-		{
+
+		for (int i = 0; i < packets.size(); i++) {
 			int j = 0;
 			boolean inserito = false;
-			while(!inserito && j<coreBins.size())
-			{
+			while (!inserito && j < coreBins.size()) {
 				inserito = coreBins.get(j).insertPacket(packets.get(i));
 				j++;
 			}
-			if(!inserito)
-			{
-				coreBins.add(new CoreBin(bins.getWidth(),bins.getHeight()));
-				if(!coreBins.get(j).insertPacket(packets.get(i)))
+			if (!inserito) {
+				coreBins.add(new CoreBin(bins.getWidth(), bins.getHeight()));
+				if (!coreBins.get(j).insertPacket(packets.get(i)))
 					return null;
 			}
 		}
-		
-		ArrayList<Bin> resultBins  = new ArrayList<Bin>();
-		for(int i = 0;i<coreBins.size();i++)
-		{
-			Bin appBin = new Bin(i,bins.getWidth(),bins.getHeight());
-			for(int j = 0; j < coreBins.get(i).packets.size();j++)
-			{
+
+		ArrayList<Bin> resultBins = new ArrayList<Bin>();
+		for (int i = 0; i < coreBins.size(); i++) {
+			Bin appBin = new Bin(i, bins.getWidth(), bins.getHeight());
+			for (int j = 0; j < coreBins.get(i).packets.size(); j++) {
 				appBin.addPacket(coreBins.get(i).packets.get(j));
 			}
 			resultBins.add(appBin);
 		}
-		
-		return new BlfLayout(resultBins,0);
+
+		return new BlfLayout(resultBins, 0);
 	}
-	
+
 }
