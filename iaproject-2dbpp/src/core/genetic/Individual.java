@@ -10,6 +10,7 @@ import logic.Packet;
 import logic.PacketConfiguration;
 
 import BLFCore.BlfLayout;
+import BLFCore.PackingProcedures;
 
 class Individual {
 	
@@ -58,8 +59,8 @@ class Individual {
 	}
 
 	public float calculateLayout(BinConfiguration binConfiguration) {
-		
-//		this.layout = classeUrban.getLayout(this.sequence,binConfiguration);
+
+		this.layout = PackingProcedures.getLayout(this.sequence,binConfiguration);
 		return this.layout.getFitness();
 	}
 

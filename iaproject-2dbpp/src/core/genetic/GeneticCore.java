@@ -9,6 +9,7 @@ import java.util.Random;
 import logic.Bin;
 import logic.Packet;
 import logic.ProblemConfiguration;
+
 import core.AbstractCore;
 import core.Core2GuiTranslators;
 import core.CoreConfiguration;
@@ -121,11 +122,56 @@ public class GeneticCore extends AbstractCore<Integer, List<Bin>> {
 	}
 	
 	private Individual replaceWorstIndividual(Individual child) {
-		return null;
+		// initialize the first individual as worst 
+		int worstIndex = 0;
+		int bestIndex = 0;
+		// if i find an individual with worse fitness i mark it as worst
+		for ( int i = 1; i < populationSize; i++ ) {
+			if ( population[i].getFitness() > population[worstIndex].getFitness() ) {
+				worstIndex = i;
+			}
+			if ( population[i].getFitness() < population[bestIndex].getFitness() ) {
+				bestIndex = i;
+			}
+		}
+		// if child fitness is better than the worst then replace the worst individual ...
+		if (child.getFitness() < population[worstIndex].getFitness()) {
+			population[worstIndex] = child;
+			// ... and if child fitness is better than the current best update the best
+			if (population[worstIndex].getFitness() < population[bestIndex].getFitness()) {
+				bestIndex = worstIndex;
+			}
+		}
+		return population[bestIndex];
 	}
 
+	// return an individual from the population selecting it
+	// according with roulette mechanism
 	private Individual selectIndividual() {
-		return null;
+		float fitnessSum = 0;
+		float probSum = 0;
+		float[] probSelection = new float[populationSize];
+		
+		for ( int i = 0; i < populationSize; i++ ) {
+			fitnessSum += population[i].getFitness();
+		}
+		for ( int i = 0; i < populationSize; i++ ) {
+			probSelection[i] = population[i].getFitness() / fitnessSum;
+		}
+		
+		int candidate = 0;
+		float randValue = rand.nextFloat();
+		
+		for ( int i = 0; i < populationSize; i++ ) {
+			if (randValue > probSum) {
+				probSum += probSelection[i];
+			} else {
+				candidate = i;
+				break;
+			}
+		}
+		
+		return population[candidate];
 	}
 
 	@Override
