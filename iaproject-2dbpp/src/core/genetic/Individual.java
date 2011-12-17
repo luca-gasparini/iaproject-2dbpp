@@ -21,11 +21,11 @@ class Individual {
 	public Individual(List<PacketConfiguration> packetsInfo, BinConfiguration binsInfo) {		
 		// translate input from List<PacketConfigutation> to List<Packet>
 		this.sequence = new ArrayList<Packet>();
+		int id = 0; // forse qui si può migliorare
 		for( int i=0; i < packetsInfo.size(); i++ ) {
 			for( int j=0; j < packetsInfo.get(i).getMolteplicity(); j++ ) {
-				// istantiate GUIPacket because i need to save color
 				this.sequence.add( new Packet(
-						i + j,
+						id++,
 						packetsInfo.get(i).getWidth(), 
 						packetsInfo.get(i).getHeight(),
 						packetsInfo.get(i).getColor()));
