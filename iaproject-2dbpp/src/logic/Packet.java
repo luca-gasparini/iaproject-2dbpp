@@ -45,7 +45,7 @@ public class Packet extends AbstractPacket {
 		}
 		
 		public void setY(int yCord) {
-			this.x = yCord;
+			this.y = yCord;
 		}
 	}
 	
