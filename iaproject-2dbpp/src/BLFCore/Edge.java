@@ -144,7 +144,7 @@ public class Edge {
 	
 	public static Point Intersection(Edge e1,Point x)
 	{
-		return e1.getLeftPoint().x <= x.x && e1.getRightPoint().x > x.x && 
+		return e1.getLeftPoint().x <= x.x && e1.getRightPoint().x >= x.x && 
 				e1.getUpperPoint().y >= x.y &&  e1.getLowerPoint().y <= x.y ?
 						x : null;
 	}

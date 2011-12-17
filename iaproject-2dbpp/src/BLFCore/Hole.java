@@ -133,15 +133,15 @@ public class Hole {
 		 * attraverso sui lati dell'hole e mi fermo quando interseco il rect se
 		 * interseco per un segmento ho 2 possibili strade da seguire
 		 */
-		int c = j;
+		int c = (j) % flags.length;
 		boolean firstIteration = true;// alla prima iterazione non devo trovare
 										// intersezioni
 		boolean stopCondition = false;
 		while (!stopCondition) {
 			if (incremental)
-				c++;
+				c = (c + 1) % flags.length;
 			else
-				c--;
+				c = (c - 1 + flags.length) % flags.length;
 			int intersectEdge = -1;
 			int intersectPoint = -1;
 			for (int i = 0; i < 4; i++) {
@@ -186,13 +186,13 @@ public class Hole {
 					rectIndex = intersectPoint;
 					Point startPoint = Edge.Intersection(getEdge(c),
 							rect.getEdge(intersectPoint)).isPoint();
-					newHoleEdge.add(getEdge(c));
+					newHoleEdge.add(getEdge(c));// TODO flag
 					Edge e1 = new Edge(startPoint,
 							rect.getEdge(intersectPoint).p1);
 					Edge e2 = new Edge(startPoint,
 							rect.getEdge(intersectPoint).p2);
-					if (Edge.Intersection(e1, getEdge(incremental ? c + 1
-							: c - 1)) == null) {
+					if (Edge.Intersection(e1,
+							getEdge(incremental ? c + 1 : c - 1)).isPoint() == null) {
 						newHoleEdge.add(e1);
 						verso = false;
 					} else {
@@ -212,11 +212,13 @@ public class Hole {
 						rectIndex--;
 				}
 				if (verso) {
-					newHoleEdge.add(new Edge(rect.getEdge(rectIndex).p1,
-							stopPoint));
+					if (!Point.equals(rect.getEdge(rectIndex).p1, stopPoint))
+						newHoleEdge.add(new Edge(rect.getEdge(rectIndex).p1,
+								stopPoint));
 				} else {
-					newHoleEdge.add(new Edge(rect.getEdge(rectIndex).p2,
-							stopPoint));
+					if (!Point.equals(rect.getEdge(rectIndex).p2, stopPoint))
+						newHoleEdge.add(new Edge(rect.getEdge(rectIndex).p2,
+								stopPoint));
 				}
 			}
 		}
@@ -251,7 +253,9 @@ public class Hole {
 	}
 
 	private Edge getEdge(int index) {
-		return edges.get((index + edges.size()) % edges.size());
+		while (index < 0)
+			index += edges.size();
+		return edges.get(index % edges.size());
 	}
 
 	public void divideSubHoles() {
@@ -315,15 +319,15 @@ public class Hole {
 		// find leftMostEdges, Qi and relative Qw
 		// scan the left side of the hole starting from down
 		Qi.add(null);
-			// Qi starts from Q1. every Qi is related to his upper
-						// LeftMostEdges
+		// Qi starts from Q1. every Qi is related to his upper
+		// LeftMostEdges
 		ArrayList<Point> Qw = new ArrayList<Point>();
 		ArrayList<Edge> edgeOfQw = new ArrayList<Edge>();
 
 		Qw.add(null);
 		edgeOfQw.add(null);
 
-		i = (lowerEdge + 1 + edges.size())%edges.size();
+		i = (lowerEdge + 1 + edges.size()) % edges.size();
 		while (i != upperEdge) {
 			Edge currentEdge = getEdge(i);
 			Edge previousEdge = getEdge(i - 1);
@@ -410,9 +414,8 @@ public class Hole {
 
 					if (lIndex == 0)// search lowerEdge
 					{
-						if (Edge.equals(getEdge(i),
-								getEdge(lowerEdge)))
-								foundQw = true;
+						if (Edge.equals(getEdge(i), getEdge(lowerEdge)))
+							foundQw = true;
 					}
 
 					else// search for qW
@@ -424,15 +427,14 @@ public class Hole {
 					}
 
 					if (foundQw) {
-						
+
 						/*
-					 	if(lIndex == 0)
-							sb.FT.add(getEdge(lowerEdge).getRightPoint());
-						
-						else
-							sb.FT.add(appQw);
-						*/
-						
+						 * if(lIndex == 0)
+						 * sb.FT.add(getEdge(lowerEdge).getRightPoint());
+						 * 
+						 * else sb.FT.add(appQw);
+						 */
+
 						Point stoppingPoint = lIndex == 0 ? getEdge(lowerEdge)
 								.getLeftPoint() : Qi.get(lIndex);
 						int j = edgeIndex;
@@ -442,12 +444,10 @@ public class Hole {
 							j--;
 						}
 						sb.FB.add(getEdge(j).p1);
-						if(lIndex == 0)
-						{
+						if (lIndex == 0) {
 							sb.FB.add(getEdge(lowerEdge).getRightPoint());
-							sb.FB.add(getEdge(lowerEdge-1).getUpperPoint());
-						}
-						else{
+							sb.FB.add(getEdge(lowerEdge - 1).getUpperPoint());
+						} else {
 							sb.FB.add(Qw.get(lIndex));
 							sb.FB.add(edgeOfQw.get(lIndex).getUpperPoint());
 						}
@@ -461,23 +461,21 @@ public class Hole {
 		}
 	}
 
-	public ArrayList<Point> getCandidates(CoreRectangle rect)
-	{
+	public ArrayList<Point> getCandidates(CoreRectangle rect) {
 		ArrayList<Point> li = new ArrayList<Point>();
-		for(int i = 0;i < subHoles.size();i++)
-		{
-			LinkedList<Point> Top,Bottom;
+		for (int i = 0; i < subHoles.size(); i++) {
+			LinkedList<Point> Top, Bottom;
 			Top = PackingProcedures.Top(subHoles.get(i), rect.width);
 			Bottom = PackingProcedures.Bottom(subHoles.get(i), rect.width);
-			ArrayList<CandidatePoint> app = PackingProcedures.Placing(rect.heigth, Bottom, Top);
-			for(int j =0; j<app.size();j++)
-			{
+			ArrayList<CandidatePoint> app = PackingProcedures.Placing(
+					rect.heigth, Bottom, Top);
+			for (int j = 0; j < app.size(); j++) {
 				CandidatePoint x = app.get(j);
-				if(x.feasible == true)
+				if (x.feasible == true)
 					li.add(x.p);
 			}
 		}
 		return li;
 	}
-	
+
 }

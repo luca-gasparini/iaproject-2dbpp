@@ -34,6 +34,8 @@ public class CoreRectangle {
 	
 	public Edge getEdge(int index)
 	{
-		return rectEdges.get((index + rectEdges.size()) % rectEdges.size());
+		while(index < 0)
+			index = index+rectEdges.size();
+		return rectEdges.get(index % rectEdges.size());
 	}
 }
