@@ -53,7 +53,31 @@ public abstract class AbstractCore<K, T> extends SwingWorker<Void, CoreResult<T>
 			
 			return toReturn;
 		}
+	}
+	
+	/**
+	 * MUST BE CREATED JUST A MOMENT BEFORE PUBLISHING IT
+	 *
+	 * @param <R>
+	 */
+	public abstract class AbstractCoreResult<R> implements CoreResult<R> {
+		private final int nIterations;
+		private final long elapsedTime;
 		
+		public AbstractCoreResult() {
+			this.nIterations = AbstractCore.this.getNIterations();
+			this.elapsedTime = AbstractCore.this.getElapsedTime();
+		}
+		
+		@Override
+		public int getNIterations() {
+			return this.nIterations;
+		}
+		
+		@Override
+		public long getElapsedTime() {
+			return this.elapsedTime;
+		}
 	}
 	
 	private final Object mutex = new Object();
@@ -91,31 +115,36 @@ public abstract class AbstractCore<K, T> extends SwingWorker<Void, CoreResult<T>
 	
 	@Override
 	protected final void process(List<CoreResult<T>> chunks) {
+		
 		/* we are interested only in painting the last optimum (this
 		 * increases performance)
 		 */
 		final CoreResult<T> result = chunks.get(chunks.size() - 1);
 		final T lastOptimum = result.getBins();
 		displayer.paint(new GUIOptimum() {
+			private final int nIterations = result.getNIterations();
+			private final long elapsedTime = result.getElapsedTime();
+			private final float fitness = result.getFitness();
+			private final List<GUIBin> bins = c2gt.translate(lastOptimum);
 			
 			@Override
 			public int getNIterations() {
-				return AbstractCore.this.getNIterations();
+				return this.nIterations;
 			}
 			
 			@Override
 			public float getFitness() {
-				return result.getFitness();
+				return this.fitness;
 			}
 			
 			@Override
 			public long getElapsedTime() {
-				return AbstractCore.this.getElapsedTime();
+				return this.elapsedTime;
 			}
 			
 			@Override
 			public List<GUIBin> getBins() {
-				return c2gt.translate(lastOptimum);
+				return this.bins;
 			}
 		});
 	}

@@ -6,8 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import logic.*;
-
+import logic.Bin;
+import logic.Packet;
+import logic.ProblemConfiguration;
 import core.AbstractCore;
 import core.Core2GuiTranslators;
 import core.CoreConfiguration;
@@ -59,7 +60,7 @@ public class GeneticCore extends AbstractCore<Integer, List<Bin>> {
 			// publish results only if better
 			if ( bestIndividual.getFitness() < currentFitness) {
 				currentFitness = bestIndividual.getFitness();
-				CoreResult<List<Bin>> cr = new CoreResult<List<Bin>>() {
+				CoreResult<List<Bin>> cr = new AbstractCoreResult<List<Bin>>() {
 					@Override
 					public float getFitness() {
 						return bestIndividual.getFitness();

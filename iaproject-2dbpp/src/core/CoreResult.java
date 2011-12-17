@@ -6,4 +6,7 @@ public interface CoreResult<T> {
 	
 	public T getBins();
 	
+	public int getNIterations();
+	
+	public long getElapsedTime();
 }

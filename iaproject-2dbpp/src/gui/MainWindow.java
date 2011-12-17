@@ -4,8 +4,6 @@ import gui.common.AbstractFrame;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -27,11 +25,7 @@ import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
@@ -191,182 +185,6 @@ public class MainWindow extends AbstractFrame {
 		}
 	}
 	
-	private class OptimumPaintingPanel extends JPanel implements OptimumPainter {
-		
-		private static final long serialVersionUID = -2130969442515268077L;
-		
-		private JList binList;
-		// use unmodifiable JTextField so text can be selected but not modified
-		private JTextField nIteration;
-		private JTextField fitnessValue;
-		private JTextField nBins;
-		private JTextField elapsedTime;
-		private JPanel binDisplayer;
-		
-		public OptimumPaintingPanel() {
-			init();
-		}
-		
-		private void init() {
-			TitledBorder optTitleBorder = BorderFactory.createTitledBorder("OPTIMUM DISPLAYER");
-			optTitleBorder.setTitleFont(GUIUtils.TITLE_FONT);
-			optTitleBorder.setTitleJustification(TitledBorder.LEFT);
-			this.setBorder(optTitleBorder);
-			
-			// create components
-			binList = new JList();
-			binList.setVisibleRowCount(7);
-			binList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-			JScrollPane listScroller = new JScrollPane(binList, 
-					JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, 
-					JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-			listScroller.setPreferredSize(new Dimension(150, 150));
-			TitledBorder binTitle = BorderFactory.createTitledBorder("Bin List");
-			listScroller.setBorder(binTitle);
-			
-			JLabel elapsedTimeLbl = new JLabel("elapsed time");
-			elapsedTimeLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-			nIteration = new JTextField(10);
-			nIteration.setEditable(false);
-			
-			JLabel nIterationLbl = new JLabel("# iterations");
-			nIterationLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-			elapsedTime = new JTextField(10);
-			elapsedTime.setEditable(false);
-			
-			JLabel fitnessValueLbl = new JLabel("fitness value");
-			fitnessValueLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-			fitnessValue = new JTextField(10);
-			fitnessValue.setEditable(false);
-			
-			JLabel nBinsLbl = new JLabel("# bins");
-			nBinsLbl.setHorizontalAlignment(SwingConstants.RIGHT);
-			nBins = new JTextField(10);
-			nBins.setEditable(false);
-			
-			binDisplayer = new JPanel();
-			
-			JPanel centerPane = new JPanel(new BorderLayout());
-			centerPane.add(GUIUtils.getHorizontalSeparator(5, 5), BorderLayout.PAGE_START);
-			centerPane.add(binDisplayer, BorderLayout.CENTER);
-			
-			// lay out components
-			this.setLayout(new BorderLayout());
-			
-			JPanel infoPanel = new JPanel(new GridBagLayout());
-			GridBagConstraints c = new GridBagConstraints();
-
-			c.gridy = 0;
-			c.gridx = 0;
-			c.insets = new Insets(0, 90, 0, 5);
-			c.anchor = GridBagConstraints.LINE_END;
-			infoPanel.add(nIterationLbl, c);
-			
-			c.gridy = 1;
-			c.gridx = 0;
-			infoPanel.add(elapsedTimeLbl, c);
-			
-			c.gridy = 2;
-			c.gridx = 0;
-			infoPanel.add(fitnessValueLbl, c);
-			
-			c.gridy = 3;
-			c.gridx = 0;
-			infoPanel.add(nBinsLbl, c);
-			
-			c.gridy = 0;
-			c.gridx = 1;
-			c.weightx = 0.2;
-			c.insets = new Insets(2, 0, 2, 0);
-			c.anchor = GridBagConstraints.LINE_START;
-			infoPanel.add(nIteration, c);
-			
-			c.gridy = 1;
-			c.gridx = 1;
-			infoPanel.add(elapsedTime, c);
-			
-			c.gridy = 2;
-			c.gridx = 1;
-			infoPanel.add(fitnessValue, c);
-			
-			c.gridy = 3;
-			c.gridx = 1;
-			infoPanel.add(nBins, c);
-			
-			
-			JPanel topPanel = new JPanel(new BorderLayout());
-			topPanel.add(listScroller, BorderLayout.LINE_START);
-			topPanel.add(infoPanel, BorderLayout.CENTER);
-			this.add(topPanel, BorderLayout.PAGE_START);
-			
-			this.add(centerPane, BorderLayout.CENTER);
-			
-		}
-
-		@Override
-		public void paint(GUIOptimum newOptimum) {
-			// print only if core is running
-			if (actualState == State.READY || actualState == State.CONFIGURATION) {
-				return;
-			}
-			
-			this.elapsedTime.setText(newOptimum.getElapsedTime() + "ms");
-			this.fitnessValue.setText(Float.toString(newOptimum.getFitness()));
-			this.nIteration.setText(Integer.toString(newOptimum.getNIterations()));
-			this.nBins.setText(Integer.toString(newOptimum.getBins().size()));
-			// TODO display bins!!!
-			// Nicola C.: approccio per test
-			// add bins to the list
-			binList.setListData(newOptimum.getBins().toArray());
-			
-			// display bins...
-			binDisplayer.removeAll();
-			
-			// ---- cut out ----
-//			System.out.println("size: " + binDisplayer.getSize());
-//			System.out.println("pref size: " + binDisplayer.getSize());
-			// -----------------
-			
-			// calculate maximum bin per row...
-			int maxBinPerRow = 3; // TODO keep in mind space between components
-			// calculate magnification factor
-			int magnificationFactor = 3; // TODO as previous todo's
-			// set binDisplayer layout manager
-			binDisplayer.setLayout(new GridLayout(0, maxBinPerRow));
-			for (GUIBin bin : newOptimum.getBins()) {
-				bin.setMagnificationFactor(magnificationFactor);
-				
-				// build panel to print GUIBin
-				Box binPanel = Box.createVerticalBox();
-				bin.setAlignmentX(Component.CENTER_ALIGNMENT);
-				binPanel.add(bin);
-				binPanel.add(Box.createVerticalStrut(5));
-				JLabel label = new JLabel("Bin " + bin.toString());
-				label.setAlignmentX(Component.CENTER_ALIGNMENT);
-				binPanel.add(label);
-				binDisplayer.add(binPanel);
-			}
-			
-			/* revalidate & repaint binDisplayer (it's layout is changed and
-			 * maybe even it's content)
-			 */
-			binDisplayer.revalidate();
-			binDisplayer.repaint();
-		}
-		
-		public void reset() {
-			this.elapsedTime.setText(null);
-			this.fitnessValue.setText(null);
-			this.nIteration.setText(null);
-			this.nBins.setText(null);
-			this.binList.removeAll();
-			
-			this.binDisplayer.removeAll();
-			this.binDisplayer.revalidate();
-			this.binDisplayer.repaint();
-		}
-	}
-	
 	public enum State {
 		CONFIGURATION,
 		READY,
@@ -413,6 +231,7 @@ public class MainWindow extends AbstractFrame {
 	
 	@Override
 	public void init() {
+		
 		this.setSize(1100, 700);
 		this.setLocationRelativeTo(null);
 		
@@ -434,7 +253,7 @@ public class MainWindow extends AbstractFrame {
 				ProblemConfigurer pc = new ProblemConfigurer(MainWindow.this, problemConf);
 				problemConf = pc.askUser();
 				
-				if (problemConf != null) {
+				if (problemConf != null && actualState == State.CONFIGURATION) {
 					switchToState(State.READY);
 				}
 			}
@@ -501,7 +320,7 @@ public class MainWindow extends AbstractFrame {
 				
 				try {
 					CoreDescriptor core = ecp.getChoosedCore().getDescriptor();
-					coreController = core.getConfiguredInstance(problemConf, opp);
+					coreController = core.getConfiguredInstance(problemConf, opp.setUp());
 				} catch (Exception e1) {
 					GUIUtils.showErrorMessage(MainWindow.this, e1.toString());
 					return;

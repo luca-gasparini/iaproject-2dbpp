@@ -1,17 +1,9 @@
 import gui.MainWindow;
-import gui.ProblemConfigurer;
 
-import java.awt.Color;
 import java.io.File;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
+import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-
-import logic.BinConfiguration;
-import logic.PacketConfiguration;
-import logic.ProblemConfiguration;
 
 
 public class Main {
@@ -34,6 +26,7 @@ public class Main {
 			public void run() {
 				MainWindow window = new MainWindow(confFile);
 				window.setVisible(true);
+				window.setExtendedState(JFrame.MAXIMIZED_BOTH);
 				
 //				BinConfiguration bc = new BinConfiguration(10, 12);
 //				PacketConfiguration pkt1 = new PacketConfiguration(1, 1, 10, Color.RED);

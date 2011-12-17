@@ -3,7 +3,7 @@ package core.dummy;
 import gui.OptimumPainter;
 
 import java.awt.Color;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -43,32 +43,61 @@ public class DummyCore extends AbstractCore<Integer, List<Bin>> {
 			}
 			// ....
 			
-			// publish results
-			CoreResult<List<Bin>> cr = new CoreResult<List<Bin>>() {
+			
+			// --- begin test --- 
+			int nBins = rand.nextInt(20) + 1;
+			final List<Bin> bins = new ArrayList<Bin>(nBins+1);
+			for (int i = 0; i < nBins; i++) {
+				bins.add(createRandomBin(i, 
+						problemConf.getBin().getWidth(), 
+						problemConf.getBin().getHeight()));
+			}
+			
+			CoreResult<List<Bin>> cr = new AbstractCoreResult<List<Bin>>() {
+				private float fitness = rand.nextFloat();
 				
 				@Override
 				public float getFitness() {
-					return rand.nextFloat();
+					return this.fitness;
 				}
+				
 				@Override
 				public List<Bin> getBins() {
-					/* test */
-					List<Bin> testList = new LinkedList<Bin>();
-					testList.add(new Bin(1, 100, 100));
-					testList.add(new Bin(2, 50, 50));
-					Packet id0 = new Packet(10, 10, 10, 20, 20, Color.BLUE);
-					id0.setRotate(true);
-					testList.get(0).addPacket(id0);
-					testList.get(0).addPacket(new Packet(11, 15, 20, 40, 40, Color.green));
-					
-					return testList;
+					return bins;
 				}
 			};
+			// --- end test ---
+			
+			
+			// publish results
 			publish(cr);
 		}
 		
 	}
-
+	
+	private Bin createRandomBin(int id, int width, int height) {
+		int nPackets = rand.nextInt(10);
+		
+		Bin newBin = new Bin(id, width, height);
+		for (int i = 0; i < nPackets; i++) {
+			newBin.addPacket(createRandomPacket(i, width, height));
+		}
+		
+		return newBin;
+	}
+	
+	private Packet createRandomPacket(int id, int binW, int binH) {
+		int blpX = rand.nextInt(binW);
+		int blpY = rand.nextInt(binH);
+		
+		int pW = rand.nextInt(binW - blpX) + 1;
+		int pH = rand.nextInt(binH - blpY) + 1;
+		
+		Color color = new Color(rand.nextInt());
+		
+		return new Packet(id, pW, pH, blpX, blpY, color);
+	}
+	
 	@Override
 	protected boolean reachedStoppingCondition() {
 		return false;

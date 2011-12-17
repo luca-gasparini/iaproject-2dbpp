@@ -47,4 +47,25 @@ public final class GUIUtils {
 		JOptionPane.showMessageDialog(parent, message, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 	
+	private static final StringBuilder builder = new StringBuilder();
+	public static String elapsedTime2String(long msElapsedTime) {
+		long millis = msElapsedTime % 1000;
+		msElapsedTime /= 1000;
+		long sec = msElapsedTime % 60;
+		msElapsedTime /= 60;
+		long min = msElapsedTime % 60;
+		long hours = msElapsedTime / 60;
+		
+		synchronized (builder) {
+			builder.setLength(0);
+			builder.append(hours);
+			builder.append(':');
+			builder.append(min);
+			builder.append(':');
+			builder.append(sec);
+			builder.append('.');
+			builder.append(millis);
+			return builder.toString();
+		}
+	}
 }
