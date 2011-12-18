@@ -7,6 +7,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collections;
@@ -19,12 +20,14 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
@@ -72,6 +75,71 @@ public class OptimumPaintingPanel extends JPanel {
 		}
 	}
 	
+	private class BinDisplayerPane extends JPanel implements Scrollable {
+		private static final long serialVersionUID = -2032186887504479184L;
+		
+		private static final int FRACTION = 2;
+		
+		/**
+		 * Returns the size of a component inside this panel: we know
+		 * that every component has the same size, so we just take the
+		 * first one.
+		 * 
+		 * @return
+		 */
+		private int computeVScrollSize() {
+			if (getComponentCount() == 0) {
+				return 1;
+			}
+			
+			return getComponent(0).getPreferredSize().height / FRACTION + 1;
+		}
+		
+		private int computeHScrollSize() {
+			if (getComponentCount() == 0) {
+				return 1;
+			}
+			
+			return getComponent(0).getPreferredSize().width / FRACTION + 1;
+		}
+		
+		@Override
+		public Dimension getPreferredScrollableViewportSize() {
+			return this.getPreferredSize();
+		}
+
+		@Override
+		public int getScrollableUnitIncrement(Rectangle visibleRect,
+				int orientation, int direction) {
+			if (orientation == SwingConstants.VERTICAL) {
+				return this.computeVScrollSize();
+			} else {
+				return this.computeHScrollSize();
+			}
+		}
+
+		@Override
+		public int getScrollableBlockIncrement(Rectangle visibleRect,
+				int orientation, int direction) {
+			if (orientation == SwingConstants.VERTICAL) {
+				return this.computeVScrollSize();
+			} else {
+				return this.computeHScrollSize();
+			}
+		}
+
+		@Override
+		public boolean getScrollableTracksViewportWidth() {
+			return true;
+		}
+
+		@Override
+		public boolean getScrollableTracksViewportHeight() {
+			return false;
+		}
+		
+	}
+	
 	private BinListModel binList;
 	/**
 	 * Please note that although elements are inserted sequentially,
@@ -84,6 +152,12 @@ public class OptimumPaintingPanel extends JPanel {
 	private JTextField fitnessValue;
 	private JTextField nBins;
 	private JTextField elapsedTime;
+	/**
+	 * !!MUST!! CONTAIN AT LEAST ONE {@link JComponent} FOR EACH DISPLAYED BIN,
+	 * ADDED IN THE SAME ORDER AS {@link GUIOptimum} STORES THEM.
+	 * This means that {@link JPanel#getComponent(int) binDisplayer.getComponent(i)}
+	 * returns the component that displays GUIOptimum.getBins().get(i).
+	 */
 	private JPanel binDisplayer;
 	private TokenPainter lastToken = null;
 	
@@ -104,7 +178,7 @@ public class OptimumPaintingPanel extends JPanel {
 		this.setBorder(optTitleBorder);
 		
 		// create components
-		JList binJList = new JList();
+		final JList binJList = new JList();
 		binList = new BinListModel();
 		binJList.setModel(binList);
 		binJList.setCellRenderer(new DefaultListCellRenderer(){
@@ -125,6 +199,10 @@ public class OptimumPaintingPanel extends JPanel {
 		});
 		binJList.setVisibleRowCount(7);
 		binJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		binJList.setToolTipText("<HTML>Bins:" +
+				"<UL><LI>ID" +
+				"<LI>[number of contained packets]</UL>" +
+				"Double-click to ensure that selected bin is visible</HTML>");
 		JScrollPane binListScroller = new JScrollPane(binJList, 
 				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, 
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -170,6 +248,11 @@ public class OptimumPaintingPanel extends JPanel {
 		});
 		optimumJList.setVisibleRowCount(7);
 		optimumJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		optimumJList.setToolTipText("<HTML>History of found optimum:" +
+				"<UL><LI>#incremental optimum number<BR/>" +
+				"<LI> [number of bins in the solution]<BR/>" +
+				"<LI> @elapsed time before finding the solution</UL>" +
+				"<P>Double-click to show selected optimum</P></HTML>");
 		JScrollPane optListScroller = new JScrollPane(optimumJList,
 				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -197,11 +280,24 @@ public class OptimumPaintingPanel extends JPanel {
 		nBins = new JTextField(10);
 		nBins.setEditable(false);
 		
-		binDisplayer = new JPanel();
-		JScrollPane scrollPane = new JScrollPane(binDisplayer, 
+		binDisplayer = new BinDisplayerPane();
+		final JScrollPane scrollPane = new JScrollPane(binDisplayer, 
 				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		
+		binJList.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					int selected = binJList.getSelectedIndex();
+					
+					if (selected < 0) return;
+					
+					// binDisplayer contains ONLY one component for each bin
+					Component c = binDisplayer.getComponent(selected);
+					binDisplayer.scrollRectToVisible(c.getBounds());
+				}
+			}
+		});
 		JPanel centerPane = new JPanel(new BorderLayout());
 		centerPane.add(GUIUtils.getHorizontalSeparator(5, 5), BorderLayout.PAGE_START);
 		centerPane.add(scrollPane, BorderLayout.CENTER);
