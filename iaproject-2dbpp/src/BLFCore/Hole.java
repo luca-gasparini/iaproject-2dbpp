@@ -33,16 +33,13 @@ public class Hole {
 				// segmento
 				if (intersection != null && intersection.isPoint() == null) {
 					if (Edge.equals(intersection, getEdge(j))) {
-						if (!flags[j]) {
-							Hole hole = this.traverseFromHoleLine(j, rect,
-									flags, true);
-							if (hole != null)
-								holes.add(hole);
-							hole = this.traverseFromHoleLine(j, rect, flags,
-									false);
-							if (hole != null)
-								holes.add(hole);
-						}
+						Hole hole = this.traverseFromHoleLine(j, rect, flags,
+								true);
+						if (hole != null)
+							holes.add(hole);
+						hole = this.traverseFromHoleLine(j, rect, flags, false);
+						if (hole != null)
+							holes.add(hole);
 
 					} else if (Edge.equals(intersection, rect.getEdge(i))) {
 						/*
@@ -183,16 +180,29 @@ public class Hole {
 								.getEdge(intersectEdge).p1));
 					}
 				} else {
+					//intersezione punto
 					rectIndex = intersectPoint;
 					Point startPoint = Edge.Intersection(getEdge(c),
 							rect.getEdge(intersectPoint)).isPoint();
-					newHoleEdge.add(getEdge(c));// TODO flag
+					newHoleEdge.add(getEdge(c));
+					flags[c] = true;
 					Edge e1 = new Edge(startPoint,
 							rect.getEdge(intersectPoint).p1);
 					Edge e2 = new Edge(startPoint,
 							rect.getEdge(intersectPoint).p2);
+
+					//Potrei trovare subito stopping point e chiudere l'hole
+					if(Edge.Intersection(e1, stopPoint)!= null || Edge.Intersection(e2, stopPoint)!= null)
+					{
+						newHoleEdge.add(new Edge(startPoint,stopPoint));
+						return true;
+					}
+					
+					
+					//altrimenti continuo il traverse sul rect nel verso dove non
+					//trovo intersezioni
 					if (Edge.Intersection(e1,
-							getEdge(incremental ? c + 1 : c - 1)).isPoint() == null) {
+							getEdge(incremental ? c + 1 : c - 1)).isPoint() != null) {
 						newHoleEdge.add(e1);
 						verso = false;
 					} else {
@@ -263,7 +273,7 @@ public class Hole {
 		subHoles.clear();
 
 		int numberOfEdges = edges.size();
-		int upperEdge = -1, lowerEdge = -1;
+		int upperEdge = -1, lowerEdge = -1, rightMost = -1;
 		int i = 0;
 
 		// check for edges to be linked
@@ -284,19 +294,20 @@ public class Hole {
 
 		// finding upper and lower edges
 		for (i = 0; i < numberOfEdges; i++) {
-			if (edges.get(i).isHorizontal()
-					&& (upperEdge == -1 || edges.get(i).p1.y > edges
-							.get(upperEdge).p1.y))
+			if (getEdge(i).isHorizontal()
+					&& (upperEdge == -1 || getEdge(i).p1.y > getEdge(upperEdge).p1.y))
 				upperEdge = i;
-			if (edges.get(i).isHorizontal()
-					&& (lowerEdge == -1 || edges.get(i).p1.y < edges
-							.get(lowerEdge).p1.y))
+			if (getEdge(i).isHorizontal()
+					&& (lowerEdge == -1 || getEdge(i).p1.y < getEdge(lowerEdge).p1.y))
 				lowerEdge = i;
+			if (getEdge(i).isVertical()
+					&& (rightMost == -1 || getEdge(i).p1.x > getEdge(rightMost).p1.x))
+				rightMost = i;
 		}
 
 		// is the list in clockWise order?
 		boolean clockWise;
-		if (Point.equals(edges.get(upperEdge).p1, edges.get(upperEdge)
+		if (Point.equals(getEdge(upperEdge).p1, getEdge(upperEdge)
 				.getLeftPoint()))
 			clockWise = true;
 		else
@@ -382,7 +393,7 @@ public class Hole {
 			sb.FT.add(getEdge(edgeIndex).getUpperPoint());
 
 			boolean foundQn;
-			boolean stop = false; // true quando trovo qW o lowerEdge
+			boolean stop = false; // true quando trovo qW o rightMost
 			while (!stop) {
 				foundQn = false;
 				for (int qIndex = lIndex + 1; !foundQn && qIndex < Qi.size(); qIndex++) {
@@ -407,14 +418,14 @@ public class Hole {
 					}
 				}
 
-				if (!foundQn) {// search for Qwi or lower edge
+				if (!foundQn) {// search for Qwi or rightMost edge
 					boolean foundQw = false;
 
 					Point appQw = null;
 
-					if (lIndex == 0)// search lowerEdge
+					if (lIndex == 0)// search rigthMost
 					{
-						if (Edge.equals(getEdge(i), getEdge(lowerEdge)))
+						if (Edge.equals(getEdge(i), getEdge(rightMost)))
 							foundQw = true;
 					}
 
@@ -428,15 +439,13 @@ public class Hole {
 
 					if (foundQw) {
 
-						/*
-						 * if(lIndex == 0)
-						 * sb.FT.add(getEdge(lowerEdge).getRightPoint());
-						 * 
-						 * else sb.FT.add(appQw);
-						 */
+						if (lIndex == 0)
+							sb.FT.add(getEdge(rightMost).getLowerPoint());
+						else
+							sb.FT.add(appQw);
 
-						Point stoppingPoint = lIndex == 0 ? getEdge(lowerEdge)
-								.getLeftPoint() : Qi.get(lIndex);
+						Point stoppingPoint = lIndex == 0 ? getEdge(rightMost)
+								.getLowerPoint() : Qi.get(lIndex);
 						int j = edgeIndex;
 						sb.FB.add(getEdge(j).p2);
 						while (!Point.equals(getEdge(j).p1, stoppingPoint)) {
@@ -445,8 +454,7 @@ public class Hole {
 						}
 						sb.FB.add(getEdge(j).p1);
 						if (lIndex == 0) {
-							sb.FB.add(getEdge(lowerEdge).getRightPoint());
-							sb.FB.add(getEdge(lowerEdge - 1).getUpperPoint());
+							sb.FB.add(getEdge(rightMost).getUpperPoint());
 						} else {
 							sb.FB.add(Qw.get(lIndex));
 							sb.FB.add(edgeOfQw.get(lIndex).getUpperPoint());

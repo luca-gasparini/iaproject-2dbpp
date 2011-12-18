@@ -63,7 +63,7 @@ public class Edge {
 
 	public Point isPoint()//se il lato coincide con un punto ritorna il punto. altrimenti null
 	{
-		return p1.equals(p2) ? new Point(p1) : null;
+		return Point.equals(p1, p2) ? new Point(p1) : null;
 	}
 	
 	public static Edge upHalfLine(Point x)//semiretta da x verso l'alto
@@ -118,7 +118,7 @@ public class Edge {
 			if(e1.getUpperPoint().y >= e2.p1.y && 
 					e1.getLowerPoint().y <= e2.p1.y &&
 					e2.getLeftPoint().x <= e1.p1.x &&
-					e2.getRightPoint().x >= e1.p1.y)
+					e2.getRightPoint().x >= e1.p1.x)
 			{
 				Point app = new Point(e1.p1.x,e2.p1.y);
 				return new Edge(app,app);

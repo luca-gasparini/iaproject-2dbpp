@@ -37,16 +37,14 @@ public class PackingProcedures {
 		E.add(new CandidatePoint(Cp.get(0),Dp.get(0).y - Cp.get(0).y >= h));
 
 		while (i < m || j < p) {
-			while (D.get(j).getRightPoint().x <= C.get(i).getRightPoint().x
-					&& j < p) {
+			while ( j < p && D.get(j).getRightPoint().x <= C.get(i).getRightPoint().x) {
 				j++;
 				Point M = new Point(D.get(j).getLeftPoint().x, C.get(i)
 						.getLeftPoint().y);
 				E.add(new CandidatePoint(M, D.get(j).getLeftPoint().y
 						- C.get(i).getLeftPoint().y > h));
 			}
-			while (C.get(i).getRightPoint().x <= D.get(j).getRightPoint().x
-					&& i < m) {
+			while (i < m && C.get(i).getRightPoint().x <= D.get(j).getRightPoint().x) {
 				i++;
 				boolean test = D.get(j).getLeftPoint().y
 						- C.get(i).getLeftPoint().y >= h;
@@ -56,9 +54,23 @@ public class PackingProcedures {
 		}
 
 		if(p>0 && m>0)
-		E.add(new CandidatePoint(C.get(m).getRightPoint(), D.get(p)
-				.getRightPoint().y - C.get(m).getRightPoint().y >= h));
+		{
+			double xLimit = Cp.get(Cp.size()-1).x;
+			i = Cp.size() -1;
+			
+			while(i>0 && Cp.get(i).x >= xLimit)
+			{
+				j = Dp.size() -1;
+				while(j>0 && Dp.get(j).x >= xLimit)
+				{
+					E.add(new CandidatePoint(Cp.get(i), Dp.get(j).y
+							 - Cp.get(i).y >= h));
+					j--;
+				}
+				i--;
+			}
 
+		}
 		return E;
 	}
 
@@ -141,9 +153,9 @@ public class PackingProcedures {
 			ArrayList<Point> l, ArrayList<Point> r, LinkedList<Edge> Q,
 			Point support) {
 		int m = h.size() - 1;
-		while (start <= m) {// TODO controlla
+		while (start <= m) {
 			int i = start;
-			while (h.get(i).x <= support.x + length) {
+			while (h.get(i).x < support.x + length) {
 				// slide on support
 				if (h.get(i).y > b.p2.y) {
 					// Hit h[i]d[i]
@@ -151,10 +163,15 @@ public class PackingProcedures {
 					b.p2 = new Point(h.get(i));
 					Point u = new Point(b.p1.x, b.p1.y
 							- (h.get(i).y - support.y));
-					C.add(u);
-					C.add(b.p1);
+					if(C.isEmpty() || !Point.equals(C.getLast(),u))
+						C.add(u);
+					if(!Point.equals(b.p1, u))
+						C.add(b.p1);
 					Q.clear();
-					if(i==m) return;
+					if(i==m) 
+					{
+						return;
+					}
 					support = Edge.Intersection(
 							new Edge(h.get(i + 1), d.get(i + 1)),
 							new Edge(b.p1.x, false)).isPoint();
@@ -177,7 +194,8 @@ public class PackingProcedures {
 			Edge a = Q.removeFirst();
 			b.p1 = new Point(b.p1.x, a.getLeftPoint().y);
 			b.p2 = new Point(b.p2.x, a.getLeftPoint().y);
-			C.add(b.p1);
+			if(C.isEmpty() || !Point.equals(C.getLast(),b.p1))
+				C.add(b.p1);
 			start = i;
 			support = a.getRightPoint();
 		}
@@ -188,7 +206,7 @@ public class PackingProcedures {
 		LinkedList<Edge> Q = new LinkedList<Edge>();
 		int i = end - 1;
 		while (i >= start) {
-			if (Q.isEmpty() || Q.getFirst().p1.y <= l.get(i).y) {
+			if (Q.isEmpty() || Q.getFirst().getLeftPoint().y <= l.get(i).y) {
 				Q.addFirst(new Edge(l.get(i), r.get(i)));
 				i--;
 			}
