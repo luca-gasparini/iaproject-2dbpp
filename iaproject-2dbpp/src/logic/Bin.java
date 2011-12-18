@@ -1,13 +1,7 @@
 package logic;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-//import gui.GUIPacket;
-import logic.Packet;
-
-import logic.BinConfiguration;
 
 public class Bin extends BinConfiguration { // il nome non è il massimo;
 
@@ -45,18 +39,41 @@ public class Bin extends BinConfiguration { // il nome non è il massimo;
 		return packetList.contains(p);
 	}
 	
+	public int getNPackets() {
+		return this.packetList.size();
+	}
+	
 	public List<Packet> getList() {
 		return this.packetList;
 	}
 	
 	@Override
 	public boolean equals(Object b) {
+		if (b == null) {
+			return false;
+		}
+		
+		if (this == b) {
+			return true;
+		}
+		
 		if (!(b instanceof Bin))
 			return false;
 		
 		Bin binCompare = (Bin) b;
-		List<Packet> itPacket = binCompare.getList();
 		
+		if (this.id != binCompare.id) {
+			return false;
+		}
+		
+		List<Packet> itPacket = binCompare.packetList;
+		
+		// to check if both list are equals, first check their size...
+		if (this.packetList.size() != itPacket.size()) {
+			return false;
+		}
+		
+		// ...then check if both contain the same packets
 		for (Packet p: itPacket) {
 			if (!this.containsPacket(p))
 				return false;

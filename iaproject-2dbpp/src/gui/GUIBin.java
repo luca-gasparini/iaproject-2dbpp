@@ -9,7 +9,6 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
-import java.util.Iterator;
 import java.util.List;
 
 import logic.Bin;
@@ -103,7 +102,7 @@ public class GUIBin extends ResizableRawGraphics {
 		return packetRect;
 	}
 	
-	public String toString() {
+	public String getID() {
 		return Integer.toString(this.singleBin.getID());
 	}
 	
@@ -115,13 +114,24 @@ public class GUIBin extends ResizableRawGraphics {
 		return this.singleBin;
 	}
 	
+	/**
+	 * Two {@link GUIBin} are the same when have same magnification factor and
+	 * contained {@link Bin}.
+	 */
 	@Override
 	public boolean equals(Object gb) {
+		if (gb == null)
+			return false;
+		
+		if (this == gb)
+			return true;
+		
 		if (!(gb instanceof GUIBin))
 			return false;
 		
 		GUIBin gbp = (GUIBin) gb;
-		return this.singleBin.equals(gbp.getBin());
+		return this.getMagnificationFactor() == gbp.getMagnificationFactor() && 
+				this.singleBin.equals(gbp.getBin());
 	}
 	
 }

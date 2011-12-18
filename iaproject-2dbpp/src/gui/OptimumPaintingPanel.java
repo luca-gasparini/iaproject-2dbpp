@@ -107,6 +107,22 @@ public class OptimumPaintingPanel extends JPanel {
 		JList binJList = new JList();
 		binList = new BinListModel();
 		binJList.setModel(binList);
+		binJList.setCellRenderer(new DefaultListCellRenderer(){
+			private static final long serialVersionUID = 7043632887488233064L;
+			private static final String START_STR = "Bin ";
+			private final StringBuilder sBuilder = new StringBuilder(START_STR);
+			@Override
+			public Component getListCellRendererComponent(JList list,
+					Object value, int index, boolean isSelected,
+					boolean cellHasFocus) {
+				GUIBin bin = (GUIBin) value;
+				sBuilder.setLength(START_STR.length());
+				sBuilder.append(bin.getID()).append("  [").append(bin.getBin().getNPackets()).
+						append(']');
+				return super.getListCellRendererComponent(list, sBuilder.toString(), index, isSelected,
+						cellHasFocus);
+			}
+		});
 		binJList.setVisibleRowCount(7);
 		binJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		JScrollPane binListScroller = new JScrollPane(binJList, 
@@ -305,7 +321,7 @@ public class OptimumPaintingPanel extends JPanel {
 			int magnificationFactorH = Math.max(paneSize.height / binSize.height, 1);
 			magnificationFactor = Math.min(magnificationFactorW, magnificationFactorH);
 			
-			// set layout manager
+			// set layout manager (revalidation is automatically performed by setLayout)
 			binDisplayer.setLayout(new GridLayout(0, binPerRow, hSpace, vSpace));
 		}
 		
@@ -327,29 +343,38 @@ public class OptimumPaintingPanel extends JPanel {
 			// get panel (previous code ensure that there is enough boxes)
 			Box binPanel = boxIt.next();
 			
-			/* TODO in the future check if current bin is already painted 
-			 * (i.e. is the same as previous run)
-			 */
-			binPanel.removeAll();
+			GUIBin prevBin = null;
+			if (binPanel.getComponentCount() > 0) {
+				prevBin = (GUIBin) binPanel.getComponent(0);
+			}
 			
-			bin.setAlignmentX(Component.CENTER_ALIGNMENT);
-			binPanel.add(bin);
-			binPanel.add(Box.createVerticalStrut(5));
-			JLabel label = new JLabel("Bin " + bin.toString());
-			label.setAlignmentX(Component.CENTER_ALIGNMENT);
-			binPanel.add(label);
-			
-			binPanel.revalidate();
-			binPanel.repaint();
+			// reprint the panel only if bin is changed
+			if (!bin.equals(prevBin)) {
+				binPanel.removeAll();
+				
+				// always put bin as the first component!!
+				bin.setAlignmentX(Component.CENTER_ALIGNMENT);
+				binPanel.add(bin);
+				binPanel.add(Box.createVerticalStrut(5));
+				JLabel label = new JLabel("Bin " + bin.getID());
+				label.setAlignmentX(Component.CENTER_ALIGNMENT);
+				binPanel.add(label);
+				
+				binPanel.revalidate();
+				binPanel.repaint();
+			}
 		}
 		
 		while (boxIt.hasNext()) {
 			Box box = (Box) boxIt.next();
-			box.removeAll();
-			box.revalidate();
-			box.repaint();
+			// empty & repaint only not-already-empty boxes
+			if (box.getComponentCount() > 0) {
+				box.removeAll();
+				box.repaint();
+			}
 		}
 		
+		// update last painted optimum
 		lastPaintedOpt = newOptimum;
 	}
 	
