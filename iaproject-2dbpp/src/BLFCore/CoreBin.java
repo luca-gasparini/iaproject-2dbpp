@@ -1,16 +1,15 @@
 package BLFCore;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import logic.Packet;
 
 public class CoreBin {
 	ArrayList<Packet> packets;
-	LinkedList<Hole> holes;
+	ArrayList<Hole> holes;
 	
 	CoreBin(double binWidth,double binHeigth)
 	{
 		packets = new ArrayList<Packet>();
-		holes = new LinkedList<Hole>();
+		holes = new ArrayList<Hole>();
 		ArrayList<Edge> edges = new ArrayList<Edge>();
 		edges.add(new Edge(new Point(0,0),new Point(0,binHeigth)));
 		edges.add(new Edge(new Point(0,binHeigth),new Point(binWidth,binHeigth)));
@@ -18,8 +17,6 @@ public class CoreBin {
 		edges.add(new Edge(new Point(binWidth,0),new Point(0,0)));
 		holes.add(new Hole(edges));
 	}
-	
-
 	
 	public ArrayList<Packet> getPackets()
 	{

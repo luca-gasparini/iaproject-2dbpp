@@ -1,13 +1,13 @@
 package BLFCore;
-import java.util.LinkedList;
+import java.util.ArrayList;
 public class SubHole {
-	LinkedList<Point> FT;//contiene anche il rightmost
-	LinkedList<Point> FB;//contiene anche il rightmost.. e il leftmost
+	ArrayList<Point> FT;//contiene anche il rightmost
+	ArrayList<Point> FB;//contiene anche il rightmost.. e il leftmost
 	
 	SubHole()
 	{
-		FT = new LinkedList<Point>();
-		FB = new LinkedList<Point>();
+		FT = new ArrayList<Point>();
+		FB = new ArrayList<Point>();
 	}
 	Point Q;
 }

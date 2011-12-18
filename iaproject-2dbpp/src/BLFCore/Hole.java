@@ -6,13 +6,13 @@ import java.util.ArrayList;
 public class Hole {
 
 	ArrayList<Edge> edges;
-	LinkedList<SubHole> subHoles;
+	ArrayList<SubHole> subHoles;
 	ArrayList<Point> Qi;
 
 	Hole(ArrayList<Edge> e) {
 		edges = e;
 		Qi = new ArrayList<Point>();
-		subHoles = new LinkedList<SubHole>();
+		subHoles = new ArrayList<SubHole>();
 		divideSubHoles();
 	}
 
@@ -180,7 +180,7 @@ public class Hole {
 								.getEdge(intersectEdge).p1));
 					}
 				} else {
-					//intersezione punto
+					// intersezione punto
 					rectIndex = intersectPoint;
 					Point startPoint = Edge.Intersection(getEdge(c),
 							rect.getEdge(intersectPoint)).isPoint();
@@ -191,16 +191,16 @@ public class Hole {
 					Edge e2 = new Edge(startPoint,
 							rect.getEdge(intersectPoint).p2);
 
-					//Potrei trovare subito stopping point e chiudere l'hole
-					if(Edge.Intersection(e1, stopPoint)!= null || Edge.Intersection(e2, stopPoint)!= null)
-					{
-						newHoleEdge.add(new Edge(startPoint,stopPoint));
+					// Potrei trovare subito stopping point e chiudere l'hole
+					if (Edge.Intersection(e1, stopPoint) != null
+							|| Edge.Intersection(e2, stopPoint) != null) {
+						newHoleEdge.add(new Edge(startPoint, stopPoint));
 						return true;
 					}
-					
-					
-					//altrimenti continuo il traverse sul rect nel verso dove non
-					//trovo intersezioni
+
+					// altrimenti continuo il traverse sul rect nel verso dove
+					// non
+					// trovo intersezioni
 					if (Edge.Intersection(e1,
 							getEdge(incremental ? c + 1 : c - 1)).isPoint() != null) {
 						newHoleEdge.add(e1);
@@ -277,11 +277,18 @@ public class Hole {
 		int i = 0;
 
 		// check for edges to be linked
-		if (!Point.equals(getEdge(0).p2, getEdge(1).p1))
-			if (Point.equals(getEdge(0).p1, getEdge(1).p1)
-					|| Point.equals(getEdge(0).p1, getEdge(1).p2)) {
+		if (!Point.equals(getEdge(0).p2, getEdge(1).p1)) {
+			if (Point.equals(getEdge(0).p2, getEdge(1).p2))
+				getEdge(1).swapPoints();
+			else if (Point.equals(getEdge(0).p1, getEdge(1).p1)) {
 				getEdge(0).swapPoints();
+			} else if (Point.equals(getEdge(0).p1, getEdge(1).p2)) {
+				getEdge(0).swapPoints();
+				getEdge(1).swapPoints();
+			} else {
+				throw new IllegalArgumentException("edges are not linked");
 			}
+		}
 
 		for (i = 0; i < numberOfEdges; i++) {
 			if (!(Point.equals(getEdge(i).p2, getEdge(i + 1).p1))) {
@@ -388,7 +395,7 @@ public class Hole {
 			i = edgeIndex + 1;
 
 			subHoles.add(new SubHole());
-			SubHole sb = subHoles.getLast();
+			SubHole sb = subHoles.get(subHoles.size()-1);
 			sb.FT.add(getEdge(edgeIndex).getLowerPoint());
 			sb.FT.add(getEdge(edgeIndex).getUpperPoint());
 

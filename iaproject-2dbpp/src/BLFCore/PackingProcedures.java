@@ -9,8 +9,16 @@ public class PackingProcedures {
 
 	public static ArrayList<CandidatePoint> Placing(double h,
 			LinkedList<Point> Cp, LinkedList<Point> Dp) {
+		
+		ArrayList<CandidatePoint> E = new ArrayList<CandidatePoint>();
+		
+		
+		if(Cp.size() == 0 || Dp.size() == 0)
+			return E;
+		
 		int i = 0;
 		int j = 0;
+		
 		LinkedList<Edge> C = new LinkedList<Edge>();
 		LinkedList<Edge> D = new LinkedList<Edge>();
 		C.add(null);
@@ -33,7 +41,6 @@ public class PackingProcedures {
 		int m = C.size() - 1;
 		int p = D.size() - 1;
 
-		ArrayList<CandidatePoint> E = new ArrayList<CandidatePoint>();
 		E.add(new CandidatePoint(Cp.get(0),Dp.get(0).y - Cp.get(0).y >= h));
 
 		while (i < m || j < p) {
@@ -295,13 +302,15 @@ public class PackingProcedures {
 			}
 		}
 
-		double xLimit = s.FT.getLast().x - length;
-		while (D.size() > 1 && D.getLast().x > xLimit) {
+		double xLimit = s.FT.get(s.FT.size() - 1).x - length;
+		while (D.size() > 0 && D.getLast().x > xLimit) {
 			D.removeLast();
-			Point p = D.getLast();
-			if (p.x < xLimit) {
-				p = new Point(xLimit, p.y);
-				D.addLast(p);
+			if (D.size() > 0) {
+				Point p = D.getLast();
+				if (p.x < xLimit) {
+					p = new Point(xLimit, p.y);
+					D.addLast(p);
+				}
 			}
 		}
 
