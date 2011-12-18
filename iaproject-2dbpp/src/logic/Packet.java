@@ -47,6 +47,15 @@ public class Packet extends AbstractPacket {
 		public void setY(int yCord) {
 			this.y = yCord;
 		}
+		
+		@Override
+		public boolean equals (Object p) {
+			if (!(p instanceof Point))
+				return false;
+			
+			Point pt = (Point) p;
+			return this.x == pt.getX() && this.y == pt.getY();
+		}
 	}
 	
 	public int getId() {
@@ -59,6 +68,10 @@ public class Packet extends AbstractPacket {
 	
 	public int getPointY() {
 		return this.bottomLeftPoint.getY();
+	}
+	
+	public Point getPoint() {
+		return this.bottomLeftPoint;
 	}
 	
 	public void setPoint(int x, int y) {
@@ -77,18 +90,24 @@ public class Packet extends AbstractPacket {
 		this.rotate = rot;
 	}
 
+	@Override
 	public boolean equals(Object p) {
 		if (!(p instanceof Packet))
 			return false;
 		
 		Packet pac = (Packet) p;
-		return this.id == pac.getId();
+		return (
+				this.id == pac.getId() &&
+				this.color.equals(pac.getColor()) &&
+				this.rotate == pac.isRotate() &&
+				this.bottomLeftPoint.equals(pac.getPoint())
+				);
 	}
 	
 	public Color getColor() {
 		return this.color;
 	}
-	
+		
 	public Packet clone() {
 		Packet clo = new Packet(this.id, this.getWidth(), this.getHeight(), this.getPointX(), this.getPointY(), this.color);
 		clo.setRotate(this.rotate);

@@ -10,6 +10,7 @@ import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
 import java.util.Iterator;
+import java.util.List;
 
 import logic.Bin;
 import logic.Packet;
@@ -22,7 +23,6 @@ public class GUIBin extends ResizableRawGraphics {
 
 	private static final long serialVersionUID = -6647245677472183286L; 
 	
-	
 	private final Bin singleBin;
 	private final int defaultFontSize;
 	
@@ -34,9 +34,10 @@ public class GUIBin extends ResizableRawGraphics {
 	
 	@Override
 	protected void doPaint(Graphics2D g2d, int factor) {
-		
-		// impostazioni carattere
+		// Graphics buffer = this.getGraphics();
+		// impostazioni rendering
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 		Font font = new Font("Arial", Font.TRUETYPE_FONT, this.getFontSize());
 		g2d.setFont(font);
 		
@@ -48,17 +49,17 @@ public class GUIBin extends ResizableRawGraphics {
 				singleBin.getHeight()*super.getMagnificationFactor());
 		
 		Rectangle borderBin = new Rectangle(dimBorderBin);
-		super.setSize(dimBorderBin);
+		
 		g2d.setColor(Color.lightGray); // colore a piacere (per far risaltare la frontiera);
 		g2d.fill(borderBin);
+		g2d.setColor(Color.BLACK);
 		g2d.draw(borderBin);
 		
 		// disegno packet
-		Iterator<Packet> itPacket = singleBin.getIteratorList();
+		List<Packet> listPacket = singleBin.getList();
 		
-		while (itPacket.hasNext()) {
-				
-			Packet currentPacket = itPacket.next();
+		for (Packet currentPacket: listPacket) {
+						
 			// rettangolo packet
 			g2d.setColor(currentPacket.getColor());
 			Rectangle packetRect = buildRectangleFromPacket(currentPacket);
@@ -73,6 +74,7 @@ public class GUIBin extends ResizableRawGraphics {
 			float sh = lm.getAscent() + lm.getDescent();
 			g2d.drawString(idString, (int)packetRect.getCenterX()-sw/2, (int)packetRect.getCenterY()+sh/2);
 		}
+		
 	}
 
 	private int getPosYCorrect(Packet p) {
@@ -107,6 +109,19 @@ public class GUIBin extends ResizableRawGraphics {
 	
 	private int getFontSize() {
 		return (int)Math.round(this.defaultFontSize*super.getMagnificationFactor()/1.5);
+	}
+	
+	public Bin getBin() {
+		return this.singleBin;
+	}
+	
+	@Override
+	public boolean equals(Object gb) {
+		if (!(gb instanceof GUIBin))
+			return false;
+		
+		GUIBin gbp = (GUIBin) gb;
+		return this.singleBin.equals(gbp.getBin());
 	}
 	
 }

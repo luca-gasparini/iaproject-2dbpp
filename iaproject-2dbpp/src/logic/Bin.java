@@ -45,7 +45,22 @@ public class Bin extends BinConfiguration { // il nome non è il massimo;
 		return packetList.contains(p);
 	}
 	
-	public Iterator<Packet> getIteratorList() {
-		return this.packetList.iterator();
+	public List<Packet> getList() {
+		return this.packetList;
+	}
+	
+	@Override
+	public boolean equals(Object b) {
+		if (!(b instanceof Bin))
+			return false;
+		
+		Bin binCompare = (Bin) b;
+		List<Packet> itPacket = binCompare.getList();
+		
+		for (Packet p: itPacket) {
+			if (!this.containsPacket(p))
+				return false;
+		}
+		return true;
 	}
 }
