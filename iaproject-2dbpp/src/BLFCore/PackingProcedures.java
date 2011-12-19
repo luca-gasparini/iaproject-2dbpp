@@ -72,7 +72,7 @@ public class PackingProcedures {
 				while(j>0 && Dp.get(j).x >= xLimit)
 				{
 					E.add(new CandidatePoint(Cp.get(i), Dp.get(j).y
-							 - Cp.get(i).y >= h));
+							 - Cp.get(i).y >= h ));
 					j--;
 				}
 				i--;
@@ -184,7 +184,7 @@ public class PackingProcedures {
 					}
 					support = Edge.Intersection(
 							new Edge(h.get(i + 1), d.get(i + 1)),
-							new Edge(b.p1.x, false)).isPoint();
+							new Edge(b.p1.y, false)).isPoint();
 
 					slide(i + 1, length, b, C, h, d, l, r, Q, support);
 					return;
