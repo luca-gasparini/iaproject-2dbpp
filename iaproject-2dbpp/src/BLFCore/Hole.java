@@ -446,7 +446,8 @@ public class Hole {
 			SubHole sb = subHoles.get(subHoles.size() - 1);
 			sb.FT.add(getEdge(edgeIndex).getLowerPoint());
 			sb.FT.add(getEdge(edgeIndex).getUpperPoint());
-
+			sb.Q = Qi.get(lIndex);
+			
 			boolean foundQn;
 			boolean stop = false; // true quando trovo qW o rightMost
 			while (!stop) {
@@ -455,7 +456,7 @@ public class Hole {
 					// search for a Qi & "jump over it".
 					if (Edge.Intersection(getEdge(i), Qi.get(qIndex)) != null) {
 						foundQn = true;
-						sb.Q = Qi.get(qIndex);// TODO controlla!!
+						//sb.Q = Qi.get(qIndex);// SBAGLIATO!!
 						Point a = getEdge(i).getUpperPoint();
 						i = (i + 2) % edges.size();
 
