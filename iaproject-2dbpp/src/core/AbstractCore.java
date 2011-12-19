@@ -2,6 +2,7 @@ package core;
 
 import gui.GUIBin;
 import gui.GUIOptimum;
+import gui.GUISignaler;
 import gui.OptimumPainter;
 
 import java.util.List;
@@ -21,7 +22,9 @@ import core.dummy.DummyCore;
 public abstract class AbstractCore<K, T> extends SwingWorker<Void, CoreResult<T>> {
 	
 	private class Controller implements CoreController {
-
+		
+		private GUISignaler signaler;
+		
 		@Override
 		public void start() {
 			AbstractCore.this.execute();
@@ -52,6 +55,29 @@ public abstract class AbstractCore<K, T> extends SwingWorker<Void, CoreResult<T>
 			this.resume();
 			
 			return toReturn;
+		}
+
+		@Override
+		public void setSignaler(GUISignaler s) {
+			if (s == null) {
+				throw new NullPointerException("null signaler");
+			}
+			
+			assert this.signaler == null : "Cannot set more than one signaler";
+			
+			this.signaler = s;
+		}
+		
+		private void signalIteration(int nIteration) {
+			if (this.signaler != null) {
+				this.signaler.signalIteration(this, nIteration);
+			}
+		}
+		
+		private void signalEnd() {
+			if (this.signaler != null) {
+				this.signaler.signalEnd(this);
+			}
 		}
 	}
 	
@@ -92,7 +118,7 @@ public abstract class AbstractCore<K, T> extends SwingWorker<Void, CoreResult<T>
 	// used an atomic integer just because I'm lazy
 	private final AtomicInteger nIterations = new AtomicInteger(0);
 	private final OptimumPainter displayer;
-	private final CoreController controller;
+	private final Controller controller;
 	private final Core2GuiTranslator<T> c2gt;
 	
 	// volatile because can be accessed by different threads
@@ -153,6 +179,9 @@ public abstract class AbstractCore<K, T> extends SwingWorker<Void, CoreResult<T>
 		if (reachedStoppingCondition()) {
 			return false;
 		}
+		if (this.isCancelled()) {
+			return false;
+		}
 		
 		/* check if it's paused and, if so, send thread to sleep,
 		 * otherwise return true.
@@ -175,25 +204,22 @@ public abstract class AbstractCore<K, T> extends SwingWorker<Void, CoreResult<T>
 			}
 		}
 		
-		if (this.isCancelled()) {
-			return false;
-		} else {
-			/* this is the right place to put the iteration increment because, 
-			 * here, worker is not in pause and it is already in the new processing
-			 * iteration. In other words, if we had put the increment elsewhere
-			 * in some situation we would have had the counter one
-			 * step ahead.
-			 */
-			nIterations.incrementAndGet();
-			return true;
-		}
+		/* this is the right place to put the iteration increment because, 
+		 * here, worker is not in pause and it is already in the new processing
+		 * iteration. In other words, if we had put the increment elsewhere
+		 * in some situation we would have had the counter one
+		 * step ahead.
+		 */
+		nIterations.incrementAndGet();
+		this.controller.signalIteration(this.getNIterations());
+		return true;
 	}
 	
 	@Override
 	protected final Void doInBackground() {
 		this.startTime = System.currentTimeMillis();
 		doWork();
-		this.displayer.signalFinish(controller);
+		this.controller.signalEnd();
 		return null;
 	}
 	

@@ -4,6 +4,7 @@ import gui.common.AbstractFrame;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -26,6 +27,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
@@ -185,6 +187,26 @@ public class MainWindow extends AbstractFrame {
 		}
 	}
 	
+	private class Signaler implements GUISignaler {
+
+		@Override
+		public void signalIteration(CoreController cc, int nIteration) {
+			// do nothing
+		}
+
+		@Override
+		public void signalEnd(CoreController cc) {
+			if (MainWindow.this.coreController != cc) {
+				// spurious signalation, discard it
+				return;
+			}
+			
+			MainWindow.this.coreController = null;
+			switchToState(State.ENDED);
+		}
+		
+	}
+	
 	public enum State {
 		CONFIGURATION,
 		READY,
@@ -197,6 +219,7 @@ public class MainWindow extends AbstractFrame {
 	private EngineConfPanel ecp;
 	
 	private JLabel stateLabel;
+	private JProgressBar coreRunningBar;
 	
 	private JButton confInputBtn;
 	private JButton loadConfBtn;
@@ -237,7 +260,7 @@ public class MainWindow extends AbstractFrame {
 		this.setLocationRelativeTo(null);
 		
 		ecp = new EngineConfPanel();
-		opp = new OptimumPaintingPanel(this);
+		opp = new OptimumPaintingPanel();
 		
 		JPanel mainPanel = new JPanel(new BorderLayout());
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(3, 3, 2, 3));
@@ -328,6 +351,7 @@ public class MainWindow extends AbstractFrame {
 				}
 				
 				MainWindow.this.switchToState(MainWindow.State.RUNNING);
+				coreController.setSignaler(new Signaler());
 				coreController.start();
 			}
 		});
@@ -456,9 +480,18 @@ public class MainWindow extends AbstractFrame {
 		stateLabel.setFont(GUIUtils.STATE_BAR_FONT);
 		stateLabel.setAlignmentX(JLabel.LEFT_ALIGNMENT);
 		
+		coreRunningBar = new JProgressBar();
+		coreRunningBar.setIndeterminate(true);
+		coreRunningBar.setMaximumSize(new Dimension(100, Integer.MAX_VALUE));
+
+		Box hBox = Box.createHorizontalBox();
+		hBox.add(stateLabel);
+		hBox.add(Box.createHorizontalGlue());
+		hBox.add(coreRunningBar);
+		
 		JPanel statePanel = new JPanel(new BorderLayout());
 		statePanel.add(GUIUtils.getHorizontalSeparator(7, 2), BorderLayout.PAGE_START);
-		statePanel.add(stateLabel, BorderLayout.PAGE_END);
+		statePanel.add(hBox, BorderLayout.PAGE_END);
 		
 		mainPanel.add(statePanel, BorderLayout.PAGE_END);
 		
@@ -512,18 +545,6 @@ public class MainWindow extends AbstractFrame {
 		this.configManager.saveToFile(configfile);
 	}
 	
-	public void coreEnded(CoreController cc) {
-		if (this.coreController != cc) {
-			// spurious signalation, discard it
-			return;
-		}
-		
-		GUIUtils.showInfoMessage(this, "Core ended");
-		
-		this.coreController = null;
-		switchToState(State.ENDED);
-	}
-	
 	private void switchToState(State newState) {
 		
 		switch (newState) {
@@ -531,6 +552,7 @@ public class MainWindow extends AbstractFrame {
 			stateLabel.setText("Waiting for CONFIGURATION");
 			pauseBtn.setText("PAUSE");
 			opp.reset();
+			coreRunningBar.setVisible(false);
 			
 			break;
 			
@@ -538,24 +560,30 @@ public class MainWindow extends AbstractFrame {
 			stateLabel.setText("Core READY");
 			pauseBtn.setText("PAUSE");
 			opp.reset();
+			coreRunningBar.setVisible(false);
 			
 			break;
 			
 		case RUNNING:
 			stateLabel.setText("Core RUNNING");
 			pauseBtn.setText("PAUSE");
+			coreRunningBar.setIndeterminate(true);
+			coreRunningBar.setVisible(true);
 			
 			break;
 			
 		case PAUSED:
 			stateLabel.setText("Core PAUSED");
 			pauseBtn.setText("RESUME");
+			coreRunningBar.setIndeterminate(false);
+			coreRunningBar.setVisible(true);
 			
 			break;
 			
 		case ENDED:
 			stateLabel.setText("Core ENDED");
 			pauseBtn.setText("PAUSE");
+			coreRunningBar.setVisible(false);
 			
 			break;
 			
