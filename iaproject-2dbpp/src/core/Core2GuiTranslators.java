@@ -24,10 +24,9 @@ public final class Core2GuiTranslators {
 			public List<GUIBin> translate(List<Bin> coreOptimum) {
 				
 				List<GUIBin> guiBinList = new LinkedList<GUIBin>();
-				Iterator<Bin> itBin = coreOptimum.iterator();
 				
-				while (itBin.hasNext()) {
-					guiBinList.add(new GUIBin(itBin.next()));
+				for (Bin itBin: coreOptimum) {
+					guiBinList.add(new GUIBin(itBin));
 				}
 				
 				return guiBinList;
@@ -43,10 +42,9 @@ public final class Core2GuiTranslators {
 			public List<GUIBin> translate(List<Bin> coreOptimum) {
 				
 				List<GUIBin> guiBinList = new LinkedList<GUIBin>();
-				Iterator<Bin> itBin = coreOptimum.iterator();
 				
-				while (itBin.hasNext()) {
-					guiBinList.add(new GUIBin(itBin.next()));
+				for (Bin itBin: coreOptimum) {
+					guiBinList.add(new GUIBin(itBin));
 				}
 				
 				return guiBinList;

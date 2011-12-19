@@ -39,7 +39,6 @@ public class GeneticCore extends AbstractCore<Integer, List<Bin>> {
 		// arrivato qui sono sicuro che ogni individuo della popolazione ha un suo layout blf e una fitness associata
 		this.bestIndividual = findBest();
 		this.currentFitness = bestIndividual.getFitness();
-
 	}
 
 

@@ -7,11 +7,13 @@ public class Bin extends BinConfiguration { // il nome non è il massimo;
 
 	private List<Packet> packetList;
 	private final int id;
+	private float density;
 	
 	public Bin(int id, int width, int height) {
 		super(width, height);
 		packetList = new LinkedList<Packet>();
 		this.id = id;
+		this.density = 0;
 	}
 	
 	public int getID() {
@@ -19,10 +21,18 @@ public class Bin extends BinConfiguration { // il nome non è il massimo;
 	}
 	
 	public void addPacket(Packet p) {
-		if (packetList.contains(p))
+		if (containsPacket(p))
 			throw new IllegalArgumentException();
 		
 		packetList.add(p);
+	}
+	
+	public float getDensity() {
+		return this.density;
+	}
+	
+	public void setDensity(float d) {
+		this.density = d;
 	}
 	
 	public Packet deletePacket(Packet p) {

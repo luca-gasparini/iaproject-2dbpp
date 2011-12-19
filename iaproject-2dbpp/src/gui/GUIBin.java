@@ -29,11 +29,15 @@ public class GUIBin extends ResizableRawGraphics {
 		super(new Dimension(s.getWidth(), s.getHeight()));
 		this.singleBin = s;
 		this.defaultFontSize = 6;
+		this.setToolTipText("<HTML>"+
+				"<p>N. packets = "+s.getNPackets()+"</p>"+
+				"<p>Density = "+s.getDensity()+"</p>"+
+				"</HTML>"
+				);
 	}
 	
 	@Override
 	protected void doPaint(Graphics2D g2d, int factor) {
-		// Graphics buffer = this.getGraphics();
 		// impostazioni rendering
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
@@ -78,9 +82,9 @@ public class GUIBin extends ResizableRawGraphics {
 
 	private int getPosYCorrect(Packet p) {
 		if (!(p.isRotate()))
-			return (singleBin.getHeight()-p.getHeight())*super.getMagnificationFactor();
+			return (singleBin.getHeight()-p.getHeight()-p.getPointY())*super.getMagnificationFactor();
 		else
-			return (singleBin.getHeight()-p.getWidth())*super.getMagnificationFactor();
+			return (singleBin.getHeight()-p.getWidth()-p.getPointY())*super.getMagnificationFactor();
 		
 	}
 	
