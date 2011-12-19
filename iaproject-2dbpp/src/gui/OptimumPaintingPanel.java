@@ -31,6 +31,8 @@ import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
+import core.CoreController;
+
 public class OptimumPaintingPanel extends JPanel {
 
 	private static final long serialVersionUID = -2130969442515268077L;
@@ -39,6 +41,11 @@ public class OptimumPaintingPanel extends JPanel {
 		@Override
 		public void paint(GUIOptimum newOptimum) {
 			OptimumPaintingPanel.this.askPaint(newOptimum, TokenPainter.this);
+		}
+
+		@Override
+		public void signalFinish(CoreController cc) {
+			mainWindow.coreEnded(cc);
 		}
 	}
 	
@@ -166,8 +173,15 @@ public class OptimumPaintingPanel extends JPanel {
 	private int magnificationFactor = -1;
 	private final int MAX_BIN_PER_ROW = 3;
 	private boolean firstPrint = true;
+	private final MainWindow mainWindow;
 	
-	public OptimumPaintingPanel() {
+	public OptimumPaintingPanel(MainWindow main) {
+		if (main == null) {
+			throw new NullPointerException();
+		}
+		
+		this.mainWindow = main;
+		
 		init();
 	}
 	
@@ -373,6 +387,7 @@ public class OptimumPaintingPanel extends JPanel {
 		
 		List<GUIBin> bins = newOptimum.getBins();
 		assert bins.size() > 0 : "NO BINS NO PARTY";
+		
 		if (lastPaintedOpt == null) lastPaintedOpt = newOptimum;
 		
 		this.binList.setData(bins);

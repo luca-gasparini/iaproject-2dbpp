@@ -189,7 +189,8 @@ public class MainWindow extends AbstractFrame {
 		CONFIGURATION,
 		READY,
 		RUNNING,
-		PAUSED
+		PAUSED,
+		ENDED;
 	}
 	
 	private OptimumPaintingPanel opp;
@@ -236,7 +237,7 @@ public class MainWindow extends AbstractFrame {
 		this.setLocationRelativeTo(null);
 		
 		ecp = new EngineConfPanel();
-		opp = new OptimumPaintingPanel();
+		opp = new OptimumPaintingPanel(this);
 		
 		JPanel mainPanel = new JPanel(new BorderLayout());
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(3, 3, 2, 3));
@@ -326,15 +327,7 @@ public class MainWindow extends AbstractFrame {
 					return;
 				}
 				
-				switch (actualState) {
-				case READY:
-					switchToState(State.RUNNING);
-					break;
-				default:
-					GUIUtils.showErrorMessage(MainWindow.this, "Wrong state: should be in READY state");
-					break;
-				}
-				
+				MainWindow.this.switchToState(MainWindow.State.RUNNING);
 				coreController.start();
 			}
 		});
@@ -394,6 +387,7 @@ public class MainWindow extends AbstractFrame {
 				switch (actualState) {
 				case CONFIGURATION:
 				case READY:
+				case ENDED:
 					GUIUtils.showErrorMessage(MainWindow.this, "Wrong state");
 					break;
 				case PAUSED:
@@ -413,20 +407,23 @@ public class MainWindow extends AbstractFrame {
 		resetBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (coreController == null) {
-					GUIUtils.showErrorMessage(MainWindow.this, "Core is not started yet");
-					return;
-				}
-				
 				switch (actualState) {
 				case READY:
 				case CONFIGURATION:
+					assert coreController == null : "Non-null controller in state READY & CONF";
 					GUIUtils.showErrorMessage(MainWindow.this, "Core is not running: START it first");
 					break;
 					
 				case RUNNING:
 				case PAUSED:
+					assert coreController != null : "Null controller in state RUNNING & PAUSED";
+					
 					coreController.stop();
+					coreController = null;
+					switchToState(State.READY);
+					break;
+					
+				case ENDED:
 					coreController = null;
 					switchToState(State.READY);
 					break;
@@ -515,6 +512,18 @@ public class MainWindow extends AbstractFrame {
 		this.configManager.saveToFile(configfile);
 	}
 	
+	public void coreEnded(CoreController cc) {
+		if (this.coreController != cc) {
+			// spurious signalation, discard it
+			return;
+		}
+		
+		GUIUtils.showInfoMessage(this, "Core ended");
+		
+		this.coreController = null;
+		switchToState(State.ENDED);
+	}
+	
 	private void switchToState(State newState) {
 		
 		switch (newState) {
@@ -543,6 +552,13 @@ public class MainWindow extends AbstractFrame {
 			pauseBtn.setText("RESUME");
 			
 			break;
+			
+		case ENDED:
+			stateLabel.setText("Core ENDED");
+			pauseBtn.setText("PAUSE");
+			
+			break;
+			
 		}
 		
 		this.actualState = newState;

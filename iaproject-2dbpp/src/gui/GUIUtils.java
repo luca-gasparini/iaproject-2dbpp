@@ -47,6 +47,10 @@ public final class GUIUtils {
 		JOptionPane.showMessageDialog(parent, message, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 	
+	public static final void showInfoMessage(Component parent, String message) {
+		JOptionPane.showMessageDialog(parent, message, "Info", JOptionPane.INFORMATION_MESSAGE);
+	}
+	
 	private static final StringBuilder builder = new StringBuilder();
 	public static String elapsedTime2String(long msElapsedTime) {
 		long millis = msElapsedTime % 1000;

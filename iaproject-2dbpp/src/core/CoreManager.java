@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import core.BLFTest.BLFTestConfigurator;
 import core.dummy.DummyConfigurator;
 import core.genetic.GeneticConfigurator;
 
@@ -20,6 +21,7 @@ public class CoreManager {
 		// TODO add here all CoreDescriptors with their names
 		map.put("Dummy", DummyConfigurator.class);
 		map.put("Genetic", GeneticConfigurator.class);
+		map.put("BLFTest", BLFTestConfigurator.class);
 		// ...
 		
 		CORES = Collections.unmodifiableMap(map);

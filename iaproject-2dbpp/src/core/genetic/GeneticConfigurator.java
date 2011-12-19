@@ -34,8 +34,7 @@ public class GeneticConfigurator extends AbstractConfigurator<Integer> {
 	}
 
 	@Override
-	protected AbstractCore<Integer, ?> getConfiguredCore(CoreConfiguration<Integer> conf, OptimumPainter painter)
-			throws DataParsingException {
+	protected AbstractCore<Integer, ?> getConfiguredCore(CoreConfiguration<Integer> conf, OptimumPainter painter) {
 		return new GeneticCore(conf, painter);
 	}
 

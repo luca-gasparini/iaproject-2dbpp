@@ -193,6 +193,7 @@ public abstract class AbstractCore<K, T> extends SwingWorker<Void, CoreResult<T>
 	protected final Void doInBackground() {
 		this.startTime = System.currentTimeMillis();
 		doWork();
+		this.displayer.signalFinish(controller);
 		return null;
 	}
 	
@@ -201,6 +202,15 @@ public abstract class AbstractCore<K, T> extends SwingWorker<Void, CoreResult<T>
 	 * by now see {@link DummyCore}
 	 */
 	protected abstract void doWork();
+	
+	/**
+	 * Tells to the {@link #canContinue()} method that this core has
+	 * reached some sort of stopping condition (# of iteration, max fitness
+	 * value, etc). Avoid to check this method in the core implementation, the
+	 * test is already safely performed inside {@link #canContinue()} method.
+	 * 
+	 * @return
+	 */
 	protected abstract boolean reachedStoppingCondition();
 	
 	public final long getElapsedTime() {
