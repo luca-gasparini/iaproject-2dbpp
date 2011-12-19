@@ -13,12 +13,15 @@ public class Edge {
 		}
 	}
 
+	//crea la copia di un lato
 	Edge(Edge e)
 	{
 		p1 = new Point(e.p1);
 		p2 = new Point(e.p2);
 	}
 	
+	//crea una retta verticale o orizzontale
+	//c è la coordinata x se verticale, y se orizzontale
 	Edge(double c,boolean vertical)
 	{
 		if(vertical)
@@ -76,6 +79,7 @@ public class Edge {
 		return new Edge(x,new Point(Double.MAX_VALUE,x.y));
 	}
 	
+	//scambia i punti, utile per tenere le varie liste in clockwise
 	public void swapPoints()
 	{
 		Point app = p1;
@@ -129,6 +133,7 @@ public class Edge {
 
 	}
 
+	//ritorna la lunghezza del segmento
 	public double length()
 	{
 		double diff = 0;
@@ -142,6 +147,7 @@ public class Edge {
 		else return -diff;
 	}
 	
+	//ritorna il punto intersezione tra punto x e Edge e1 se esiste, altrimenti null
 	public static Point Intersection(Edge e1,Point x)
 	{
 		return e1.getLeftPoint().x <= x.x && e1.getRightPoint().x >= x.x && 

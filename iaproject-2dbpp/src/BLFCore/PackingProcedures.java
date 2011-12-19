@@ -7,6 +7,7 @@ import java.util.List;
 
 public class PackingProcedures {
 
+	//Placing.. pseudocodice preso dal paper con qualche modifica per i casi particolari..
 	public static ArrayList<CandidatePoint> Placing(double h,
 			LinkedList<Point> Cp, LinkedList<Point> Dp) {
 		
@@ -81,6 +82,8 @@ public class PackingProcedures {
 		return E;
 	}
 
+	
+	
 	public static LinkedList<Point> Bottom(SubHole s, double length) {
 
 		// converto FB nel formato (hi,di) che sono lati verticali con hi.y >
@@ -317,6 +320,8 @@ public class PackingProcedures {
 		return D;
 	}
 
+	
+	//metodo da utilizzare da fuori...
 	public static BlfLayout getLayout(List<Packet> packets,
 			BinConfiguration bins) {
 		ArrayList<CoreBin> coreBins = new ArrayList<CoreBin>();

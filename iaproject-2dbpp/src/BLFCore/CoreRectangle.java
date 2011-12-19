@@ -26,6 +26,7 @@ public class CoreRectangle {
 		Point upRigth = new Point(bottomLeft.x + width,bottomLeft.y + heigth);
 		Point bottomRigth = new Point(bottomLeft.x + width,bottomLeft.y);
 		
+		//creo i lati del rettangolo
 		rectEdges.add(new Edge(bottomLeft,upLeft));
 		rectEdges.add(new Edge(upLeft,upRigth));
 		rectEdges.add(new Edge(upRigth,bottomRigth));
@@ -34,6 +35,7 @@ public class CoreRectangle {
 	
 	public Edge getEdge(int index)
 	{
+		//ritorna il lato index ( fa il modulo se index out of bound )
 		while(index < 0)
 			index = index+rectEdges.size();
 		return rectEdges.get(index % rectEdges.size());
