@@ -13,7 +13,6 @@ public class PackingProcedures {
 		
 		ArrayList<CandidatePoint> E = new ArrayList<CandidatePoint>();
 		
-		
 		if(Cp.size() == 0 || Dp.size() == 0)
 			return E;
 		
@@ -25,16 +24,30 @@ public class PackingProcedures {
 		C.add(null);
 		D.add(null); // gli indici nel paper partono da 1
 		// converto in liste di lati orizzontali
+		//in realtˆ in casi particolari mi servono anche dei singoli punti..
+		//ad esempio quando salgo e scendo nella stessa verticale
 		for (i = 0; i < Cp.size() - 1; i++) {
 			Edge app = new Edge(Cp.get(i), Cp.get(i + 1));
 			if (app.isHorizontal())
 				C.add(app);
+			else if(i>0)
+			{
+				Edge app2 = new Edge(Cp.get(i-1), Cp.get(i));
+				if(app2.isVertical());
+				C.add(new Edge(app2.getLowerPoint(),app2.getLowerPoint()));
+			}
 		}
 
 		for (i = 0; i < Dp.size() - 1; i++) {
 			Edge app = new Edge(Dp.get(i), Dp.get(i + 1));
 			if (app.isHorizontal())
 				D.add(app);
+			else if(i>0)
+			{
+				Edge app2 = new Edge(Cp.get(i-1), Cp.get(i));
+				if(app2.isVertical());
+				C.add(new Edge(app2.getUpperPoint(),app2.getUpperPoint()));
+			}
 		}
 
 		i = 1;
@@ -77,12 +90,9 @@ public class PackingProcedures {
 				}
 				i--;
 			}
-
 		}
 		return E;
 	}
-
-	
 	
 	public static LinkedList<Point> Bottom(SubHole s, double length) {
 
@@ -136,25 +146,19 @@ public class PackingProcedures {
 			}
 		}
 
+		double limit;
 		if (s.Q != null)
-			while (C.size() > 0 && C.getLast().x > s.Q.x) {
-				Point x = C.removeLast();
-				if (C.size() <= 1 || C.getLast().x >= s.Q.x) {
-					x = new Point(s.Q.x - 1, x.y);
-					C.addLast(x);
-				}
-			}
-		else {
-			double limit = s.FB.get(s.FB.size() - 1).x - length;
+			limit = s.Q.x;
+		else
+			limit = s.FB.get(s.FB.size() -1).x -length;
+		
 			while (C.size() > 0 && C.getLast().x > limit) {
 				Point x = C.removeLast();
-				if (C.size() <= 1 || C.getLast().x < s.Q.x) {
+				if (C.size() > 0  && C.getLast().x < limit) {
 					x = new Point(limit, x.y);
 					C.addLast(x);
 				}
 			}
-		}
-
 		return C;
 	}
 
@@ -218,8 +222,8 @@ public class PackingProcedures {
 		while (i >= start) {
 			if (Q.isEmpty() || Q.getFirst().getLeftPoint().y <= l.get(i).y) {
 				Q.addFirst(new Edge(l.get(i), r.get(i)));
-				i--;
 			}
+			i--;
 		}
 		return Q;
 	}
@@ -271,11 +275,11 @@ public class PackingProcedures {
 			while (i < p) {
 				if (d.get(p - 1).y <= d.get(i).y
 						&& d.get(p - 1).x <= d.get(i).x + length) {
-					Point u = new Point(d.get(p - 1).x - length, d.get(i).y);
+					Point u = new Point(d.get(p - 1).x - length, h.get(i).y);
 					Point v = new Point(d.get(p - 1).x - length, d.get(p - 1).y);
 					Point z = new Point(h.get(p).x - length, h.get(p).y);
 					D.add(u);
-					D.add(v);
+					D.add(v);//TODO possono essere uguali
 					D.add(z);
 					return D;
 				}

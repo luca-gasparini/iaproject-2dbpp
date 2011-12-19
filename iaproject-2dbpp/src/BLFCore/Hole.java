@@ -371,12 +371,28 @@ public class Hole {
 			// we have to revert the list
 			app = new ArrayList<Edge>();
 			i = edges.size() - 1;
-			while (i > 0) {
+			boolean setUpper = false;
+			boolean setLower = false;
+			boolean setRight = false;
+			while (i >= 0) {
 				app.add(new Edge(getEdge(i).p2, getEdge(i).p1));
+				if(!setUpper && i == upperEdge)
+				{
+					upperEdge = app.size() -1;
+					setUpper = true;
+				}
+				if(!setLower && i == lowerEdge)
+				{
+					lowerEdge = app.size()-1;
+					setLower = true;
+				}
+				if(!setRight && i == rightMost)
+				{
+					rightMost = app.size()-1;
+					setRight = true;
+				}
 				i--;
 			}
-			upperEdge = (edges.size() - upperEdge) % edges.size();
-			lowerEdge = (edges.size() - lowerEdge) % edges.size();
 			edges = app;
 		}
 
@@ -504,7 +520,6 @@ public class Hole {
 							sb.FT.add(appQw);
 
 						// ora trovo FB
-
 						Point stoppingPoint = lIndex == 0 ? getEdge(rightMost)
 								.getLowerPoint() : Qi.get(lIndex);
 
