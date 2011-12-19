@@ -9,7 +9,7 @@ public class Hole {
 	ArrayList<SubHole> subHoles;
 	ArrayList<Point> Qi;
 
-	//data una lista di Edge, crea l'hole contenuto in questi lati
+	// data una lista di Edge, crea l'hole contenuto in questi lati
 	Hole(ArrayList<Edge> e) {
 		edges = e;
 		Qi = new ArrayList<Point>();
@@ -17,7 +17,8 @@ public class Hole {
 		divideSubHoles();
 	}
 
-	// add rectangle to the hole and return a list of the new Holes created from this
+	// add rectangle to the hole and return a list of the new Holes created from
+	// this
 	public ArrayList<Hole> updateHoles(CoreRectangle rect) {
 		ArrayList<Hole> holes = new ArrayList<Hole>();
 
@@ -142,8 +143,8 @@ public class Hole {
 				c = (c - 1 + flags.length) % flags.length;
 			int intersectEdge = -1;
 			int intersectPoint = -1;
-			
-			//controllo se interseco il rettangolo
+
+			// controllo se interseco il rettangolo
 			for (int i = 0; i < 4; i++) {
 				Edge inter = Edge.Intersection(getEdge(c), rect.getEdge(i));
 				if (inter != null && inter.isPoint() == null)
@@ -153,38 +154,40 @@ public class Hole {
 					intersectPoint = i;
 			}
 
-			//se non trovo intersezioni aggiungo lato e proseguo
+			// se non trovo intersezioni aggiungo lato e proseguo
 			if (intersectEdge == -1 && intersectPoint == -1) {
 				if (flags[c])
 					return false;
 				firstIteration = false;
 				newHoleEdge.add(getEdge(c));
 				flags[c] = true;
-				
+
 			} else {
-				
+
 				if (firstIteration)
 					return false;
-				
+
 				stopCondition = true;
 				boolean verso = false;
 				int rectIndex = 0;
-				
+
 				// trovata intersezione...traverse su rettangolo
 				// prima di tutto scelgo il lato del rettangolo da dove partire
-				
-				//se l'intersezione è un lato avro altri due lati che intersecano con un punto
+
+				// se l'intersezione è un lato avro altri due lati che
+				// intersecano con un punto
 				if (intersectEdge != -1) {
 					rectIndex = intersectEdge;
 					Point firstPoint = incremental ? getEdge(c).p1
 							: getEdge(c).p2;
-					
-					//prendo il lato più vicino tra questi due e scelgo di conseguenza il verso
-					//del traverse sul rettangolo
+
+					// prendo il lato più vicino tra questi due e scelgo di
+					// conseguenza il verso
+					// del traverse sul rettangolo
 					if (new Edge(firstPoint, rect.getEdge(intersectEdge).p1)
 							.length() > new Edge(firstPoint,
 							rect.getEdge(intersectEdge).p2).length()) {
-						
+
 						verso = true;
 						newHoleEdge.add(new Edge(firstPoint, rect
 								.getEdge(intersectEdge).p2));
@@ -193,7 +196,7 @@ public class Hole {
 						newHoleEdge.add(new Edge(firstPoint, rect
 								.getEdge(intersectEdge).p1));
 					}
-					
+
 				} else {
 					// intersezione punto
 					rectIndex = intersectPoint;
@@ -217,17 +220,17 @@ public class Hole {
 					// non trovo intersezioni
 					if (Edge.Intersection(e1,
 							getEdge(incremental ? c + 1 : c - 1)).isPoint() != null) {
-						
+
 						newHoleEdge.add(e1);
 						verso = false;
 					} else {
-						
+
 						newHoleEdge.add(e2);
 						verso = true;
 					}
 				}
-				
-				//ora proseguo finche non trovo intersezione con lo stop point
+
+				// ora proseguo finche non trovo intersezione con lo stop point
 				if (verso == true)
 					rectIndex++;
 				else
@@ -239,8 +242,8 @@ public class Hole {
 					else
 						rectIndex--;
 				}
-				
-				//chiudo l'hole sullo stopping point
+
+				// chiudo l'hole sullo stopping point
 				if (verso) {
 					if (!Point.equals(rect.getEdge(rectIndex).p1, stopPoint))
 						newHoleEdge.add(new Edge(rect.getEdge(rectIndex).p1,
@@ -255,7 +258,8 @@ public class Hole {
 		return true;
 	}
 
-	//traverse nel caso in cui trovo un intersezione che coincide con un lato dell'hole
+	// traverse nel caso in cui trovo un intersezione che coincide con un lato
+	// dell'hole
 	private Hole traverseFromHoleLine(int j, CoreRectangle rect,
 			boolean[] flags, boolean incremental) {
 		// se il lato successivo interseca con il rect per più di un punto mi
@@ -270,8 +274,8 @@ public class Hole {
 		}
 
 		ArrayList<Edge> newHoleEdge = new ArrayList<Edge>();
-		
-		//trovo il punto dove devo tornare dopo il traverse
+
+		// trovo il punto dove devo tornare dopo il traverse
 		Point stopPoint = incremental ? getEdge(j).p2 : getEdge(j).p1;
 		newHoleEdge.add(getEdge(c));
 		if (this.traverse(newHoleEdge, stopPoint, c, rect, flags, incremental))
@@ -291,13 +295,20 @@ public class Hole {
 		return edges.get(index % edges.size());
 	}
 
-	
-	//Prende un hole e calcola tutti i subHole in esso contenuti
+	// Prende un hole e calcola tutti i subHole in esso contenuti
 	public void divideSubHoles() {
 		Qi.clear();
 		subHoles.clear();
 
-		int numberOfEdges = edges.size();
+		// elimino lati che sono un punto.. potrebbe succedere durante
+		// updateHoles..
+		ArrayList<Edge> app = new ArrayList<Edge>();
+		for (int i = 0; i < edges.size(); i++) {
+			if (getEdge(i).isPoint() == null)
+				app.add(getEdge(i));
+		}
+
+		edges = app;
 		int upperEdge = -1, lowerEdge = -1, rightMost = -1;
 		int i = 0;
 
@@ -315,7 +326,7 @@ public class Hole {
 			}
 		}
 
-		for (i = 0; i < numberOfEdges; i++) {
+		for (i = 0; i < edges.size(); i++) {
 			if (!(Point.equals(getEdge(i).p2, getEdge(i + 1).p1))) {
 				if (Point.equals(getEdge(i).p2, getEdge(i + 1).p2)) {
 					getEdge(i + 1).swapPoints();
@@ -324,8 +335,19 @@ public class Hole {
 			}
 		}
 
+		// se ho due lati consecutivi entrambi verticali o entrambi orizzontali
+		// li unisco in un solo lato.. sembrerebbe inutile ma poi mi risolve un po
+		// di problemi.. 
+		for (i = 0; i < edges.size(); i++) {
+			if ((getEdge(i).isVertical() && getEdge(i + 1).isVertical())
+					|| (getEdge(i).isHorizontal() && getEdge(i+1).isHorizontal())) {
+				getEdge(i).p2 = getEdge(i + 1).p2;
+				edges.remove((i + 1 + edges.size()) % edges.size());
+			}
+		}
+
 		// finding upper, lower and rightmost edges
-		for (i = 0; i < numberOfEdges; i++) {
+		for (i = 0; i < edges.size(); i++) {
 			if (getEdge(i).isHorizontal()
 					&& (upperEdge == -1 || getEdge(i).p1.y > getEdge(upperEdge).p1.y))
 				upperEdge = i;
@@ -347,18 +369,17 @@ public class Hole {
 
 		if (!clockWise) {
 			// we have to revert the list
-			ArrayList<Edge> app = new ArrayList<Edge>();
-			i = numberOfEdges;
+			app = new ArrayList<Edge>();
+			i = edges.size() - 1;
 			while (i > 0) {
 				app.add(new Edge(getEdge(i).p2, getEdge(i).p1));
 				i--;
 			}
-			upperEdge = (numberOfEdges - upperEdge) % numberOfEdges;
-			lowerEdge = (numberOfEdges - lowerEdge) % numberOfEdges;
+			upperEdge = (edges.size() - upperEdge) % edges.size();
+			lowerEdge = (edges.size() - lowerEdge) % edges.size();
 			edges = app;
 		}
 
-		
 		ArrayList<Integer> leftMostEdges = new ArrayList<Integer>();
 		// find leftMostEdges, Qi and relative Qw
 		// scan the left side of the hole starting from down
@@ -416,13 +437,13 @@ public class Hole {
 
 		// Ok.. find subHole's FT & FB
 		subHoles.clear();
-		//per ogni leftMostEdge ho un subHole
+		// per ogni leftMostEdge ho un subHole
 		for (int lIndex = 0; lIndex < leftMostEdges.size(); lIndex++) {
 			int edgeIndex = leftMostEdges.get(lIndex);
 			i = edgeIndex + 1;
 
 			subHoles.add(new SubHole());
-			SubHole sb = subHoles.get(subHoles.size()-1);
+			SubHole sb = subHoles.get(subHoles.size() - 1);
 			sb.FT.add(getEdge(edgeIndex).getLowerPoint());
 			sb.FT.add(getEdge(edgeIndex).getUpperPoint());
 
@@ -434,7 +455,7 @@ public class Hole {
 					// search for a Qi & "jump over it".
 					if (Edge.Intersection(getEdge(i), Qi.get(qIndex)) != null) {
 						foundQn = true;
-						sb.Q = Qi.get(qIndex);//TODO controlla!!
+						sb.Q = Qi.get(qIndex);// TODO controlla!!
 						Point a = getEdge(i).getUpperPoint();
 						i = (i + 2) % edges.size();
 
@@ -445,15 +466,16 @@ public class Hole {
 							Eb = Edge.Intersection(Edge.upHalfLine(a),
 									getEdge(i));
 						}
-						
+
 						Point b = Eb.isPoint();
 						sb.FT.add(b);
 						sb.FT.add(getEdge(i).getRightPoint());
 						i = (i + 1) % edges.size();
 					}
 				}
-				
-				//se ho trovato Qn aspetto un giro.. non credo serva ma male non fa...
+
+				// se ho trovato Qn aspetto un giro.. non credo serva ma male
+				// non fa...
 				if (!foundQn) {// search for Qwi or rightMost edge
 					boolean foundQw = false;
 
@@ -473,7 +495,6 @@ public class Hole {
 						}
 					}
 
-					
 					if (foundQw) {
 
 						if (lIndex == 0)
@@ -481,22 +502,22 @@ public class Hole {
 						else
 							sb.FT.add(appQw);
 
-						//ora trovo FB
-						
-						
+						// ora trovo FB
+
 						Point stoppingPoint = lIndex == 0 ? getEdge(rightMost)
 								.getLowerPoint() : Qi.get(lIndex);
-								
-						int j = edgeIndex;//lato del leftMost
-						
-						//scorro la parte bassa del subhole fino allo stoppingPoint
+
+						int j = edgeIndex;// lato del leftMost
+
+						// scorro la parte bassa del subhole fino allo
+						// stoppingPoint
 						sb.FB.add(getEdge(j).p2);
 						while (!Point.equals(getEdge(j).p1, stoppingPoint)) {
 							sb.FB.add(getEdge(j).p1);
 							j--;
 						}
-						
-						//trovato stopping point
+
+						// trovato stopping point
 						sb.FB.add(getEdge(j).p1);
 						if (lIndex == 0) {
 							sb.FB.add(getEdge(rightMost).getUpperPoint());
@@ -505,9 +526,9 @@ public class Hole {
 							sb.FB.add(edgeOfQw.get(lIndex).getUpperPoint());
 						}
 						stop = true;
-					
+
 					} else {
-						//se non ho trovato niente aggiungo il punto e avanzo
+						// se non ho trovato niente aggiungo il punto e avanzo
 						sb.FT.add(getEdge(i).p2);
 						i = (i + 1) % edges.size();
 					}
@@ -516,19 +537,18 @@ public class Hole {
 		}
 	}
 
-	
 	public ArrayList<Point> getCandidates(CoreRectangle rect) {
 		ArrayList<Point> li = new ArrayList<Point>();
 		for (int i = 0; i < subHoles.size(); i++) {
 			LinkedList<Point> Top, Bottom;
-			
+
 			Top = PackingProcedures.Top(subHoles.get(i), rect.width);
 			Bottom = PackingProcedures.Bottom(subHoles.get(i), rect.width);
-			
+
 			ArrayList<CandidatePoint> app = PackingProcedures.Placing(
 					rect.heigth, Bottom, Top);
-			
-			//controllo i candidati e mi prendo solo quelli feasible.. 
+
+			// controllo i candidati e mi prendo solo quelli feasible..
 			for (int j = 0; j < app.size(); j++) {
 				CandidatePoint x = app.get(j);
 				if (x.feasible == true)
