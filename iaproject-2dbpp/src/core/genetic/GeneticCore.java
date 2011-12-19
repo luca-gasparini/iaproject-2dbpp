@@ -89,12 +89,12 @@ public class GeneticCore extends AbstractCore<Integer, List<Bin>> {
 		
 		
 		// set up father genome breaking point
-		int p = rand.nextInt() % problemConf.getPackets().size();
+		int p = rand.nextInt( genomeSize );
 		// set up number of gene to copy from father
-		int q = rand.nextInt() % ( problemConf.getPackets().size() + 1 ) - p;
+		int q = rand.nextInt( genomeSize + 1 - p);
 		
 		// extract the genome portion of the father and add it to the child genome
-		for (Packet fatherGene: father.getSequence().subList(p, q)) {
+		for (Packet fatherGene: father.getSequence().subList(p, p + q )) {
 			childGenome.add( fatherGene.clone() );
 			isGeneCopied[fatherGene.getId()] = true;
 		}

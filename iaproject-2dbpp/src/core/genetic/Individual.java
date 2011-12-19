@@ -45,7 +45,7 @@ class Individual {
 	}
 
 	// apply mutation to the individual
-	protected Individual mutate() {
+	public Individual mutate() {
 		return null;
 	}
 	
