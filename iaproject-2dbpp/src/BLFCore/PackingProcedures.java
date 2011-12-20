@@ -1,40 +1,44 @@
 package BLFCore;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import logic.*;
 import java.util.List;
 
 public class PackingProcedures {
-	
-	//Placing.. pseudocodice preso dal paper con qualche modifica per i casi particolari..
+
+	// Placing.. pseudocodice preso dal paper con qualche modifica per i casi
+	// particolari..
 	public static ArrayList<CandidatePoint> Placing(double h,
 			LinkedList<Point> Cp, LinkedList<Point> Dp) {
-		
+
 		ArrayList<CandidatePoint> E = new ArrayList<CandidatePoint>();
-		
-		if(Cp.size() == 0 || Dp.size() == 0)
+
+		if (Cp.size() == 0 || Dp.size() == 0)
 			return E;
-		
+
 		int i = 0;
 		int j = 0;
-		
+
 		LinkedList<Edge> C = new LinkedList<Edge>();
 		LinkedList<Edge> D = new LinkedList<Edge>();
 		C.add(null);
 		D.add(null); // gli indici nel paper partono da 1
 		// converto in liste di lati orizzontali
-		//in realtˆ in casi particolari mi servono anche dei singoli punti..
-		//ad esempio quando salgo e scendo nella stessa verticale
+		// in realtˆ in casi particolari mi servono anche dei singoli punti..
+		// ad esempio quando salgo e scendo nella stessa verticale
 		for (i = 0; i < Cp.size() - 1; i++) {
 			Edge app = new Edge(Cp.get(i), Cp.get(i + 1));
 			if (app.isHorizontal())
 				C.add(app);
-			else if(i>0)
-			{
-				Edge app2 = new Edge(Cp.get(i-1), Cp.get(i));
-				if(app2.isVertical())
-					C.add(new Edge(app2.getLowerPoint(),app2.getLowerPoint()));
+			else if (i > 0) {
+				Edge app2 = new Edge(Cp.get(i - 1), Cp.get(i));
+				if (app2.isVertical())
+					C.add(new Edge(app2.getLowerPoint(), app2.getLowerPoint()));
 			}
 		}
 
@@ -42,11 +46,10 @@ public class PackingProcedures {
 			Edge app = new Edge(Dp.get(i), Dp.get(i + 1));
 			if (app.isHorizontal())
 				D.add(app);
-			else if(i>0)
-			{
-				Edge app2 = new Edge(Dp.get(i-1), Dp.get(i));
-				if(app2.isVertical())
-					D.add(new Edge(app2.getUpperPoint(),app2.getUpperPoint()));
+			else if (i > 0) {
+				Edge app2 = new Edge(Dp.get(i - 1), Dp.get(i));
+				if (app2.isVertical())
+					D.add(new Edge(app2.getUpperPoint(), app2.getUpperPoint()));
 			}
 		}
 
@@ -55,17 +58,19 @@ public class PackingProcedures {
 		int m = C.size() - 1;
 		int p = D.size() - 1;
 
-		E.add(new CandidatePoint(Cp.get(0),Dp.get(0).y - Cp.get(0).y >= h));
+		E.add(new CandidatePoint(Cp.get(0), Dp.get(0).y - Cp.get(0).y >= h));
 
 		while (i < m || j < p) {
-			while ( j < p && D.get(j).getRightPoint().x <= C.get(i).getRightPoint().x) {
+			while (j < p
+					&& D.get(j).getRightPoint().x <= C.get(i).getRightPoint().x) {
 				j++;
 				Point M = new Point(D.get(j).getLeftPoint().x, C.get(i)
 						.getLeftPoint().y);
 				E.add(new CandidatePoint(M, D.get(j).getLeftPoint().y
 						- C.get(i).getLeftPoint().y > h));
 			}
-			while (i < m && C.get(i).getRightPoint().x <= D.get(j).getRightPoint().x) {
+			while (i < m
+					&& C.get(i).getRightPoint().x <= D.get(j).getRightPoint().x) {
 				i++;
 				boolean test = D.get(j).getLeftPoint().y
 						- C.get(i).getLeftPoint().y >= h;
@@ -74,18 +79,15 @@ public class PackingProcedures {
 			}
 		}
 
-		if(p>0 && m>0)
-		{
-			double xLimit = Cp.get(Cp.size()-1).x;
-			i = Cp.size() -1;
-			
-			while(i>0 && Cp.get(i).x >= xLimit)
-			{
-				j = Dp.size() -1;
-				while(j>0 && Dp.get(j).x >= xLimit)
-				{
+		if (p > 0 && m > 0) {
+			double xLimit = Cp.get(Cp.size() - 1).x;
+			i = Cp.size() - 1;
+
+			while (i > 0 && Cp.get(i).x >= xLimit) {
+				j = Dp.size() - 1;
+				while (j > 0 && Dp.get(j).x >= xLimit) {
 					E.add(new CandidatePoint(Cp.get(i), Dp.get(j).y
-							 - Cp.get(i).y >= h ));
+							- Cp.get(i).y >= h));
 					j--;
 				}
 				i--;
@@ -93,7 +95,7 @@ public class PackingProcedures {
 		}
 		return E;
 	}
-	
+
 	public static LinkedList<Point> Bottom(SubHole s, double length) {
 
 		// converto FB nel formato (hi,di) che sono lati verticali con hi.y >
@@ -140,8 +142,8 @@ public class PackingProcedures {
 
 		while (C.size() > 0 && C.get(0).x < d.get(0).x) {
 			Point x = C.remove(0);
-			if (C.size() == 0 || C.getFirst().x > d.get(0).x) {
-				x = new Point(d.get(0).x, x.y);
+			if (C.size() > 0 && C.getFirst().x > d.get(0).x) {
+				x = new Point(d.get(0).x, C.getFirst().y);
 				C.addFirst(x);
 			}
 		}
@@ -150,15 +152,15 @@ public class PackingProcedures {
 		if (s.Q != null)
 			limit = s.Q.x;
 		else
-			limit = s.FB.get(s.FB.size() -1).x -length;
-		
-			while (C.size() > 0 && C.getLast().x > limit) {
-				Point x = C.removeLast();
-				if (C.size() > 0  && C.getLast().x < limit) {
-					x = new Point(limit, x.y);
-					C.addLast(x);
-				}
+			limit = s.FB.get(s.FB.size() - 1).x - length;
+
+		while (C.size() > 0 && C.getLast().x > limit) {
+			Point x = C.removeLast();
+			if (C.size() > 0 && C.getLast().x < limit) {
+				x = new Point(limit, C.getLast().y);
+				C.addLast(x);
 			}
+		}
 		return C;
 	}
 
@@ -177,13 +179,12 @@ public class PackingProcedures {
 					b.p2 = new Point(h.get(i));
 					Point u = new Point(b.p1.x, b.p1.y
 							- (h.get(i).y - support.y));
-					if(C.isEmpty() || !Point.equals(C.getLast(),u))
+					if (C.isEmpty() || !Point.equals(C.getLast(), u))
 						C.add(u);
-					if(!Point.equals(b.p1, u))
+					if (!Point.equals(b.p1, u))
 						C.add(b.p1);
 					Q.clear();
-					if(i==m) 
-					{
+					if (i == m) {
 						return;
 					}
 					support = Edge.Intersection(
@@ -205,13 +206,17 @@ public class PackingProcedures {
 			C.add(b.p1);
 			LinkedList<Edge> Q1 = setup(start, i, l, r);
 			Q = merge(Q, Q1);
-			Edge a = Q.removeFirst();
-			b.p1 = new Point(b.p1.x, a.getLeftPoint().y);
-			b.p2 = new Point(b.p2.x, a.getLeftPoint().y);
-			if(C.isEmpty() || !Point.equals(C.getLast(),b.p1))
-				C.add(b.p1);
-			start = i;
-			support = a.getRightPoint();
+			if (!Q.isEmpty()) {
+				Edge a = Q.removeFirst();// TODO noSuchElement
+				b.p1 = new Point(b.p1.x, a.getLeftPoint().y);
+				b.p2 = new Point(b.p2.x, a.getLeftPoint().y);
+				if (C.isEmpty() || !Point.equals(C.getLast(), b.p1))
+					C.add(b.p1);
+
+				support = a.getRightPoint();
+				start = i;
+			} else
+				return;
 		}
 	}
 
@@ -279,7 +284,7 @@ public class PackingProcedures {
 					Point v = new Point(d.get(p - 1).x - length, d.get(p - 1).y);
 					Point z = new Point(h.get(p).x - length, h.get(p).y);
 					D.add(u);
-					D.add(v);//TODO possono essere uguali
+					D.add(v);
 					D.add(z);
 					break;
 				}
@@ -327,8 +332,37 @@ public class PackingProcedures {
 		return D;
 	}
 
-	
-	//metodo da utilizzare da fuori...
+	private static void saveErrorLog(List<Packet> packets, BinConfiguration bins) {
+		boolean stopCondition = false;
+		String pathFile = null;
+		int i = 0;
+		File err = null;
+		int errorN = 0;
+		try {
+			while (!stopCondition) {
+				i++;
+				pathFile = "BlfError" + i + ".log";
+				err = new File(pathFile);
+				stopCondition = err.createNewFile();
+			}
+			errorN = i;
+			FileWriter writer = new FileWriter(err);
+			BufferedWriter out = new BufferedWriter(writer);
+			out.write("bin heigth:" + bins.getHeight() + "\nbin width:" + bins.getWidth());
+			for(i = 0;i< packets.size();i++)
+			{
+				out.write("\n\nPacket " + i + ":\nHeigth:" + packets.get(i).getHeight() + "\nWidth:" + packets.get(i).getWidth());
+			}
+			out.close();
+			writer.close();
+		} catch (IOException e) {
+		}
+		
+		throw new BlfErrorException(
+				"Errore BLF... blfError" + errorN + ".log saved.. invialo ad urban...");
+	}
+
+	// metodo da utilizzare da fuori...
 	public static BlfLayout getLayout(List<Packet> packets,
 			BinConfiguration bins) {
 		ArrayList<CoreBin> coreBins = new ArrayList<CoreBin>();
@@ -337,13 +371,21 @@ public class PackingProcedures {
 			int j = 0;
 			boolean inserito = false;
 			while (!inserito && j < coreBins.size()) {
-				inserito = coreBins.get(j).insertPacket(packets.get(i));
+				try {
+					inserito = coreBins.get(j).insertPacket(packets.get(i));
+				} catch (RuntimeException e) {
+					saveErrorLog(packets, bins);
+				}
 				j++;
 			}
 			if (!inserito) {
 				coreBins.add(new CoreBin(bins.getWidth(), bins.getHeight()));
-				if (!coreBins.get(j).insertPacket(packets.get(i)))
-					return null;
+				try {
+					if (!coreBins.get(j).insertPacket(packets.get(i)))
+						return null;
+				} catch (RuntimeException e) {
+					saveErrorLog(packets, bins);
+				}
 			}
 		}
 
@@ -357,11 +399,11 @@ public class PackingProcedures {
 			fitness += coreBins.get(i).getFitness();
 			resultBins.add(appBin);
 		}
-		
+
 		fitness = fitness / coreBins.size();
 		fitness = fitness + 100 * coreBins.size();
-		
-		return new BlfLayout(resultBins,(int)fitness);
+
+		return new BlfLayout(resultBins, (int) fitness);
 	}
 
 }
