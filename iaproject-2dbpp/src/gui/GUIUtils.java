@@ -52,6 +52,9 @@ public final class GUIUtils {
 	}
 	
 	private static final StringBuilder builder = new StringBuilder();
+	private static final String TWO_DIGIT_NUMBER = "%02d";
+	private static final String THREE_DIGIT_NUMBER = "%03d";
+	
 	public static String elapsedTime2String(long msElapsedTime) {
 		long millis = msElapsedTime % 1000;
 		msElapsedTime /= 1000;
@@ -60,15 +63,19 @@ public final class GUIUtils {
 		long min = msElapsedTime % 60;
 		long hours = msElapsedTime / 60;
 		
+		String minStr = String.format(TWO_DIGIT_NUMBER, Long.valueOf(min));
+		String secStr = String.format(TWO_DIGIT_NUMBER, Long.valueOf(sec));
+		String msStr = String.format(THREE_DIGIT_NUMBER, Long.valueOf(millis));
+		
 		synchronized (builder) {
 			builder.setLength(0);
 			builder.append(hours);
 			builder.append(':');
-			builder.append(min);
+			builder.append(minStr);
 			builder.append(':');
-			builder.append(sec);
+			builder.append(secStr);
 			builder.append('.');
-			builder.append(millis);
+			builder.append(msStr);
 			return builder.toString();
 		}
 	}
