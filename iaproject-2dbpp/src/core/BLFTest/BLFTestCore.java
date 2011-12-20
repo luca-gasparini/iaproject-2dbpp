@@ -63,8 +63,9 @@ public class BLFTestCore extends AbstractCore<Void, List<Bin>> {
 				.getLayout(packets, binConf);
 
 		List<Bin> newBins = layout.getBins();
-		// riempi newBin come vuoi, magari usando problemConf.getPackets();
 
+		final Float fitness = new Float(layout.getFitness());
+		
 		bins.addAll(newBins);
 
 		// ------------------
@@ -72,6 +73,7 @@ public class BLFTestCore extends AbstractCore<Void, List<Bin>> {
 		CoreResult<List<Bin>> result = new AbstractCoreResult<List<Bin>>() {
 			@Override
 			public float getFitness() {
+				//return fitness.floatValue(); 
 				return 0;
 			}
 

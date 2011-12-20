@@ -6,14 +6,15 @@ import logic.Packet;
 public class CoreBin {
 	ArrayList<Packet> packets;
 	ArrayList<Hole> holes;
+	double heigth;
+	Point higherPoint;//higher Point occupied by a packet;
 
 	CoreBin(double binWidth, double binHeigth) {
 		packets = new ArrayList<Packet>();
 		holes = new ArrayList<Hole>();
-
-		/*
-		 * Creo i lati del bin
-		 */
+		heigth = binHeigth;
+		
+		// creo i lati del bin
 		ArrayList<Edge> edges = new ArrayList<Edge>();
 		edges.add(new Edge(new Point(0, 0), new Point(0, binHeigth)));
 		edges.add(new Edge(new Point(0, binHeigth), new Point(binWidth,
@@ -21,7 +22,10 @@ public class CoreBin {
 		edges.add(new Edge(new Point(binWidth, binHeigth), new Point(binWidth,
 				0)));
 		edges.add(new Edge(new Point(binWidth, 0), new Point(0, 0)));
+		
+		
 		holes.add(new Hole(edges));
+		higherPoint = new Point(0,0);
 	}
 
 	public ArrayList<Packet> getPackets() {
@@ -53,6 +57,11 @@ public class CoreBin {
 		rect = new CoreRectangle(p, packet.getHeight(), packet.getWidth());
 		packet.setPoint((int) p.x, (int) p.y);
 		packets.add(packet);
+		
+		if(p.y + packet.getHeight() > higherPoint.y)
+		{
+			higherPoint = new Point(0,p.y + packet.getHeight());
+		}
 
 		// aggiorno gli hole
 		ArrayList<Hole> newHoles = holes.get(hole).updateHoles(rect);
@@ -62,4 +71,10 @@ public class CoreBin {
 
 		return true;
 	}
+	
+	public double getFitness()
+	{
+		return 100 * higherPoint.y/heigth;
+	}
+	
 }

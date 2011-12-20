@@ -4,11 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import logic.*;
 import java.util.List;
-import java.util.Random;
 
 public class PackingProcedures {
-
-	private static final Random rand = new Random(System.currentTimeMillis());
 	
 	//Placing.. pseudocodice preso dal paper con qualche modifica per i casi particolari..
 	public static ArrayList<CandidatePoint> Placing(double h,
@@ -351,15 +348,20 @@ public class PackingProcedures {
 		}
 
 		ArrayList<Bin> resultBins = new ArrayList<Bin>();
+		double fitness = 0;
 		for (int i = 0; i < coreBins.size(); i++) {
 			Bin appBin = new Bin(i, bins.getWidth(), bins.getHeight());
 			for (int j = 0; j < coreBins.get(i).packets.size(); j++) {
 				appBin.addPacket(coreBins.get(i).packets.get(j));
 			}
+			fitness += coreBins.get(i).getFitness();
 			resultBins.add(appBin);
 		}
-
-		return new BlfLayout(resultBins, rand.nextFloat());
+		
+		fitness = fitness / coreBins.size();
+		fitness = fitness + 100 * coreBins.size();
+		
+		return new BlfLayout(resultBins,(int)fitness);
 	}
 
 }
