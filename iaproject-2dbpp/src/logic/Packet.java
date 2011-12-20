@@ -16,10 +16,14 @@ public class Packet extends AbstractPacket {
 	}
 	
 	public Packet(int id, int width, int height, int x, int y, Color col) {
+		this(id, width, height, x, y, col, false);
+	}
+	
+	public Packet(int id, int width, int height, int x, int y, Color col, boolean rotate) {
 		super(width, height);
 		this.id = id;
 		this.bottomLeftPoint = new Point(x, y);
-		this.rotate = false;
+		this.rotate = rotate;
 		this.color = col;
 	}
 	

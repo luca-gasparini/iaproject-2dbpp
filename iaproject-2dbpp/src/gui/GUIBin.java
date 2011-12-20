@@ -9,7 +9,10 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
+import java.awt.font.TextAttribute;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import logic.Bin;
 import logic.Packet;
@@ -23,12 +26,12 @@ public class GUIBin extends ResizableRawGraphics {
 	private static final long serialVersionUID = -6647245677472183286L; 
 	
 	private final Bin singleBin;
-	private final int defaultFontSize;
+	private static final int defaultFontSize = 16;
+	private static final int minFontSize = 6;
 	
 	public GUIBin (Bin s) {
 		super(new Dimension(s.getWidth(), s.getHeight()));
 		this.singleBin = s;
-		this.defaultFontSize = 6;
 		this.setToolTipText("<HTML>"+
 				"<p>N. packets = "+s.getNPackets()+"</p>"+
 				"<p>Density = "+s.getDensity()+"</p>"+
@@ -41,10 +44,8 @@ public class GUIBin extends ResizableRawGraphics {
 		// impostazioni rendering
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-		Font font = new Font("Arial", Font.TRUETYPE_FONT, this.getFontSize());
+		Font font = new Font(getTextAttributes(GUIBin.defaultFontSize));
 		g2d.setFont(font);
-		
-		FontRenderContext frc = g2d.getFontRenderContext();
 		
 		// disegno bin
 		Dimension dimBorderBin = new Dimension(
@@ -71,11 +72,7 @@ public class GUIBin extends ResizableRawGraphics {
 			g2d.draw(packetRect);
 			
 			// stringa id packet
-			String idString = Integer.toString(currentPacket.getId());
-			float sw = (float)font.getStringBounds(idString, frc).getWidth();
-			LineMetrics lm = font.getLineMetrics(idString, frc);
-			float sh = lm.getAscent() + lm.getDescent();
-			g2d.drawString(idString, (int)packetRect.getCenterX()-sw/2, (int)packetRect.getCenterY()+sh/2);
+			drawNumberIntoPacket(g2d, font, currentPacket, packetRect);
 		}
 		
 	}
@@ -136,6 +133,38 @@ public class GUIBin extends ResizableRawGraphics {
 		GUIBin gbp = (GUIBin) gb;
 		return this.getMagnificationFactor() == gbp.getMagnificationFactor() && 
 				this.singleBin.equals(gbp.getBin());
+	}
+	
+	private Map<TextAttribute, Object> getTextAttributes(int size) {
+		Map<TextAttribute, Object> atbs = new HashMap<TextAttribute, Object>();
+		
+		atbs.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
+		atbs.put(TextAttribute.SIZE, size);
+		atbs.put(TextAttribute.FAMILY, "Arial");
+		return atbs;
+	}
+	
+	private void drawNumberIntoPacket(Graphics2D g2d, Font font, Packet currentPacket, Rectangle packetRect) {
+		
+		int textWidth, textHeight;
+		String idString;
+	
+		FontRenderContext frc = g2d.getFontRenderContext();
+		
+		// resize if necessary
+		do {
+			idString = Integer.toString(currentPacket.getId());
+			textWidth = (int)font.getStringBounds(idString, frc).getWidth();
+			textHeight = (int)font.getStringBounds(idString, frc).getHeight();
+			font = new Font(getTextAttributes(font.getSize()-2));
+		} while (
+				Math.min(packetRect.getWidth() - textWidth, packetRect.getHeight()-textHeight)<0 && // piccolo
+				font.getSize()>GUIBin.minFontSize // ma non troppo
+				);
+		
+		g2d.setColor(Color.black);
+		g2d.setFont(font);
+		g2d.drawString(idString, (int)packetRect.getCenterX()-textWidth/2, (int)packetRect.getCenterY()+textHeight/2);
 	}
 	
 }
