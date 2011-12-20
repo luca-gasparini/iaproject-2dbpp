@@ -78,11 +78,10 @@ public class GUIBin extends ResizableRawGraphics {
 	}
 
 	private int getPosYCorrect(Packet p) {
-		if (!(p.isRotate()))
-			return (singleBin.getHeight()-p.getHeight()-p.getPointY())*super.getMagnificationFactor();
-		else
-			return (singleBin.getHeight()-p.getWidth()-p.getPointY())*super.getMagnificationFactor();
-		
+		//if (!(p.isRotate()))
+		return (singleBin.getHeight()-p.getHeight()-p.getPointY())*super.getMagnificationFactor();
+		/*else
+			return (singleBin.getHeight()-p.getWidth()-p.getPointY())*super.getMagnificationFactor();*/
 	}
 	
 	private Rectangle buildRectangleFromPacket(Packet p) {
@@ -93,10 +92,10 @@ public class GUIBin extends ResizableRawGraphics {
 		int height = p.getHeight()*super.getMagnificationFactor();
 		int width = p.getWidth()*super.getMagnificationFactor();
 		
-		if (!(p.isRotate()))
-			d = new Dimension(width, height);
-		else
-			d = new Dimension(height, width);
+		//if (!(p.isRotate()))
+		d = new Dimension(width, height);
+		/*else
+			d = new Dimension(height, width);*/
 	
 		Rectangle packetRect = new Rectangle(coordinate, d);
 		
@@ -105,10 +104,6 @@ public class GUIBin extends ResizableRawGraphics {
 	
 	public String getID() {
 		return Integer.toString(this.singleBin.getID());
-	}
-	
-	private int getFontSize() {
-		return (int)Math.round(this.defaultFontSize*super.getMagnificationFactor()/1.5);
 	}
 	
 	public Bin getBin() {
