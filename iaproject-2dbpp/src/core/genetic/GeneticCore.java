@@ -1,5 +1,6 @@
 package core.genetic;
 
+import gui.GUIUtils;
 import gui.OptimumPainter;
 
 import java.util.ArrayList;
@@ -15,9 +16,10 @@ import core.Core2GuiTranslators;
 import core.CoreConfiguration;
 import core.CoreResult;
 
-public class GeneticCore extends AbstractCore<Integer, List<Bin>> {
+public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 	
-	private final int populationSize; // per ora immagino sia questo l'unico parametro
+	private final int populationSize;
+	private final float rotateProbability;
 	private final ProblemConfiguration problemConf;
 	
 	private float currentFitness;
@@ -26,19 +28,22 @@ public class GeneticCore extends AbstractCore<Integer, List<Bin>> {
 	
 	private final Random rand = new Random(System.currentTimeMillis());
 	
-	public GeneticCore(CoreConfiguration<Integer> conf, OptimumPainter painter) {
+	public GeneticCore(CoreConfiguration<GeneticConfiguration> conf, OptimumPainter painter) {
 		super(conf, painter, Core2GuiTranslators.getGeneticTranslator());
 		this.problemConf = conf.getProblemConfiguration();
-		this.populationSize = conf.getCoreConfiguration().intValue();
+		this.populationSize = conf.getCoreConfiguration().getPopulationSize();
+		this.rotateProbability = conf.getCoreConfiguration().getRotateProbability();
 		this.population = new Individual[this.populationSize];
 		
 		// initialize population from problem configuration
 		for( int i=0 ; i < this.populationSize; i++ ) {
 			this.population[i] = new Individual(this.problemConf.getPackets(), this.problemConf.getBin());
+		//	this.population[i].setFitness(i);
 		}
 		// arrivato qui sono sicuro che ogni individuo della popolazione ha un suo layout blf e una fitness associata
-		this.bestIndividual = findBest();
-		this.currentFitness = bestIndividual.getFitness();
+//		this.bestIndividual = findBest();
+//		this.currentFitness = bestIndividual.getFitness();
+		this.currentFitness = Float.MAX_VALUE;
 	}
 
 
@@ -52,8 +57,8 @@ public class GeneticCore extends AbstractCore<Integer, List<Bin>> {
 			Individual father = selectIndividual();
 			Individual mother = selectIndividual();
 			Individual child = crossover(father, mother);
-			child.mutate();
-			float newFitness = child.calculateLayout(problemConf.getBin()); 
+			child.mutate(rotateProbability);
+			child.calculateLayout(problemConf.getBin()); 
 			bestIndividual = replaceWorstIndividual(child);
 
 						
@@ -108,6 +113,7 @@ public class GeneticCore extends AbstractCore<Integer, List<Bin>> {
 		return new Individual(childGenome);
 	}
 
+	/*
 	private Individual findBest() {
 		// initialize the first individual as best 
 		Individual best = population[0];
@@ -118,7 +124,7 @@ public class GeneticCore extends AbstractCore<Integer, List<Bin>> {
 			}
 		}
 		return best;
-	}
+	}*/
 	
 	private Individual replaceWorstIndividual(Individual child) {
 		// initialize the first individual as worst 
@@ -148,29 +154,30 @@ public class GeneticCore extends AbstractCore<Integer, List<Bin>> {
 	// according with roulette mechanism
 	private Individual selectIndividual() {
 		float fitnessSum = 0;
-		float probSum = 0;
 		float[] probSelection = new float[populationSize];
 		
 		for ( int i = 0; i < populationSize; i++ ) {
 			fitnessSum += population[i].getFitness();
 		}
+
 		for ( int i = 0; i < populationSize; i++ ) {
+			// pi = fi / fitnessSum
 			probSelection[i] = population[i].getFitness() / fitnessSum;
 		}
 		
-		int candidate = 0;
+		int i = 0; // candidate individual
 		float randValue = rand.nextFloat();
+		float probSum = probSelection[0];
 		
-		for ( int i = 0; i < populationSize; i++ ) {
-			if (randValue > probSum) {
-				probSum += probSelection[i];
-			} else {
-				candidate = i;
-				break;
-			}
+		// divide [0,1) in subintervals [0,p0),[p0,p1),...,[p(m-1),1)
+		// each subinterval represent one of the m individuals.
+		// extraxt a random value and select the related individual
+		while ( randValue >= probSum ) {
+			probSum += probSelection[i + 1];
+			i++;
 		}
 		
-		return population[candidate];
+		return population[i];
 	}
 
 	@Override

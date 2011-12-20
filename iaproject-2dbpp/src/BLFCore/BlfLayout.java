@@ -21,4 +21,10 @@ public class BlfLayout {
 	public float getFitness() {
 		return fitness;
 	}
+/*
+	// debug method
+	public void setFitness(int i) {
+		this.fitness = i;
+	}
+*/
 }

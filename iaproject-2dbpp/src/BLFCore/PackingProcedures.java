@@ -2,10 +2,14 @@ package BLFCore;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Random;
+
 import logic.*;
 import java.util.List;
 
 public class PackingProcedures {
+
+	private static final Random rand = new Random(System.currentTimeMillis());
 
 	//Placing.. pseudocodice preso dal paper con qualche modifica per i casi particolari..
 	public static ArrayList<CandidatePoint> Placing(double h,
@@ -24,7 +28,7 @@ public class PackingProcedures {
 		C.add(null);
 		D.add(null); // gli indici nel paper partono da 1
 		// converto in liste di lati orizzontali
-		//in realtˆ in casi particolari mi servono anche dei singoli punti..
+		//in realtï¿½ in casi particolari mi servono anche dei singoli punti..
 		//ad esempio quando salgo e scendo nella stessa verticale
 		for (i = 0; i < Cp.size() - 1; i++) {
 			Edge app = new Edge(Cp.get(i), Cp.get(i + 1));
@@ -353,7 +357,7 @@ public class PackingProcedures {
 			resultBins.add(appBin);
 		}
 
-		return new BlfLayout(resultBins, 0);
+		return new BlfLayout(resultBins, rand.nextFloat());
 	}
 
 }

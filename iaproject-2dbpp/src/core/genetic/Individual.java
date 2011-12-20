@@ -45,8 +45,14 @@ class Individual {
 	}
 
 	// apply mutation to the individual
-	public Individual mutate() {
-		return null;
+	public void mutate(float pRotate) {
+/*
+		for (Packet gene: sequence) {
+			if (rand.nextFloat() <= pRotate) {
+				gene.rotate();
+			}
+		}
+*/
 	}
 	
 	// return the fitness of the individual
@@ -67,4 +73,10 @@ class Individual {
 	public List<Packet> getSequence() {
 		return this.sequence;
 	}
+/*
+	// debug method
+	public void setFitness(int i) {
+		this.layout.setFitness(i);
+	}
+*/
 }

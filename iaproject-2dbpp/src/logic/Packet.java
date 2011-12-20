@@ -117,4 +117,13 @@ public class Packet extends AbstractPacket {
 		clo.setRotate(this.rotate);
 		return clo;
 	}
+
+	public void rotate() {
+		int newWidth = getHeight();
+		int newHeight = getWidth();
+		setWidth( newWidth );
+		setHeight( newHeight );
+		setRotate( !isRotate() ); 
+		
+	}
 }
