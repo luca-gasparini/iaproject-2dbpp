@@ -550,6 +550,32 @@ public class Hole {
 					}
 				}
 			}
+			
+			//correggo FT fermandola all'altezza dell'ultimo elemento di FB.. per evitare
+			// che vada avanti e poi torni indietro..(da problemi nel placing)
+			if(lIndex != 0)
+			{
+				ArrayList<Point> appFt = new ArrayList<Point>();
+				boolean stopCondition = false;
+				int ind = 0;
+				Point limit = sb.FB.get(sb.FB.size()-1);
+				while(ind < sb.FT.size() && !stopCondition)
+				{
+					if(sb.FT.get(ind).x < limit.x)
+					{
+						appFt.add(sb.FT.get(ind));
+					}
+					else
+					{
+						Point semilast = new Point(limit.x,appFt.get(appFt.size()-1).y);
+						appFt.add(semilast);
+						appFt.add(limit);
+						stopCondition = true;
+					}
+					ind++;
+				}
+				sb.FT = appFt;
+			}
 		}
 	}
 

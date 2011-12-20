@@ -2,15 +2,14 @@ package BLFCore;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Random;
-
 import logic.*;
 import java.util.List;
+import java.util.Random;
 
 public class PackingProcedures {
 
 	private static final Random rand = new Random(System.currentTimeMillis());
-
+	
 	//Placing.. pseudocodice preso dal paper con qualche modifica per i casi particolari..
 	public static ArrayList<CandidatePoint> Placing(double h,
 			LinkedList<Point> Cp, LinkedList<Point> Dp) {
@@ -28,7 +27,7 @@ public class PackingProcedures {
 		C.add(null);
 		D.add(null); // gli indici nel paper partono da 1
 		// converto in liste di lati orizzontali
-		//in realtï¿½ in casi particolari mi servono anche dei singoli punti..
+		//in realtˆ in casi particolari mi servono anche dei singoli punti..
 		//ad esempio quando salgo e scendo nella stessa verticale
 		for (i = 0; i < Cp.size() - 1; i++) {
 			Edge app = new Edge(Cp.get(i), Cp.get(i + 1));
@@ -37,8 +36,8 @@ public class PackingProcedures {
 			else if(i>0)
 			{
 				Edge app2 = new Edge(Cp.get(i-1), Cp.get(i));
-				if(app2.isVertical());
-				C.add(new Edge(app2.getLowerPoint(),app2.getLowerPoint()));
+				if(app2.isVertical())
+					C.add(new Edge(app2.getLowerPoint(),app2.getLowerPoint()));
 			}
 		}
 
@@ -48,9 +47,9 @@ public class PackingProcedures {
 				D.add(app);
 			else if(i>0)
 			{
-				Edge app2 = new Edge(Cp.get(i-1), Cp.get(i));
-				if(app2.isVertical());
-				C.add(new Edge(app2.getUpperPoint(),app2.getUpperPoint()));
+				Edge app2 = new Edge(Dp.get(i-1), Dp.get(i));
+				if(app2.isVertical())
+					D.add(new Edge(app2.getUpperPoint(),app2.getUpperPoint()));
 			}
 		}
 
@@ -285,7 +284,7 @@ public class PackingProcedures {
 					D.add(u);
 					D.add(v);//TODO possono essere uguali
 					D.add(z);
-					return D;
+					break;
 				}
 				D.add(d.get(i));
 				if (d.get(i).y <= d.get(p - 1).y
@@ -296,7 +295,7 @@ public class PackingProcedures {
 					D.add(d.get(i));
 					D.add(u);
 					D.add(v);
-					return D;
+					break;
 				}
 				D.add(d.get(i));
 				D.add(h.get(i));
@@ -304,16 +303,19 @@ public class PackingProcedures {
 			}
 		}
 
-		while (D.size() > 1 && D.getFirst().x < 0) {
+		double xLimit = s.FT.get(0).x;
+		while (D.size() > 0 && D.getFirst().x < xLimit) {
 			D.removeFirst();
-			Point p = D.getFirst();
-			if (p.x > 0) {
-				p = new Point(0, p.y);
-				D.addFirst(p);
+			if (D.size() > 0) {
+				Point p = D.getFirst();
+				if (p.x > xLimit) {
+					p = new Point(xLimit, p.y);
+					D.addFirst(p);
+				}
 			}
 		}
 
-		double xLimit = s.FT.get(s.FT.size() - 1).x - length;
+		xLimit = s.FT.get(s.FT.size() - 1).x - length;
 		while (D.size() > 0 && D.getLast().x > xLimit) {
 			D.removeLast();
 			if (D.size() > 0) {
