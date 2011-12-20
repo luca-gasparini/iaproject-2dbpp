@@ -100,6 +100,10 @@ public class DummyCore extends AbstractCore<Integer, List<Bin>> {
 	
 	@Override
 	protected boolean reachedStoppingCondition() {
+		// 700K con stringa 0:0:15.4
+		// 700K senza stringa 0:0:14.5
+//		return getNIterations() == 700000;
+		
 		return false;
 	}
 

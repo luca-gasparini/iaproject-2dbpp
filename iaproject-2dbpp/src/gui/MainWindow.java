@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -29,6 +30,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
 import logic.ConfigurationManager;
@@ -187,11 +189,61 @@ public class MainWindow extends AbstractFrame {
 		}
 	}
 	
+	/**
+	 * This class is needed in order to avoid to print EVERY iteration
+	 * performed by the Core.
+	 */
 	private class Signaler implements GUISignaler {
+		
+		private class PaintingDelegate implements Runnable {
+			private final Object mutex = new Object();
+			private final AtomicBoolean shouldSubmit = new AtomicBoolean(true);
+			
+			private int nIteration;
+			private long elapsedTime;
+
+			@Override
+			public void run() {
+				shouldSubmit.set(true);
+				
+				synchronized (mutex) {
+					coreRunningBar.setString("It #" + this.nIteration + " @" + 
+								GUIUtils.elapsedTime2String(this.elapsedTime));
+				}
+			}
+			
+			/**
+			 * Set given parameter to be painted. Due to the fact that
+			 * delegation and effective paint are asynchronous operations,
+			 * it is possible that some values won't be painted at all; however
+			 * it is granted that the last submitted value will always be 
+			 * printed.
+			 * 
+			 * @param nIt
+			 * @param elapsed
+			 */
+			private void delegatePaint(int nIt, long elapsed) {
+				synchronized (mutex) {
+					this.nIteration = nIt;
+					this.elapsedTime = elapsed;
+				}
+				
+				if (shouldSubmit.getAndSet(false)) {
+					SwingUtilities.invokeLater(this);
+				}
+			}
+		}
+		
+		private final PaintingDelegate delegate = new PaintingDelegate();
 
 		@Override
-		public void signalIteration(CoreController cc, int nIteration) {
-			// do nothing
+		public void signalIteration(CoreController cc, int nIteration, long elapsedTime) {
+			if (MainWindow.this.coreController != cc) {
+				// spurious signalation, discard it
+				return;
+			}
+			
+			delegate.delegatePaint(nIteration, elapsedTime);
 		}
 
 		@Override
@@ -481,8 +533,11 @@ public class MainWindow extends AbstractFrame {
 		stateLabel.setAlignmentX(JLabel.LEFT_ALIGNMENT);
 		
 		coreRunningBar = new JProgressBar();
+		coreRunningBar.setStringPainted(true);
 		coreRunningBar.setIndeterminate(true);
-		coreRunningBar.setMaximumSize(new Dimension(100, Integer.MAX_VALUE));
+		Dimension crbd = new Dimension(250, coreRunningBar.getFont().getSize() + 1);
+		coreRunningBar.setPreferredSize(crbd);
+		coreRunningBar.setMaximumSize(crbd);
 
 		Box hBox = Box.createHorizontalBox();
 		hBox.add(stateLabel);

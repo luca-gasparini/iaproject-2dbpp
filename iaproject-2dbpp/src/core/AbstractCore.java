@@ -68,9 +68,9 @@ public abstract class AbstractCore<K, T> extends SwingWorker<Void, CoreResult<T>
 			this.signaler = s;
 		}
 		
-		private void signalIteration(int nIteration) {
+		private void signalIteration(int nIteration, long elapsedTime) {
 			if (this.signaler != null) {
-				this.signaler.signalIteration(this, nIteration);
+				this.signaler.signalIteration(this, nIteration, elapsedTime);
 			}
 		}
 		
@@ -211,7 +211,7 @@ public abstract class AbstractCore<K, T> extends SwingWorker<Void, CoreResult<T>
 		 * step ahead.
 		 */
 		nIterations.incrementAndGet();
-		this.controller.signalIteration(this.getNIterations());
+		this.controller.signalIteration(this.getNIterations(), this.getElapsedTime());
 		return true;
 	}
 	
