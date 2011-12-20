@@ -139,7 +139,23 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		BinConfiguration bc = new BinConfiguration(binW.intValue(), binH.intValue());
 		
 		PacketConfiguration[] tmp = new PacketConfiguration[packetListModel.size()];
+		
 		packetListModel.copyInto(tmp);
+		
+		/*
+		 * check max
+		 */
+		int maxW = 0;
+		int maxH = 0;
+		for (int i=0; i<tmp.length; i++) {
+			if (maxW<tmp[i].getWidth())
+				maxW = tmp[i].getWidth();
+			if (maxH<tmp[i].getHeight())
+				maxH = tmp[i].getHeight();
+		}
+		if (maxW>binH || maxH>binH) {
+			throw new DataParsingException("Bin TOO small");
+		}
 		
 		List<PacketConfiguration> packets = Arrays.asList(tmp);
 		
