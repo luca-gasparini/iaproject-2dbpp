@@ -237,7 +237,7 @@ public class PackingProcedures {
 			LinkedList<Edge> Q1) {
 		if (!Q.isEmpty() && !Q1.isEmpty()) {
 			Edge s = Q1.getFirst();
-			while (Q.getLast().p1.y >= s.p1.y)
+			while (Q.size() > 0 && Q.getLast().p1.y <= s.p1.y)
 				Q.removeLast();
 		}
 
