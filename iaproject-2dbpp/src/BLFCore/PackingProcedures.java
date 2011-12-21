@@ -372,11 +372,11 @@ public class PackingProcedures {
 			int j = 0;
 			boolean inserito = false;
 			while (!inserito && j < coreBins.size()) {
-				//try {
+				try {
 					inserito = coreBins.get(j).insertPacket(packets.get(i));
-				/*} catch (RuntimeException e) {
+				} catch (RuntimeException e) {
 					saveErrorLog(e,packets, bins);
-				}*/
+				}
 				j++;
 			}
 			if (!inserito) {
