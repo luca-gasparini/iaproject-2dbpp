@@ -35,6 +35,8 @@ public class Hole {
 				// se è un punto, al precedente o prossimo edge trovo un
 				// segmento
 				if (intersection != null && intersection.isPoint() == null) {
+					
+					//intersezione uguale a lato hole
 					if (Edge.equals(intersection, getEdge(j))) {
 						Hole hole = this.traverseFromHoleLine(j, rect, flags,
 															  true);
@@ -44,6 +46,7 @@ public class Hole {
 						if (hole != null)
 							holes.add(hole);
 						
+						//intersezione uguale a lato rect
 					} else if (Edge.equals(intersection, rect.getEdge(i))) {
 						/*
 						 * assumo che essendo entrambi attraversate in
@@ -68,6 +71,7 @@ public class Hole {
 						}
 						
 					} else {
+						
 						ArrayList<Edge> li = new ArrayList<Edge>();
 						
 						// trovo il punto dell'hole che delimita l'intersezione
@@ -95,6 +99,7 @@ public class Hole {
 								holes.add(new Hole(li));
 							}
 						} else {
+							//TODO cambia qua????
 							li.add(getEdge(j + 1));
 							if (this.traverse(li, getEdge(j).p2, j + 1, rect,
 											  flags, true))
@@ -151,8 +156,11 @@ public class Hole {
 				if (inter != null && inter.isPoint() == null)
 					intersectEdge = i;
 				
-				if (inter != null && inter.isPoint() != null)
-					intersectPoint = i;
+				if (inter != null && inter.isPoint() != null){
+					Point x = inter.isPoint();
+					if(!(Point.equals(x, rect.getEdge(i).p1) || Point.equals(x, rect.getEdge(i).p2)))
+						intersectPoint = i;
+				}
 			}
 			
 			// se non trovo intersezioni aggiungo lato e proseguo
@@ -219,8 +227,10 @@ public class Hole {
 					
 					// altrimenti continuo il traverse sul rect nel verso dove
 					// non trovo intersezioni
-					if (Edge.Intersection(e1,
-										  getEdge(incremental ? c + 1 : c - 1)).isPoint() != null) {
+					/*if (Edge.Intersection(e1,
+										  getEdge(incremental ? c + 1 : c - 1)).isPoint() != null) {*/
+					Edge intEdge =(Edge.Intersection(e1,getEdge(incremental ? c + 1 : c - 1)));
+					if (intEdge == null || intEdge.isPoint() != null ) {
 						
 						newHoleEdge.add(e1);
 						verso = false;
@@ -350,6 +360,8 @@ public class Hole {
 			}
 		}
 
+		int leftMostEdge = -1;
+		
 		// finding upper, lower and rightmost edges
 		for (i = 0; i < edges.size(); i++) {
 			if (getEdge(i).isHorizontal()
@@ -361,6 +373,8 @@ public class Hole {
 			if (getEdge(i).isVertical()
 					&& (rightMost == -1 || getEdge(i).p1.x > getEdge(rightMost).p1.x))
 				rightMost = i;
+			if(getEdge(i).isVertical() && (leftMostEdge == -1 || getEdge(i).p1.x < getEdge(leftMostEdge).p1.x))
+				leftMostEdge = i;
 		}
 
 		// is the list in clockWise order?
@@ -371,6 +385,8 @@ public class Hole {
 		else
 			clockWise = false;
 
+		
+		
 		if (!clockWise) {
 			// we have to revert the list
 			app = new ArrayList<Edge>();
@@ -378,6 +394,7 @@ public class Hole {
 			boolean setUpper = false;
 			boolean setLower = false;
 			boolean setRight = false;
+			boolean setLeft = false;
 			while (i >= 0) {
 				app.add(new Edge(getEdge(i).p2, getEdge(i).p1));
 				if (!setUpper && i == upperEdge) {
@@ -392,11 +409,24 @@ public class Hole {
 					rightMost = app.size() - 1;
 					setRight = true;
 				}
+				if (!setLeft && i == leftMostEdge) {
+					leftMostEdge = app.size() - 1;
+					setLeft = true;
+				}
 				i--;
 			}
 			edges = app;
 		}
 
+		/*
+		for(i = leftMostEdge;i != rightMost; i = (i+1)%edges.size())
+		{
+			if(getEdge(i).p1.x > getEdge(i).p2.x)
+			{
+				throw new IllegalArgumentException("coming back edge");
+			}
+		}*/
+		
 		ArrayList<Integer> leftMostEdges = new ArrayList<Integer>();
 		// find leftMostEdges, Qi and relative Qw
 		// scan the left side of the hole starting from down
@@ -494,31 +524,32 @@ public class Hole {
 
 				// se ho trovato Qn aspetto un giro.. non credo serva ma male
 				// non fa...
-				if (!foundQn) {// search for Qwi or rightMost edge
+				if (!foundQn) {// search for rightMost edge
 					boolean foundQw = false;
 
-					Point appQw = null;
+					
 
-					if (lIndex == 0)// search rigthMost
-					{
+					/*if (lIndex == 0)// search rigthMost
+					{*/
 						if (Edge.equals(getEdge(i), getEdge(rightMost)))
 							foundQw = true;
-					}
+					/*}
 
+					Point appQw = null;
 					else// search for qW
 					{
 						appQw = Edge.Intersection(getEdge(i), Qw.get(lIndex));
 						if (appQw != null) {
 							foundQw = true;
 						}
-					}
+					}*/
 
 					if (foundQw) {
 
-						if (lIndex == 0)
+						//if (lIndex == 0)
 							sb.FT.add(getEdge(rightMost).getLowerPoint());
-						else
-							sb.FT.add(appQw);
+						/*else
+							sb.FT.add(appQw);*/
 
 						// ora trovo FB
 						Point stoppingPoint = lIndex == 0 ? getEdge(rightMost)
@@ -526,22 +557,43 @@ public class Hole {
 
 						int j = edgeIndex;// lato del leftMost
 
-						// scorro la parte bassa del subhole fino allo
-						// stoppingPoint
+						// scorro la parte bassa del subhole fino a rightMostEdge saltando
+						// quando trovo un Qi precedente
 						sb.FB.add(getEdge(j).p2);
-						while (!Point.equals(getEdge(j).p1, stoppingPoint)) {
+						int interQi = -1;
+						while (j != rightMost) {
+							interQi = -1;
+							for(int i1=1;i1<Qi.size() && interQi == -1;i1++)
+							{
+								if(Point.equals(getEdge(j).p1,Qi.get(i1)))
+										interQi = i1;
+							}
+							if(interQi!= -1)
+							{
+								j = (j -2 + edges.size())%edges.size();
+								Edge half = Edge.rightHalfLine(Qi.get(interQi));
+								Edge app2 =Edge.Intersection(getEdge(j),half);
+								while(app2 == null){
+									j = (j -1 + edges.size())%edges.size();
+									app2 =Edge.Intersection(getEdge(j),half);
+								}
+								sb.FB.add(app2.getLeftPoint());
+								
+							}
+							else{
 							sb.FB.add(getEdge(j).p1);
-							j--;
+							j = (j -1 + edges.size())%edges.size();
+							}
 						}
 
-						// trovato stopping point
+						/*// trovato stopping point
 						sb.FB.add(getEdge(j).p1);
-						if (lIndex == 0) {
+						if (lIndex == 0) {*/
 							sb.FB.add(getEdge(rightMost).getUpperPoint());
-						} else {
+						/*} else {
 							sb.FB.add(Qw.get(lIndex));
 							sb.FB.add(edgeOfQw.get(lIndex).getUpperPoint());
-						}
+						}*/
 						stop = true;
 
 					} else {
@@ -551,7 +603,8 @@ public class Hole {
 					}
 				}
 			}
-
+			
+			
 			// correggo FT fermandola all'altezza dell'ultimo elemento di FB..
 			// per evitare
 			// che vada avanti e poi torni indietro..(da problemi nel placing)
@@ -559,7 +612,7 @@ public class Hole {
 				ArrayList<Point> appFt = new ArrayList<Point>();
 				boolean stopCondition = false;
 				int ind = 0;
-				Point limit = sb.FB.get(sb.FB.size() - 1);
+				Point limit = sb.FB.get(sb.FB.size() - 2);
 				while (ind < sb.FT.size() && !stopCondition) {
 					if (sb.FT.get(ind).x < limit.x) {
 						appFt.add(sb.FT.get(ind));

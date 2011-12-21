@@ -141,11 +141,11 @@ public class PackingProcedures {
 		}
 
 		while (C.size() > 0 && C.get(0).x < d.get(0).x) {
-			Point x = C.remove(0);
-			if (C.size() > 0 && C.getFirst().x > d.get(0).x) {
-				x = new Point(d.get(0).x, C.getFirst().y);
-				C.addFirst(x);
-			}
+			C.remove(0);
+		}
+		if (C.size() > 0 && C.getFirst().x > d.get(0).x) {
+			Point x = new Point(d.get(0).x, C.getFirst().y);
+			C.addFirst(x);
 		}
 
 		double limit;
@@ -155,11 +155,11 @@ public class PackingProcedures {
 			limit = s.FB.get(s.FB.size() - 1).x - length;
 
 		while (C.size() > 0 && C.getLast().x > limit) {
-			Point x = C.removeLast();
-			if (C.size() > 0 && C.getLast().x < limit) {
-				x = new Point(limit, C.getLast().y);
-				C.addLast(x);
-			}
+			C.removeLast();
+		}
+		if (C.size() > 0 && C.getLast().x < limit) {
+			Point x = new Point(limit, C.getLast().y);
+			C.addLast(x);
 		}
 		return C;
 	}
@@ -308,31 +308,32 @@ public class PackingProcedures {
 		double xLimit = s.FT.get(0).x;
 		while (D.size() > 0 && D.getFirst().x < xLimit) {
 			D.removeFirst();
-			if (D.size() > 0) {
-				Point p = D.getFirst();
-				if (p.x > xLimit) {
-					p = new Point(xLimit, p.y);
-					D.addFirst(p);
-				}
+		}
+		if (D.size() > 0) {
+			Point p = D.getFirst();
+			if (p.x > xLimit) {
+				p = new Point(xLimit, p.y);
+				D.addFirst(p);
 			}
 		}
 
-		xLimit = s.FT.get(s.FT.size() - 1).x - length;
+		xLimit = s.Q == null ? s.FT.get(s.FT.size() - 1).x - length : s.Q.x;
 		while (D.size() > 0 && D.getLast().x > xLimit) {
 			D.removeLast();
-			if (D.size() > 0) {
-				Point p = D.getLast();
-				if (p.x < xLimit) {
-					p = new Point(xLimit, p.y);
-					D.addLast(p);
-				}
+		}
+		if (D.size() > 0) {
+			Point p = D.getLast();
+			if (p.x < xLimit) {
+				p = new Point(xLimit, p.y);
+				D.addLast(p);
 			}
 		}
 
 		return D;
 	}
 
-	private static void saveErrorLog(RuntimeException e, List<Packet> packets, BinConfiguration bins) {
+	private static void saveErrorLog(RuntimeException e, List<Packet> packets,
+			BinConfiguration bins) {
 		boolean stopCondition = false;
 		String pathFile = null;
 		int i = 0;
@@ -349,18 +350,20 @@ public class PackingProcedures {
 			FileWriter writer = new FileWriter(err);
 			BufferedWriter out = new BufferedWriter(writer);
 			e.printStackTrace();
-			out.write("bin heigth:" + bins.getHeight() + "\nbin width:" + bins.getWidth());
-			for(i = 0;i< packets.size();i++)
-			{
-				out.write("\n\nPacket " + i + ":\nHeigth:" + packets.get(i).getHeight() + "\nWidth:" + packets.get(i).getWidth());
+			out.write(e.toString() + "\nbin width:" + bins.getWidth()
+					+ "\nbin heigth:" + bins.getHeight());
+			for (i = 0; i < packets.size(); i++) {
+				out.write("\n\nPacket " + i + "\nWidth:"
+						+ packets.get(i).getWidth() + ":\nHeigth:"
+						+ packets.get(i).getHeight());
 			}
 			out.close();
 			writer.close();
 		} catch (IOException ex) {
 		}
-		
-		throw new BlfErrorException(
-				"Errore BLF... blfError" + errorN + ".log saved.. invialo ad urban...");
+
+		throw new BlfErrorException("Errore BLF... blfError" + errorN
+				+ ".log saved.. invialo ad urban...");
 	}
 
 	// metodo da utilizzare da fuori...
@@ -374,8 +377,9 @@ public class PackingProcedures {
 			while (!inserito && j < coreBins.size()) {
 				try {
 					inserito = coreBins.get(j).insertPacket(packets.get(i));
+
 				} catch (RuntimeException e) {
-					saveErrorLog(e,packets, bins);
+					saveErrorLog(e, packets, bins);
 				}
 				j++;
 			}
@@ -385,7 +389,7 @@ public class PackingProcedures {
 					if (!coreBins.get(j).insertPacket(packets.get(i)))
 						return null;
 				} catch (RuntimeException e) {
-					saveErrorLog(e,packets, bins);
+					saveErrorLog(e, packets, bins);
 				}
 			}
 		}
