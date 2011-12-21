@@ -87,6 +87,8 @@ public class MainWindow extends AbstractFrame {
 		
 		public EngineConfPanel() {
 			defaultColor = this.getBackground();
+			// needed to keep the panel as small as possible
+			this.setPreferredSize(new Dimension(0, 0));
 			init();
 		}
 		
@@ -162,7 +164,7 @@ public class MainWindow extends AbstractFrame {
 			this.add(pane, BorderLayout.CENTER);
 			prevComponent = pane;
 			
-			this.validate();
+			this.revalidate();
 		}
 		
 		public CoreItem getChoosedCore() {

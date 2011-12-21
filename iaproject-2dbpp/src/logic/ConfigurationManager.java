@@ -50,7 +50,7 @@ public class ConfigurationManager {
 		this.coreName = coreNameElm.getText();
 		
 		Element coreConfElm = root.getChild(CORE_CONF_STR);
-		if (coreConfElm != null) {
+		if (coreConfElm != null && !coreConfElm.getText().isEmpty()) {
 			// build configuration object
 			BASE64Decoder b64dec = new BASE64Decoder();
 			String b64Conf = coreConfElm.getText();
@@ -74,8 +74,8 @@ public class ConfigurationManager {
 		if (coreName == null) {
 			throw new IllegalStateException("Core name not set");
 		}
-		if (coreConfiguration == null) {
-			throw new IllegalStateException("Core configuration not set");
+		if (problemConfiguration == null) {
+			throw new IllegalStateException("Problem configuration not set");
 		}
 		
 		Element root = new Element(ROOT_STRING);
@@ -85,8 +85,8 @@ public class ConfigurationManager {
 		coreNameElm.setText(this.coreName);
 		root.addContent(coreNameElm);
 		
+		Element coreConfElm = new Element(CORE_CONF_STR);
 		if (coreConfiguration != null) {
-			Element coreConfElm = new Element(CORE_CONF_STR);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(baos);
 			oos.writeObject(coreConfiguration);
@@ -94,8 +94,8 @@ public class ConfigurationManager {
 			BASE64Encoder b64enc = new BASE64Encoder();
 			String coreConf = b64enc.encode(baos.toByteArray());
 			coreConfElm.setText(coreConf);
-			root.addContent(coreConfElm);
 		}
+		root.addContent(coreConfElm);
 		
 		Element problemConfElm = problemConf2XML(PROBLEM_CONF_STR, problemConfiguration);
 		root.addContent(problemConfElm);

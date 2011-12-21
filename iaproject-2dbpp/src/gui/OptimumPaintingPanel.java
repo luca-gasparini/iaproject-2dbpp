@@ -3,10 +3,7 @@ package gui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -20,6 +17,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
+import javax.swing.GroupLayout;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -306,46 +304,48 @@ public class OptimumPaintingPanel extends JPanel {
 		// lay out components
 		this.setLayout(new BorderLayout());
 		
-		JPanel infoPanel = new JPanel(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-
-		c.gridy = 0;
-		c.gridx = 0;
-		c.insets = new Insets(0, 90, 0, 5);
-		c.anchor = GridBagConstraints.LINE_END;
-		infoPanel.add(nIterationLbl, c);
+		JPanel tmpInfoPane = new JPanel();
+		GroupLayout layout = new GroupLayout(tmpInfoPane);
+		tmpInfoPane.setLayout(layout);
+		layout.setAutoCreateContainerGaps(true);
+		layout.setAutoCreateGaps(true);
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+						.addComponent(nIterationLbl)
+						.addComponent(elapsedTimeLbl)
+						.addComponent(fitnessValueLbl)
+						.addComponent(nBinsLbl)
+				)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+						.addComponent(nIteration, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(elapsedTime, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(fitnessValue, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(nBins, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+				)
+		);
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(nIterationLbl)
+						.addComponent(nIteration, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+				)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(elapsedTimeLbl)
+						.addComponent(elapsedTime, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+				)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(fitnessValueLbl)
+						.addComponent(fitnessValue, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+				)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(nBinsLbl)
+						.addComponent(nBins, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+				)
+		);
 		
-		c.gridy = 1;
-		c.gridx = 0;
-		infoPanel.add(elapsedTimeLbl, c);
-		
-		c.gridy = 2;
-		c.gridx = 0;
-		infoPanel.add(fitnessValueLbl, c);
-		
-		c.gridy = 3;
-		c.gridx = 0;
-		infoPanel.add(nBinsLbl, c);
-		
-		c.gridy = 0;
-		c.gridx = 1;
-		c.weightx = 0.2;
-		c.insets = new Insets(2, 0, 2, 0);
-		c.anchor = GridBagConstraints.LINE_START;
-		infoPanel.add(nIteration, c);
-		
-		c.gridy = 1;
-		c.gridx = 1;
-		infoPanel.add(elapsedTime, c);
-		
-		c.gridy = 2;
-		c.gridx = 1;
-		infoPanel.add(fitnessValue, c);
-		
-		c.gridy = 3;
-		c.gridx = 1;
-		infoPanel.add(nBins, c);
-		
+		Box infoPanel = Box.createVerticalBox();
+		infoPanel.add(Box.createVerticalGlue());
+		infoPanel.add(tmpInfoPane);
+		infoPanel.add(Box.createVerticalGlue());
 		
 		JPanel topPanel = new JPanel(new BorderLayout());
 		topPanel.add(binListScroller, BorderLayout.LINE_START);
