@@ -341,7 +341,7 @@ public class Hole {
 		// li unisco in un solo lato.. sembrerebbe inutile ma poi mi risolve un
 		// po
 		// di problemi..
-		for (i = 0; i < edges.size(); i++) {
+		for (i = -1; i < edges.size(); i++) {
 			if ((getEdge(i).isVertical() && getEdge(i + 1).isVertical())
 					|| (getEdge(i).isHorizontal() && getEdge(i + 1)
 							.isHorizontal())) {

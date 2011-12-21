@@ -332,7 +332,7 @@ public class PackingProcedures {
 		return D;
 	}
 
-	private static void saveErrorLog(List<Packet> packets, BinConfiguration bins) {
+	private static void saveErrorLog(RuntimeException e, List<Packet> packets, BinConfiguration bins) {
 		boolean stopCondition = false;
 		String pathFile = null;
 		int i = 0;
@@ -348,6 +348,7 @@ public class PackingProcedures {
 			errorN = i;
 			FileWriter writer = new FileWriter(err);
 			BufferedWriter out = new BufferedWriter(writer);
+			e.printStackTrace();
 			out.write("bin heigth:" + bins.getHeight() + "\nbin width:" + bins.getWidth());
 			for(i = 0;i< packets.size();i++)
 			{
@@ -355,7 +356,7 @@ public class PackingProcedures {
 			}
 			out.close();
 			writer.close();
-		} catch (IOException e) {
+		} catch (IOException ex) {
 		}
 		
 		throw new BlfErrorException(
@@ -371,11 +372,11 @@ public class PackingProcedures {
 			int j = 0;
 			boolean inserito = false;
 			while (!inserito && j < coreBins.size()) {
-				try {
+				//try {
 					inserito = coreBins.get(j).insertPacket(packets.get(i));
-				} catch (RuntimeException e) {
-					saveErrorLog(packets, bins);
-				}
+				/*} catch (RuntimeException e) {
+					saveErrorLog(e,packets, bins);
+				}*/
 				j++;
 			}
 			if (!inserito) {
@@ -384,7 +385,7 @@ public class PackingProcedures {
 					if (!coreBins.get(j).insertPacket(packets.get(i)))
 						return null;
 				} catch (RuntimeException e) {
-					saveErrorLog(packets, bins);
+					saveErrorLog(e,packets, bins);
 				}
 			}
 		}
