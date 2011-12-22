@@ -19,7 +19,9 @@ import core.CoreResult;
 public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 	
 	private final int populationSize;
-	private final float rotateProbability;
+	private final float pRotateMutation;
+	private final float pOrderMutation;
+	private final float pCrossover;
 	private final ProblemConfiguration problemConf;
 	
 	private float currentFitness;
@@ -32,7 +34,10 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 		super(conf, painter, Core2GuiTranslators.getGeneticTranslator());
 		this.problemConf = conf.getProblemConfiguration();
 		this.populationSize = conf.getCoreConfiguration().getPopulationSize();
-		this.rotateProbability = conf.getCoreConfiguration().getRotateProbability();
+		this.pRotateMutation = conf.getCoreConfiguration().getRotateMutationProbability();
+		this.pOrderMutation = conf.getCoreConfiguration().getOrderMutationProbability();
+		this.pCrossover = conf.getCoreConfiguration().getCrossoverProbability();
+		
 		this.population = new Individual[this.populationSize];
 		
 		// initialize population from problem configuration
@@ -56,11 +61,10 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 		
 			Individual father = selectIndividual();
 			Individual mother = selectIndividual();
-			Individual child = crossover(father, mother);
-			child.mutate(rotateProbability);
+			Individual child = crossover(father, mother, pCrossover);
+			child.mutate(pRotateMutation, pOrderMutation);
 			child.calculateLayout(problemConf.getBin()); 
 			bestIndividual = replaceWorstIndividual(child);
-
 						
 			// publish results only if better
 			if ( bestIndividual.getFitness() < currentFitness) {
@@ -82,35 +86,39 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 	}
 
 	
-	private Individual crossover(Individual father, Individual mother) {
+	private Individual crossover(Individual father, Individual mother, float pCrossover) {
 		
-		int genomeSize = father.getSequence().size();
-		List<Packet> childGenome = new ArrayList<Packet>(genomeSize);
-		boolean[] isGeneCopied = new boolean[genomeSize];
-		for ( int i = 0; i < genomeSize; i++ ) {
-			isGeneCopied[i] = false;
-		}
-		
-		
-		// set up father genome breaking point
-		int p = rand.nextInt( genomeSize );
-		// set up number of gene to copy from father
-		int q = rand.nextInt( genomeSize + 1 - p);
-		
-		// extract the genome portion of the father and add it to the child genome
-		for (Packet fatherGene: father.getSequence().subList(p, p + q )) {
-			childGenome.add( fatherGene.clone() );
-			isGeneCopied[fatherGene.getId()] = true;
-		}
-		
-		// complete with the genome of the mother
-		for (Packet motherGene: mother.getSequence()) {
-			if ( !isGeneCopied[ motherGene.getId() ] ) {
-				childGenome.add( motherGene.clone() );
+		if (rand.nextFloat() < pCrossover) {
+	
+			int genomeSize = father.getSequence().size();
+			List<Packet> childGenome = new ArrayList<Packet>(genomeSize);
+			boolean[] isGeneCopied = new boolean[genomeSize];
+			for ( int i = 0; i < genomeSize; i++ ) {
+				isGeneCopied[i] = false;
 			}
+			
+			
+			// set up father genome breaking point
+			int p = rand.nextInt( genomeSize );
+			// set up number of gene to copy from father
+			int q = rand.nextInt( genomeSize + 1 - p);
+			
+			// extract the genome portion of the father and add it to the child genome
+			for (Packet fatherGene: father.getSequence().subList(p, p + q )) {
+				childGenome.add( fatherGene.clone() );
+				isGeneCopied[fatherGene.getId()] = true;
+			}
+			
+			// complete with the genome of the mother
+			for (Packet motherGene: mother.getSequence()) {
+				if ( !isGeneCopied[ motherGene.getId() ] ) {
+					childGenome.add( motherGene.clone() );
+				}
+			}
+	
+			return new Individual(childGenome);
 		}
-
-		return new Individual(childGenome);
+		return father; 
 	}
 
 	/*

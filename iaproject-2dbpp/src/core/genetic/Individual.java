@@ -45,14 +45,16 @@ class Individual {
 	}
 
 	// apply mutation to the individual
-	public void mutate(float pRotate) {
-/*
+	public void mutate(float pRotate, float pOrderMutation) {
+
 		for (Packet gene: sequence) {
-			if (rand.nextFloat() <= pRotate) {
+			if (rand.nextFloat() < pRotate) {
 				gene.rotate();
 			}
 		}
-*/
+		
+		// qui dovrò metterci order based mutation
+
 	}
 	
 	// return the fitness of the individual
