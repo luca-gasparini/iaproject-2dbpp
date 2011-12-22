@@ -2,31 +2,31 @@ package core.BLFTest;
 
 import gui.OptimumPainter;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.ArrayList;
-
-import BLFCore.BlfLayout;
+import java.util.List;
 
 import logic.Bin;
 import logic.BinConfiguration;
 import logic.Packet;
 import logic.PacketConfiguration;
 import logic.ProblemConfiguration;
+import BLFCore.BlfLayout;
 import core.AbstractCore;
 import core.Core2GuiTranslator;
 import core.CoreConfiguration;
 import core.CoreResult;
 
-public class BLFTestCore extends AbstractCore<Void, List<Bin>> {
+public class BLFTestCore extends AbstractCore<List<Packet>, List<Bin>> {
 
 	private final ProblemConfiguration problemConf;
+	private final List<Packet> packets;
 
-	public BLFTestCore(CoreConfiguration<Void> configuration,
+	public BLFTestCore(CoreConfiguration<List<Packet>> configuration,
 			OptimumPainter painter, Core2GuiTranslator<List<Bin>> translator) {
 		super(configuration, painter, translator);
 
 		this.problemConf = configuration.getProblemConfiguration();
+		this.packets = configuration.getCoreConfiguration();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -34,8 +34,6 @@ public class BLFTestCore extends AbstractCore<Void, List<Bin>> {
 	protected void doWork() {
 
 		// PUT YOUR CODE HERE:
-		final List<Bin> bins = new LinkedList<Bin>();
-
 		/*
 		 * puoi usare come input la lista di bin passata con assieme alla
 		 * variabile pc, oppure creartene una tu. Quello che importa � che, alla
@@ -48,33 +46,33 @@ public class BLFTestCore extends AbstractCore<Void, List<Bin>> {
 
 		// example code;
 		BinConfiguration binConf = problemConf.getBin();
-		List<PacketConfiguration> pkConf = problemConf.getPackets();
-		ArrayList<Packet> packets = new ArrayList<Packet>();
-		int cont=0;
-		for (int i = 0; i < pkConf.size(); i++) {
-			PacketConfiguration pkc = pkConf.get(i);
-			
-			for (int j=0; j<pkc.getMolteplicity(); j++) {
-				packets.add(new Packet(cont++, pkc.getWidth(), pkc.getHeight(), 0, 0, pkc.getColor()));
+		
+		List<Packet> packets;
+		
+		if (this.packets != null && !this.packets.isEmpty()) {
+			packets = this.packets;
+		} else {
+			packets = new ArrayList<Packet>();
+			List<PacketConfiguration> pkConf = problemConf.getPackets();
+			int cont=0;
+			for (PacketConfiguration pkc : pkConf) {
+				for (int j=0; j<pkc.getMolteplicity(); j++) {
+					packets.add(new Packet(cont++, pkc.getWidth(), pkc.getHeight(), 0, 0, pkc.getColor()));
+				}
 			}
 		}
-
-		BlfLayout layout = BLFCore.PackingProcedures
-				.getLayout(packets, binConf);
-
-		List<Bin> newBins = layout.getBins();
-
-		final Float fitness = new Float(layout.getFitness());
 		
-		bins.addAll(newBins);
-
+		BlfLayout layout = BLFCore.PackingProcedures.getLayout(packets, binConf);
+			
+		final List<Bin> bins = layout.getBins();
+		final float fitness = layout.getFitness();
+		
 		// ------------------
 
 		CoreResult<List<Bin>> result = new AbstractCoreResult<List<Bin>>() {
 			@Override
 			public float getFitness() {
-				//return fitness.floatValue(); 
-				return 0;
+				return fitness; 
 			}
 
 			@Override

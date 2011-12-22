@@ -5,6 +5,8 @@ import java.util.List;
 
 public class Bin extends BinConfiguration { // il nome non è il massimo;
 
+	private static final long serialVersionUID = -6741647185330811868L;
+	
 	private List<Packet> packetList;
 	private final int id;
 	private float density;

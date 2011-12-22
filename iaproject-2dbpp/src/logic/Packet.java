@@ -1,11 +1,12 @@
 package logic;
 
 import java.awt.Color;
-
-import logic.AbstractPacket;
+import java.awt.Point;
 
 public class Packet extends AbstractPacket {
 
+	private static final long serialVersionUID = 5442423919170523032L;
+	
 	private final int id;
 	private Point bottomLeftPoint;
 	private boolean rotate;
@@ -27,63 +28,28 @@ public class Packet extends AbstractPacket {
 		this.color = col;
 	}
 	
-	private class Point {
-		private int x;
-		private int y;
-		
-		public Point(int x, int y) {
-			this.x = x;
-			this.y = y;
-		}
-		
-		public int getX() {
-			return this.x;
-		}
-		
-		public int getY() {
-			return this.y;
-		}
-		
-		public void setX(int xCord) {
-			this.x = xCord;
-		}
-		
-		public void setY(int yCord) {
-			this.y = yCord;
-		}
-		
-		@Override
-		public boolean equals (Object p) {
-			if (!(p instanceof Point))
-				return false;
-			
-			Point pt = (Point) p;
-			return this.x == pt.getX() && this.y == pt.getY();
-		}
-	}
-	
 	public int getId() {
 		return this.id;
 	}
 	
 	public int getPointX() {
-		return this.bottomLeftPoint.getX();
+		return this.bottomLeftPoint.x;
 	}
 	
 	public int getPointY() {
-		return this.bottomLeftPoint.getY();
+		return this.bottomLeftPoint.y;
 	}
 	
 	public Point getPoint() {
-		return this.bottomLeftPoint;
+		return new Point(this.bottomLeftPoint);
 	}
 	
 	public void setPoint(int x, int y) {
 		if (x<0 || y<0)
 			throw new IllegalArgumentException();
 		
-		this.bottomLeftPoint.setX(x);
-		this.bottomLeftPoint.setY(y);
+		this.bottomLeftPoint.x = x;
+		this.bottomLeftPoint.y = y;
 	}
 	
 	public boolean isRotate() {

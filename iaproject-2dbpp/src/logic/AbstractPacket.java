@@ -1,9 +1,11 @@
 package logic;
 
 import java.awt.Dimension;
+import java.io.Serializable;
 
-public abstract class AbstractPacket {
+public abstract class AbstractPacket implements Serializable {
 
+	private static final long serialVersionUID = -3719533933391235589L;
 	private int width;
 	private int height;
 	

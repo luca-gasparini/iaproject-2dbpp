@@ -1,8 +1,11 @@
 package logic;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class ProblemConfiguration {
+public class ProblemConfiguration implements Serializable {
+	
+	private static final long serialVersionUID = -9102540924261089702L;
 	
 	private final BinConfiguration bin;
 	private final List<PacketConfiguration> packets;

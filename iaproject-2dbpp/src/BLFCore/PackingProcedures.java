@@ -1,13 +1,18 @@
 package BLFCore;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
-import logic.*;
 import java.util.List;
+
+import logic.Bin;
+import logic.BinConfiguration;
+import logic.ConfigurationManager;
+import logic.Packet;
+import logic.PacketConfiguration;
+import logic.ProblemConfiguration;
 
 public class PackingProcedures {
 
@@ -29,7 +34,7 @@ public class PackingProcedures {
 		C.add(null);
 		D.add(null); // gli indici nel paper partono da 1
 		// converto in liste di lati orizzontali
-		// in realtˆ in casi particolari mi servono anche dei singoli punti..
+		// in realtï¿½ in casi particolari mi servono anche dei singoli punti..
 		// ad esempio quando salgo e scendo nella stessa verticale
 		for (i = 0; i < Cp.size() - 1; i++) {
 			Edge app = new Edge(Cp.get(i), Cp.get(i + 1));
@@ -334,6 +339,7 @@ public class PackingProcedures {
 
 	private static void saveErrorLog(RuntimeException e, List<Packet> packets,
 			BinConfiguration bins) {
+		
 		boolean stopCondition = false;
 		String pathFile = null;
 		int i = 0;
@@ -342,24 +348,24 @@ public class PackingProcedures {
 		try {
 			while (!stopCondition) {
 				i++;
-				pathFile = "BlfError" + i + ".log";
+				pathFile = "BLF_" + e.getClass().getSimpleName() + i + ".log";
 				err = new File(pathFile);
 				stopCondition = err.createNewFile();
 			}
 			errorN = i;
-			FileWriter writer = new FileWriter(err);
-			BufferedWriter out = new BufferedWriter(writer);
-			e.printStackTrace();
-			out.write(e.toString() + "\nbin width:" + bins.getWidth()
-					+ "\nbin heigth:" + bins.getHeight());
-			for (i = 0; i < packets.size(); i++) {
-				out.write("\n\nPacket " + i + "\nWidth:"
-						+ packets.get(i).getWidth() + ":\nHeigth:"
-						+ packets.get(i).getHeight());
-			}
-			out.close();
-			writer.close();
+			
+			ConfigurationManager confManager = new ConfigurationManager();
+			// prepare a dummy ProblemConf
+			ProblemConfiguration problemConf = new ProblemConfiguration(bins, 
+					Collections.<PacketConfiguration>emptyList());
+			
+			confManager.setCoreConfiguration(packets);
+			confManager.setProblemConfiguration(problemConf);
+			confManager.setCoreName("BLFTest");
+			confManager.saveToFile(err);
+			
 		} catch (IOException ex) {
+			ex.printStackTrace();
 		}
 
 		throw new BlfErrorException("Errore BLF... blfError" + errorN

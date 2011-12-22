@@ -6,6 +6,8 @@ import logic.AbstractPacket;
 
 public class PacketConfiguration extends AbstractPacket {
 	
+	private static final long serialVersionUID = -5887885664050237441L;
+	
 	private final int molteplicity;
 	private final Color color;
 	
