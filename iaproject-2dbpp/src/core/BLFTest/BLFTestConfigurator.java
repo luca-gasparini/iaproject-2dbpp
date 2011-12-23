@@ -22,18 +22,25 @@ public class BLFTestConfigurator extends AbstractConfigurator<BLFTestCoreConfigu
 	private static final JPanel confComp = new JPanel();
 	private JCheckBox rotateCheck;
 	
-	private List<Packet> packets;
 	
-	@Override
-	public JComponent getConfigurationComponent() {
-		
+	public BLFTestConfigurator() {
+
 		rotateCheck = new JCheckBox("rotate 1 to 1");
 		rotateCheck.setSelected(false);
 		
 		confComp.add(rotateCheck);
+		
+	}
+	@Override
+	public JComponent getConfigurationComponent() {
 		return confComp;
 	}
 
+	@Override
+	protected AbstractCore<BLFTestCoreConfiguration, ?> getConfiguredCore(CoreConfiguration<BLFTestCoreConfiguration> conf, OptimumPainter painter) {
+		return new BLFTestCore(conf, painter);
+	}
+	
 	@Override
 	protected void setConfiguration(BLFTestCoreConfiguration config) {
 		rotateCheck.setSelected(config.getSelected());
@@ -50,10 +57,4 @@ public class BLFTestConfigurator extends AbstractConfigurator<BLFTestCoreConfigu
 		return new BLFTestCoreConfiguration(rotate);
 	}
 	
-	@Override
-	protected AbstractCore<BLFTestCoreConfiguration, ?> getConfiguredCore(CoreConfiguration<BLFTestCoreConfiguration> conf, OptimumPainter painter) {
-		return new BLFTestCore(conf, painter);
-	}
-
-
 }
