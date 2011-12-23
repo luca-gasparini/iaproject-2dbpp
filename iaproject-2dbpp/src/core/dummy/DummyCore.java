@@ -9,6 +9,8 @@ import java.util.Random;
 
 import logic.Bin;
 import logic.Packet;
+import logic.PacketDescriptor;
+import logic.PacketSolution;
 import logic.ProblemConfiguration;
 import core.AbstractCore;
 import core.Core2GuiTranslators;
@@ -32,6 +34,14 @@ public class DummyCore extends AbstractCore<Integer, List<Bin>> {
 	protected void doWork() {
 		// controlled cycling
 		
+		int nBins = 1;//rand.nextInt(20) + 1;
+		final List<Bin> bins = new ArrayList<Bin>(nBins+1);
+		for (int i = 0; i < nBins; i++) {
+			bins.add(createRandomBin(i, 
+					problemConf.getBin().getWidth(), 
+					problemConf.getBin().getHeight()));
+		}
+		boolean b=true;
 		while (this.canContinue()) {
 			
 			// method processing... here you can insert your code
@@ -42,17 +52,15 @@ public class DummyCore extends AbstractCore<Integer, List<Bin>> {
 				return;
 			}
 			// ....
-			
-			
-			// --- begin test --- 
-			int nBins = rand.nextInt(20) + 1;
-			final List<Bin> bins = new ArrayList<Bin>(nBins+1);
-			for (int i = 0; i < nBins; i++) {
-				bins.add(createRandomBin(i, 
-						problemConf.getBin().getWidth(), 
-						problemConf.getBin().getHeight()));
-			}
-			
+			//java.util.Collections.shuffle(bins);
+			b = !b;
+			System.out.println(
+					bins.get(0).getList().get(0).isRotate()+"id = "+
+					bins.get(0).getList().get(0).getId()+"width = "+
+					bins.get(0).getList().get(0).getWidth()
+			);
+			bins.get(0).getList().get(0).setRotate(b);
+			// --- begin test --- 	
 			CoreResult<List<Bin>> cr = new AbstractCoreResult<List<Bin>>() {
 				private float fitness = rand.nextFloat();
 				
@@ -76,7 +84,7 @@ public class DummyCore extends AbstractCore<Integer, List<Bin>> {
 	}
 	
 	private Bin createRandomBin(int id, int width, int height) {
-		int nPackets = rand.nextInt(10);
+		int nPackets = 2;//rand.nextInt(10);
 		
 		Bin newBin = new Bin(id, width, height);
 		for (int i = 0; i < nPackets; i++) {
@@ -95,7 +103,7 @@ public class DummyCore extends AbstractCore<Integer, List<Bin>> {
 		
 		Color color = new Color(rand.nextInt());
 		
-		return new Packet(id, pW, pH, blpX, blpY, color);
+		return new PacketSolution(new PacketDescriptor(id, pW, pH, color), blpX, blpY);
 	}
 	
 	@Override

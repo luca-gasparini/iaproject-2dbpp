@@ -7,26 +7,30 @@ import java.util.List;
 
 import logic.Bin;
 import logic.BinConfiguration;
+import logic.ManageSolution;
 import logic.Packet;
 import logic.PacketConfiguration;
+import logic.PacketDescriptor;
 import logic.ProblemConfiguration;
 import BLFCore.BlfLayout;
 import core.AbstractCore;
 import core.Core2GuiTranslator;
+import core.Core2GuiTranslators;
 import core.CoreConfiguration;
 import core.CoreResult;
 
-public class BLFTestCore extends AbstractCore<List<Packet>, List<Bin>> {
+public class BLFTestCore extends AbstractCore<BLFTestCoreConfiguration, List<Bin>> {
 
 	private final ProblemConfiguration problemConf;
-	private final List<Packet> packets;
-
-	public BLFTestCore(CoreConfiguration<List<Packet>> configuration,
-			OptimumPainter painter, Core2GuiTranslator<List<Bin>> translator) {
-		super(configuration, painter, translator);
+	List<PacketConfiguration> pkConf;
+	private boolean rotate;
+	
+	public BLFTestCore(CoreConfiguration<BLFTestCoreConfiguration> configuration, OptimumPainter painter) {
+		super(configuration, painter, Core2GuiTranslators.getDummyTranslator());
 
 		this.problemConf = configuration.getProblemConfiguration();
-		this.packets = configuration.getCoreConfiguration();
+		this.pkConf = problemConf.getPackets();
+		this.rotate = configuration.getCoreConfiguration().getSelected();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -49,18 +53,8 @@ public class BLFTestCore extends AbstractCore<List<Packet>, List<Bin>> {
 		
 		List<Packet> packets;
 		
-		if (this.packets != null && !this.packets.isEmpty()) {
-			packets = this.packets;
-		} else {
-			packets = new ArrayList<Packet>();
-			List<PacketConfiguration> pkConf = problemConf.getPackets();
-			int cont=0;
-			for (PacketConfiguration pkc : pkConf) {
-				for (int j=0; j<pkc.getMolteplicity(); j++) {
-					packets.add(new Packet(cont++, pkc.getWidth(), pkc.getHeight(), 0, 0, pkc.getColor()));
-				}
-			}
-		}
+		List<PacketDescriptor> pacs = ManageSolution.buildPacketList(pkConf);
+		packets = ManageSolution.buildPacketSolutionTestRotate(pacs, rotate);
 		
 		BlfLayout layout = BLFCore.PackingProcedures.getLayout(packets, binConf);
 			
