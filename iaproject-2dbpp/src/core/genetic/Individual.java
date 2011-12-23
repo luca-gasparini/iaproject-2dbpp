@@ -1,11 +1,11 @@
 package core.genetic;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import logic.Bin;
 import logic.BinConfiguration;
+import logic.ManageSolution;
 import logic.Packet;
 import logic.PacketConfiguration;
 
@@ -20,20 +20,8 @@ class Individual {
 
 	public Individual(List<PacketConfiguration> packetsInfo, BinConfiguration binsInfo) {		
 		// translate input from List<PacketConfigutation> to List<Packet>
-		this.sequence = new ArrayList<Packet>();
-		int id = 0; // forse qui si può migliorare
-		for( int i=0; i < packetsInfo.size(); i++ ) {
-			for( int j=0; j < packetsInfo.get(i).getMolteplicity(); j++ ) {
-				this.sequence.add( new Packet(
-						id++,
-						packetsInfo.get(i).getWidth(), 
-						packetsInfo.get(i).getHeight(),
-						packetsInfo.get(i).getColor()));
-			}
-		
-		} 
+		this.sequence = ManageSolution.buildPacketList(packetsInfo);
 		java.util.Collections.shuffle(this.sequence, rand);
-		
 		// calculate blf layout and related fitness of the individual
 		this.calculateLayout(binsInfo);
 		
@@ -47,14 +35,23 @@ class Individual {
 	// apply mutation to the individual
 	public void mutate(float pRotate, float pOrderMutation) {
 
+		// rotation based mutation
 		for (Packet gene: sequence) {
 			if (rand.nextFloat() < pRotate) {
-				gene.rotate();
+				gene.setRotate( !gene.isRotate() );
 			}
 		}
 		
-		// qui dovrò metterci order based mutation
-
+		// order based mutation
+		if (rand.nextFloat() < pOrderMutation) {
+			int geneIndex1 = rand.nextInt( sequence.size() );
+			int geneIndex2 = rand.nextInt( sequence.size() );
+			Packet tempGene = sequence.get(geneIndex1);
+			sequence.set(geneIndex1, sequence.get(geneIndex2));
+			sequence.set(geneIndex2, tempGene);
+		}
+		
+		this.layout = null;
 	}
 	
 	// return the fitness of the individual
