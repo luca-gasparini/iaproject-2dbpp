@@ -19,7 +19,7 @@ import core.dummy.DummyCore;
  * @param <K> Core-specific configuration class
  * @param <T> Core-specific result class
  */
-public abstract class AbstractCore<K, T> extends SwingWorker<Void, CoreResult<T>> {
+public abstract class AbstractCore<K, T> extends SwingWorker<Void, GUIOptimum> {
 	
 	private class Controller implements CoreController {
 		
@@ -139,19 +139,18 @@ public abstract class AbstractCore<K, T> extends SwingWorker<Void, CoreResult<T>
 		this.controller = new Controller();
 	}
 	
-	@Override
-	protected final void process(List<CoreResult<T>> chunks) {
-		
-		/* we are interested only in painting the last optimum (this
-		 * increases performance)
-		 */
-		final CoreResult<T> result = chunks.get(chunks.size() - 1);
-		final T lastOptimum = result.getBins();
-		displayer.paint(new GUIOptimum() {
+	/**
+	 * USE THIS METHOD AND NOT {@link #publish(Object...)} TO PUBLISH
+	 * YOUR OPTIMUMS.
+	 * 
+	 * @param result
+	 */
+	protected final void publishResult(final CoreResult<T> result) {
+		GUIOptimum optimum = new GUIOptimum() {
 			private final int nIterations = result.getNIterations();
 			private final long elapsedTime = result.getElapsedTime();
 			private final float fitness = result.getFitness();
-			private final List<GUIBin> bins = c2gt.translate(lastOptimum);
+			private final List<GUIBin> bins = c2gt.copyAndTranslate(result.getBins());
 			
 			@Override
 			public int getNIterations() {
@@ -172,7 +171,18 @@ public abstract class AbstractCore<K, T> extends SwingWorker<Void, CoreResult<T>
 			public List<GUIBin> getBins() {
 				return this.bins;
 			}
-		});
+		};
+		
+		publish(optimum);
+	}
+	
+	@Override
+	protected final void process(List<GUIOptimum> chunks) {
+		
+		/* we are interested only in painting the last optimum (this
+		 * increases performance)
+		 */
+		displayer.paint(chunks.get(chunks.size() - 1));
 	}
 	
 	protected final boolean canContinue() {

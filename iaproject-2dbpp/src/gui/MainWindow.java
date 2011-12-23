@@ -19,7 +19,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -155,8 +154,7 @@ public class MainWindow extends AbstractFrame {
 			
 			newComp.setBorder(BorderFactory.createEmptyBorder(5, 10, 0, 0));
 			
-			JPanel pane = new JPanel();
-			pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS));
+			Box pane = Box.createVerticalBox();
 			pane.add(labelBox);
 			pane.add(newComp);
 			pane.add(Box.createVerticalGlue());
@@ -191,12 +189,13 @@ public class MainWindow extends AbstractFrame {
 		}
 	}
 	
-	/**
-	 * This class is needed in order to avoid to print EVERY iteration
-	 * performed by the Core.
-	 */
+	
 	private class Signaler implements GUISignaler {
 		
+		/**
+		 * This class is needed in order to avoid to print EVERY iteration
+		 * performed by the Core.
+		 */
 		private class PaintingDelegate implements Runnable {
 			private final Object mutex = new Object();
 			private final AtomicBoolean shouldSubmit = new AtomicBoolean(true);

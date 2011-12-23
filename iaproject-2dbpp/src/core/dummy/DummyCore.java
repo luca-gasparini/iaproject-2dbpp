@@ -24,15 +24,13 @@ public class DummyCore extends AbstractCore<Integer, List<Bin>> {
 	private final ProblemConfiguration problemConf;
 	
 	public DummyCore(CoreConfiguration<Integer> conf, OptimumPainter painter) {
-		super(conf, painter, Core2GuiTranslators.getDummyTranslator());
+		super(conf, painter, Core2GuiTranslators.getBinListTranslator());
 		this.problemConf = conf.getProblemConfiguration();
 		this.maxWaitPerTurn = conf.getCoreConfiguration().intValue();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void doWork() {
-		// controlled cycling
 		
 		int nBins = rand.nextInt(20) + 1;
 		final List<Bin> bins = new ArrayList<Bin>(nBins+1);
@@ -42,6 +40,7 @@ public class DummyCore extends AbstractCore<Integer, List<Bin>> {
 					problemConf.getBin().getHeight()));
 		}
 		
+		// controlled cycling
 		while (this.canContinue()) {
 			
 			// method processing... here you can insert your code
@@ -72,7 +71,7 @@ public class DummyCore extends AbstractCore<Integer, List<Bin>> {
 			
 			
 			// publish results
-			publish(cr);
+			publishResult(cr);
 		}
 		
 	}

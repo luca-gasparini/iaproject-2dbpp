@@ -31,7 +31,7 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 	private final Random rand = new Random(System.currentTimeMillis());
 	
 	public GeneticCore(CoreConfiguration<GeneticConfiguration> conf, OptimumPainter painter) {
-		super(conf, painter, Core2GuiTranslators.getGeneticTranslator());
+		super(conf, painter, Core2GuiTranslators.getBinListTranslator());
 		this.problemConf = conf.getProblemConfiguration();
 		this.populationSize = conf.getCoreConfiguration().getPopulationSize();
 		this.pRotateMutation = conf.getCoreConfiguration().getRotateMutationProbability();
@@ -79,7 +79,7 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 						return bestIndividual.getBins();
 					}
 				};
-				publish(cr);
+				publishResult(cr);
 			}
 		}
 		

@@ -2,7 +2,6 @@ package core.BLFTest;
 
 import gui.OptimumPainter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import logic.Bin;
@@ -14,7 +13,6 @@ import logic.PacketDescriptor;
 import logic.ProblemConfiguration;
 import BLFCore.BlfLayout;
 import core.AbstractCore;
-import core.Core2GuiTranslator;
 import core.Core2GuiTranslators;
 import core.CoreConfiguration;
 import core.CoreResult;
@@ -26,14 +24,13 @@ public class BLFTestCore extends AbstractCore<BLFTestCoreConfiguration, List<Bin
 	private boolean rotate;
 	
 	public BLFTestCore(CoreConfiguration<BLFTestCoreConfiguration> configuration, OptimumPainter painter) {
-		super(configuration, painter, Core2GuiTranslators.getDummyTranslator());
+		super(configuration, painter, Core2GuiTranslators.getBinListTranslator());
 
 		this.problemConf = configuration.getProblemConfiguration();
 		this.pkConf = problemConf.getPackets();
 		this.rotate = configuration.getCoreConfiguration().getSelected();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void doWork() {
 
@@ -74,7 +71,7 @@ public class BLFTestCore extends AbstractCore<BLFTestCoreConfiguration, List<Bin
 				return bins;
 			}
 		};
-		publish(result);
+		publishResult(result);
 
 	}
 

@@ -2,8 +2,6 @@ package core;
 
 import gui.GUIBin;
 
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,11 +15,11 @@ import logic.Bin;
  */
 public final class Core2GuiTranslators {
 	
-	public static final Core2GuiTranslator<List<Bin>> getDummyTranslator() {
+	public static final Core2GuiTranslator<List<Bin>> getBinListTranslator() {
 		return new Core2GuiTranslator<List<Bin>>() {
 			// modificato per fare test sul disegno con core Dummy
 			@Override
-			public List<GUIBin> translate(List<Bin> coreOptimum) {
+			public List<GUIBin> copyAndTranslate(List<Bin> coreOptimum) {
 				
 				List<GUIBin> guiBinList = new LinkedList<GUIBin>();
 				
@@ -34,23 +32,5 @@ public final class Core2GuiTranslators {
 			
 		};
 	}
-	
-	public static final Core2GuiTranslator<List<Bin>> getGeneticTranslator() {
-		return new Core2GuiTranslator<List<Bin>>() {
-			
-			@Override
-			public List<GUIBin> translate(List<Bin> coreOptimum) {
-				
-				List<GUIBin> guiBinList = new LinkedList<GUIBin>();
-				
-				for (Bin itBin: coreOptimum) {
-					guiBinList.add(new GUIBin(itBin));
-				}
-				
-				return guiBinList;
-			}
-			
-		};
-		
-	}
+
 }
