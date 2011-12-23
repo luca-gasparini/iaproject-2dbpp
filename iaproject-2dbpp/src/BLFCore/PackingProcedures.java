@@ -155,7 +155,7 @@ public class PackingProcedures {
 
 		double limit;
 		if (s.Q != null)
-			limit = s.Q.x;
+			limit = Math.min(s.Q.x,s.FB.get(s.FB.size() - 1).x - length);
 		else
 			limit = s.FB.get(s.FB.size() - 1).x - length;
 
@@ -322,7 +322,7 @@ public class PackingProcedures {
 			}
 		}
 
-		xLimit = s.Q == null ? s.FT.get(s.FT.size() - 1).x - length : s.Q.x;
+		xLimit = s.Q == null ? s.FT.get(s.FT.size() - 1).x - length : Math.min(s.Q.x,s.FT.get(s.FT.size() - 1).x - length);
 		while (D.size() > 0 && D.getLast().x > xLimit) {
 			D.removeLast();
 		}
@@ -391,12 +391,12 @@ public class PackingProcedures {
 			}
 			if (!inserito) {
 				coreBins.add(new CoreBin(bins.getWidth(), bins.getHeight()));
-				try {
+				//try {
 					if (!coreBins.get(j).insertPacket(packets.get(i)))
 						return null;
-				} catch (RuntimeException e) {
+				/*} catch (RuntimeException e) {
 					saveErrorLog(e, packets, bins);
-				}
+				}*/
 			}
 		}
 
