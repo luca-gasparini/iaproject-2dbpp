@@ -3,7 +3,7 @@ package logic;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Bin extends BinConfiguration { // il nome non è il massimo;
+public class Bin extends BinConfiguration implements Cloneable { // il nome non è il massimo;
 
 	private static final long serialVersionUID = -6741647185330811868L;
 	
@@ -91,5 +91,18 @@ public class Bin extends BinConfiguration { // il nome non è il massimo;
 				return false;
 		}
 		return true;
+	}
+	
+	@Override
+	public Bin clone() {
+		Bin copyBin = new Bin(this.id, this.getWidth(), this.getHeight());
+		copyBin.setDensity(this.getDensity());
+		
+		List<Packet> list = this.getList();
+		
+		for (Packet pac: list) {
+			copyBin.addPacket(pac.clone());
+		}
+		return copyBin;
 	}
 }

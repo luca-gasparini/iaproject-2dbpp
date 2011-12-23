@@ -4,26 +4,24 @@ import java.awt.Color;
 
 import logic.AbstractPacket;
 
-public class PacketDescriptor {
+public class PacketDescriptor extends AbstractPacket {
 
+	private static final long serialVersionUID = 8582320694102744871L;
 	private final int id;
-	private final AbstractPacket normal;
-	private final AbstractPacket rotate;
 	private final Color color;
 	
 	public PacketDescriptor(int id, int width, int height, Color col) {
+		super(width, height);
 		this.id = id;
-		normal = new AbstractPacket(width, height){};
-		rotate = new AbstractPacket(height, width){};
 		this.color = col;
 	}
 	
 	public int getWidth(boolean rot) {
-		return (rot==false)?normal.getWidth():rotate.getWidth(); 
+		return (rot==false)?this.getWidth():this.getHeight(); 
 	}
 	
 	public int getHeight(boolean rot) {
-		return (rot==false)?normal.getHeight():rotate.getHeight();
+		return this.getWidth(!rot);
 	}
 	
 	public int getId() {

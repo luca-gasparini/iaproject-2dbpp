@@ -22,7 +22,6 @@ public class BLFTestConfigurator extends AbstractConfigurator<BLFTestCoreConfigu
 	private static final JPanel confComp = new JPanel();
 	private JCheckBox rotateCheck;
 	
-	
 	public BLFTestConfigurator() {
 
 		rotateCheck = new JCheckBox("rotate 1 to 1");

@@ -37,8 +37,8 @@ public class BLFTestCore extends AbstractCore<BLFTestCoreConfiguration, List<Bin
 		// PUT YOUR CODE HERE:
 		/*
 		 * puoi usare come input la lista di bin passata con assieme alla
-		 * variabile pc, oppure creartene una tu. Quello che importa � che, alla
-		 * fine, ci� che verr� stampato nell'interfaccia grafica sar� la
+		 * variabile pc, oppure creartene una tu. Quello che importa è che, alla
+		 * fine, ciò che verrà stampato nell'interfaccia grafica sarà la
 		 * variabile bins (opportunamente convertita in GUIBin)
 		 * 
 		 * PS: non so se la stampa dei pacchetti dentro ai GUIBin sia corretta,
@@ -48,11 +48,8 @@ public class BLFTestCore extends AbstractCore<BLFTestCoreConfiguration, List<Bin
 		// example code;
 		BinConfiguration binConf = problemConf.getBin();
 		
-		List<Packet> packets;
-		
-		List<PacketDescriptor> pacs = ManageSolution.buildPacketList(pkConf);
-		packets = ManageSolution.buildPacketSolutionTestRotate(pacs, rotate);
-		
+		List<Packet> packets = ManageSolution.buildPacketSolutionTestRotate(pkConf, this.rotate);
+				
 		BlfLayout layout = BLFCore.PackingProcedures.getLayout(packets, binConf);
 			
 		final List<Bin> bins = layout.getBins();

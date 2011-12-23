@@ -2,7 +2,7 @@ package logic;
 
 import java.awt.Color;
 
-public interface Packet {
+public interface Packet extends Cloneable {
 
 	public Color getColor();
 	
@@ -22,7 +22,7 @@ public interface Packet {
 	
 	public void setRotate(boolean rot);
 	
-	public Object clone();
+	public Packet clone();
 	
 	@Override
 	public boolean equals(Object p);

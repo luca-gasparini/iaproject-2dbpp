@@ -16,6 +16,7 @@ import logic.Bin;
 public final class Core2GuiTranslators {
 	
 	public static final Core2GuiTranslator<List<Bin>> getBinListTranslator() {
+		
 		return new Core2GuiTranslator<List<Bin>>() {
 			// modificato per fare test sul disegno con core Dummy
 			@Override
@@ -24,7 +25,7 @@ public final class Core2GuiTranslators {
 				List<GUIBin> guiBinList = new LinkedList<GUIBin>();
 				
 				for (Bin itBin: coreOptimum) {
-					guiBinList.add(new GUIBin(itBin));
+					guiBinList.add(new GUIBin(itBin.clone()));
 				}
 				
 				return guiBinList;
