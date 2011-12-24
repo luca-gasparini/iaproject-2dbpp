@@ -8,4 +8,5 @@ public interface GUISignaler {
 	
 	public void signalEnd(CoreController cc);
 	
+	public void signalError(CoreController cc, Throwable t);
 }

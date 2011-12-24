@@ -23,6 +23,7 @@ public abstract class AbstractCore<K, T> extends SwingWorker<Void, GUIOptimum> {
 	
 	private class Controller implements CoreController {
 		
+		private final Object signalerMutex = new Object();
 		private GUISignaler signaler;
 		
 		@Override
@@ -63,20 +64,34 @@ public abstract class AbstractCore<K, T> extends SwingWorker<Void, GUIOptimum> {
 				throw new NullPointerException("null signaler");
 			}
 			
-			assert this.signaler == null : "Cannot set more than one signaler";
-			
-			this.signaler = s;
+			synchronized (signalerMutex) {
+				assert this.signaler == null : "Cannot set more than one signaler";
+				
+				this.signaler = s;
+			}
 		}
 		
 		private void signalIteration(int nIteration, long elapsedTime) {
-			if (this.signaler != null) {
-				this.signaler.signalIteration(this, nIteration, elapsedTime);
+			synchronized (signalerMutex) {
+				if (this.signaler != null) {
+					this.signaler.signalIteration(this, nIteration, elapsedTime);
+				}
 			}
 		}
 		
 		private void signalEnd() {
-			if (this.signaler != null) {
-				this.signaler.signalEnd(this);
+			synchronized (signalerMutex) {
+				if (this.signaler != null) {
+					this.signaler.signalEnd(this);
+				}
+			}
+		}
+		
+		private void signalError(Throwable t) {
+			synchronized (signalerMutex) {
+				if (this.signaler != null) {
+					this.signaler.signalError(this, t);
+				}
 			}
 		}
 	}
@@ -226,9 +241,17 @@ public abstract class AbstractCore<K, T> extends SwingWorker<Void, GUIOptimum> {
 	}
 	
 	@Override
-	protected final Void doInBackground() {
+	protected final Void doInBackground() throws Exception {
 		this.startTime = System.currentTimeMillis();
-		doWork();
+		
+		try {
+			doWork();
+		} catch (Exception e) {
+			e.printStackTrace();
+			this.controller.signalError(e);
+			throw e;
+		}
+		
 		this.controller.signalEnd();
 		return null;
 	}

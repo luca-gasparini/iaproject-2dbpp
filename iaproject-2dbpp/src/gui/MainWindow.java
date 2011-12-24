@@ -257,6 +257,19 @@ public class MainWindow extends AbstractFrame {
 			MainWindow.this.coreController = null;
 			switchToState(State.ENDED);
 		}
+
+		@Override
+		public void signalError(CoreController cc, Throwable t) {
+			if (MainWindow.this.coreController != cc) {
+				// spurious signalation, discard it
+				return;
+			}
+			
+			GUIUtils.showErrorMessage(MainWindow.this, t.toString());
+			
+			MainWindow.this.coreController = null;
+			switchToState(State.ENDED);
+		}
 		
 	}
 	
