@@ -38,6 +38,7 @@ public class PackingProcedures {
 		// converto in liste di lati orizzontali
 		// in realt� in casi particolari mi servono anche dei singoli punti..
 		// ad esempio quando salgo e scendo nella stessa verticale
+
 		for (i = 0; i < Cp.size() - 1; i++) {
 			Edge app = new Edge(Cp.get(i), Cp.get(i + 1));
 			if (app.isHorizontal())
@@ -157,7 +158,7 @@ public class PackingProcedures {
 
 		double limit;
 		if (s.Q != null)
-			limit = Math.min(s.Q.x,s.FB.get(s.FB.size() - 1).x - length);
+			limit = Math.min(s.Q.x, s.FB.get(s.FB.size() - 1).x - length);
 		else
 			limit = s.FB.get(s.FB.size() - 1).x - length;
 
@@ -303,7 +304,8 @@ public class PackingProcedures {
 					Point v = new Point(h.get(p).x - length, h.get(p).y);
 					D.add(d.get(i));
 					D.add(u);
-					D.add(v);
+					if (v.x > D.getLast().x)
+						D.add(v);
 					break;
 				}
 				D.add(d.get(i));
@@ -324,7 +326,8 @@ public class PackingProcedures {
 			}
 		}
 
-		xLimit = s.Q == null ? s.FT.get(s.FT.size() - 1).x - length : Math.min(s.Q.x,s.FT.get(s.FT.size() - 1).x - length);
+		xLimit = s.Q == null ? s.FT.get(s.FT.size() - 1).x - length : Math.min(
+				s.Q.x, s.FT.get(s.FT.size() - 1).x - length);
 		while (D.size() > 0 && D.getLast().x > xLimit) {
 			D.removeLast();
 		}
@@ -341,7 +344,7 @@ public class PackingProcedures {
 
 	private static void saveErrorLog(RuntimeException e, List<Packet> packets,
 			BinConfiguration bins) {
-		
+
 		boolean stopCondition = false;
 		String pathFile = null;
 		File err = null;
@@ -349,26 +352,29 @@ public class PackingProcedures {
 		try {
 			while (!stopCondition) {
 				errorN++;
-				pathFile = "BLF_" + e.getClass().getSimpleName() + errorN + ".log";
+				pathFile = "BLF_" + e.getClass().getSimpleName() + errorN
+						+ ".log";
 				err = new File(pathFile);
 				stopCondition = err.createNewFile();
 			}
-			
+
 			ConfigurationManager confManager = new ConfigurationManager();
 			// prepare a dummy ProblemConf
-			ProblemConfiguration problemConf = new ProblemConfiguration(bins, 
-					Collections.<PacketConfiguration>emptyList());
-			
-			confManager.setCoreConfiguration(new BLFTestCoreConfiguration(packets));
+			ProblemConfiguration problemConf = new ProblemConfiguration(bins,
+					Collections.<PacketConfiguration> emptyList());
+
+			confManager.setCoreConfiguration(new BLFTestCoreConfiguration(
+					packets));
 			confManager.setProblemConfiguration(problemConf);
 			confManager.setCoreName("BLFTest");
 			confManager.saveToFile(err);
-			
+
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
 
-		throw new BlfErrorException("Errore "+ err.getName() +" saved.. invialo ad urban...");
+		throw new BlfErrorException("Errore " + err.getName()
+				+ " saved.. invialo ad urban...");
 	}
 
 	// metodo da utilizzare da fuori...
@@ -380,13 +386,13 @@ public class PackingProcedures {
 			int j = 0;
 			boolean inserito = false;
 			while (!inserito && j < coreBins.size()) {
-				try {
-					inserito = coreBins.get(j).insertPacket(packets.get(i));
+				// try {
+				inserito = coreBins.get(j).insertPacket(packets.get(i));
 
-				} catch (RuntimeException e) {
-					saveErrorLog(e, packets, bins);
-					e.printStackTrace();
-				}
+				/*
+				 * } catch (RuntimeException e) { saveErrorLog(e, packets,bins);
+				 * e.printStackTrace(); }
+				 */
 				j++;
 			}
 			if (!inserito) {

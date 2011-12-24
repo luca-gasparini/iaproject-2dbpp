@@ -22,31 +22,31 @@ public class Hole {
 	// this
 	public ArrayList<Hole> updateHoles(CoreRectangle rect) {
 		ArrayList<Hole> holes = new ArrayList<Hole>();
-		
+
 		boolean[] flags = new boolean[edges.size()];
 		for (int i = 0; i < flags.length; i++)
 			flags[i] = false;
-		
+
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < edges.size(); j++) {
 				Edge intersection = Edge.Intersection(rect.getEdge(i),
-													  getEdge(j));
-				
+						getEdge(j));
+
 				// se è un punto, al precedente o prossimo edge trovo un
 				// segmento
 				if (intersection != null && intersection.isPoint() == null) {
-					
-					//intersezione uguale a lato hole
+
+					// intersezione uguale a lato hole
 					if (Edge.equals(intersection, getEdge(j))) {
 						Hole hole = this.traverseFromHoleLine(j, rect, flags,
-															  true);
+								true);
 						if (hole != null)
 							holes.add(hole);
 						hole = this.traverseFromHoleLine(j, rect, flags, false);
 						if (hole != null)
 							holes.add(hole);
-						
-						//intersezione uguale a lato rect
+
+						// intersezione uguale a lato rect
 					} else if (Edge.equals(intersection, rect.getEdge(i))) {
 						/*
 						 * assumo che essendo entrambi attraversate in
@@ -57,68 +57,68 @@ public class Hole {
 						if (!Point.equals(rect.getEdge(i).p2, getEdge(j).p2))
 							li.add(new Edge(rect.getEdge(i).p2, getEdge(j).p2));
 						if (this.traverse(li, rect.getEdge(i).p2, j, rect,
-										  flags, true)) {
+								flags, true)) {
 							holes.add(new Hole(li));
 						}
-						
+
 						// not incremental
 						li = new ArrayList<Edge>();
 						if (!Point.equals(getEdge(j).p1, rect.getEdge(i).p1))
 							li.add(new Edge(getEdge(j).p1, rect.getEdge(i).p1));
 						if (this.traverse(li, rect.getEdge(i).p1, j, rect,
-										  flags, false)) {
+								flags, false)) {
 							holes.add(new Hole(li));
 						}
-						
+
 					} else {
-						
+
 						ArrayList<Edge> li = new ArrayList<Edge>();
-						
+
 						// trovo il punto dell'hole che delimita l'intersezione
 						// devo continuare dal lato "successivo"
 						if (Edge.Intersection(intersection, getEdge(j).p1) != null) {
 							li.add(getEdge(j - 1));
 							if (this.traverse(li, getEdge(j).p1, j - 1, rect,
-											  flags, false)) {
+									flags, false)) {
 								holes.add(new Hole(li));
 							}
-							
+
 							// trovo punto del lato del rect che delimita
 							// intersezione
 							Point stopPoint;
 							if (Edge.Intersection(intersection,
-												  rect.getEdge(i).p1) != null)
+									rect.getEdge(i).p1) != null)
 								stopPoint = rect.getEdge(i).p1;
 							else
 								stopPoint = rect.getEdge(i).p2;
-							
+
 							li = new ArrayList<Edge>();
 							li.add(new Edge(stopPoint, getEdge(j).p2));
 							if (this.traverse(li, stopPoint, j, rect, flags,
-											  true)) {
+									true)) {
 								holes.add(new Hole(li));
 							}
 						} else {
-							//TODO cambia qua????
+							// TODO cambia qua????
 							li.add(getEdge(j + 1));
 							if (this.traverse(li, getEdge(j).p2, j + 1, rect,
-											  flags, true))
+									flags, true))
 								holes.add(new Hole(li));
-							
+
 							Point stopPoint;
 							if (Edge.Intersection(intersection,
-												  rect.getEdge(i).p1) != null)
+									rect.getEdge(i).p1) != null)
 								stopPoint = rect.getEdge(i).p1;
 							else
 								stopPoint = rect.getEdge(i).p2;
-							
+
 							li = new ArrayList<Edge>();
 							li.add(new Edge(stopPoint, getEdge(j).p1));
 							if (this.traverse(li, stopPoint, j, rect, flags,
-											  false)) {
+									false)) {
 								holes.add(new Hole(li));
 							}
-							
+
 						}
 					}
 				}
@@ -126,14 +126,14 @@ public class Hole {
 		}
 		return holes;
 	}
-	
+
 	// traverse a partire da un lato dell'hole fino a trovare stopping
 	// point(passsando per rect)..
 	// ritorna false se scopre che questo hole è già stato inserito (incontra un
 	// edge flaggato)
 	private boolean traverse(ArrayList<Edge> newHoleEdge, Point stopPoint,
-							 int j, CoreRectangle rect, boolean[] flags, boolean incremental) {
-		
+			int j, CoreRectangle rect, boolean[] flags, boolean incremental) {
+
 		/*
 		 * attraverso sui lati dell'hole e mi fermo quando interseco il rect se
 		 * interseco per un segmento ho 2 possibili strade da seguire
@@ -149,20 +149,21 @@ public class Hole {
 				c = (c - 1 + flags.length) % flags.length;
 			int intersectEdge = -1;
 			int intersectPoint = -1;
-			
+
 			// controllo se interseco il rettangolo
 			for (int i = 0; i < 4; i++) {
 				Edge inter = Edge.Intersection(getEdge(c), rect.getEdge(i));
 				if (inter != null && inter.isPoint() == null)
 					intersectEdge = i;
-				
-				if (inter != null && inter.isPoint() != null){
+
+				if (inter != null && inter.isPoint() != null) {
 					Point x = inter.isPoint();
-					if(!(Point.equals(x, rect.getEdge(i).p1) || Point.equals(x, rect.getEdge(i).p2)))
+					if (!(Point.equals(x, rect.getEdge(i).p1) || Point.equals(
+							x, rect.getEdge(i).p2)))
 						intersectPoint = i;
 				}
 			}
-			
+
 			// se non trovo intersezioni aggiungo lato e proseguo
 			if (intersectEdge == -1 && (intersectPoint == -1 || firstIteration)) {
 				if (flags[c])
@@ -170,77 +171,80 @@ public class Hole {
 				firstIteration = false;
 				newHoleEdge.add(getEdge(c));
 				flags[c] = true;
-				
+
 			} else {
-				
+
 				if (firstIteration && intersectEdge != -1)
 					return false;
-				
+
 				stopCondition = true;
 				boolean verso = false;
 				int rectIndex = 0;
-				
+
 				// trovata intersezione...traverse su rettangolo
 				// prima di tutto scelgo il lato del rettangolo da dove partire
-				
+
 				// se l'intersezione è un lato avro altri due lati che
 				// intersecano con un punto
 				if (intersectEdge != -1) {
 					rectIndex = intersectEdge;
 					Point firstPoint = incremental ? getEdge(c).p1
-					: getEdge(c).p2;
-					
+							: getEdge(c).p2;
+
 					// prendo il lato più vicino tra questi due e scelgo di
 					// conseguenza il verso
 					// del traverse sul rettangolo
 					if (new Edge(firstPoint, rect.getEdge(intersectEdge).p1)
-						.length() > new Edge(firstPoint,
-											 rect.getEdge(intersectEdge).p2).length()) {
-						
+							.length() > new Edge(firstPoint,
+							rect.getEdge(intersectEdge).p2).length()) {
+
 						verso = true;
 						newHoleEdge.add(new Edge(firstPoint, rect
-												 .getEdge(intersectEdge).p2));
+								.getEdge(intersectEdge).p2));
 					} else {
 						verso = false;
 						newHoleEdge.add(new Edge(firstPoint, rect
-												 .getEdge(intersectEdge).p1));
+								.getEdge(intersectEdge).p1));
 					}
-					
+
 				} else {
 					// intersezione punto
 					rectIndex = intersectPoint;
 					Point startPoint = Edge.Intersection(getEdge(c),
-														 rect.getEdge(intersectPoint)).isPoint();
+							rect.getEdge(intersectPoint)).isPoint();
 					newHoleEdge.add(getEdge(c));
 					flags[c] = true;
 					Edge e1 = new Edge(startPoint,
-									   rect.getEdge(intersectPoint).p1);
+							rect.getEdge(intersectPoint).p1);
 					Edge e2 = new Edge(startPoint,
-									   rect.getEdge(intersectPoint).p2);
-					
+							rect.getEdge(intersectPoint).p2);
+
 					// Potrei trovare subito stopping point e chiudere l'hole
 					if (Edge.Intersection(e1, stopPoint) != null
-						|| Edge.Intersection(e2, stopPoint) != null) {
+							|| Edge.Intersection(e2, stopPoint) != null) {
 						newHoleEdge.add(new Edge(startPoint, stopPoint));
 						return true;
 					}
-					
+
 					// altrimenti continuo il traverse sul rect nel verso dove
 					// non trovo intersezioni
-					/*if (Edge.Intersection(e1,
-										  getEdge(incremental ? c + 1 : c - 1)).isPoint() != null) {*/
-					Edge intEdge =(Edge.Intersection(e1,getEdge(incremental ? c + 1 : c - 1)));
-					if (intEdge == null || intEdge.isPoint() != null ) {
-						
+					/*
+					 * if (Edge.Intersection(e1, getEdge(incremental ? c + 1 : c
+					 * - 1)).isPoint() != null) {
+					 */
+					Edge intEdge = (Edge.Intersection(e1,
+							getEdge(incremental ? c + 1 : c - 1)));
+					if (intEdge == null || intEdge.isPoint() != null) {
+
 						newHoleEdge.add(e1);
 						verso = false;
 					} else {
-						
+
 						newHoleEdge.add(e2);
 						verso = true;
 					}
 				}
-				
+
 				// ora proseguo finche non trovo intersezione con lo stop point
 				if (verso == true)
 					rectIndex++;
@@ -253,39 +257,39 @@ public class Hole {
 					else
 						rectIndex--;
 				}
-				
+
 				// chiudo l'hole sullo stopping point
 				if (verso) {
 					if (!Point.equals(rect.getEdge(rectIndex).p1, stopPoint))
 						newHoleEdge.add(new Edge(rect.getEdge(rectIndex).p1,
-												 stopPoint));
+								stopPoint));
 				} else {
 					if (!Point.equals(rect.getEdge(rectIndex).p2, stopPoint))
 						newHoleEdge.add(new Edge(rect.getEdge(rectIndex).p2,
-												 stopPoint));
+								stopPoint));
 				}
 			}
 		}
 		return true;
 	}
-	
+
 	// traverse nel caso in cui trovo un intersezione che coincide con un lato
 	// dell'hole
 	private Hole traverseFromHoleLine(int j, CoreRectangle rect,
-									  boolean[] flags, boolean incremental) {
+			boolean[] flags, boolean incremental) {
 		// se il lato successivo interseca con il rect per più di un punto mi
 		// fermo
 		// se interseca per un punto (sempre) sarà li che mi devo fermare
 		int c = incremental ? j + 1 : j - 1;
 		for (int i = 0; i < 4; i++) {
-			
+
 			Edge inter = Edge.Intersection(getEdge(c), rect.getEdge(i));
 			if (inter != null && inter.isPoint() == null)
 				return null;
 		}
-		
+
 		ArrayList<Edge> newHoleEdge = new ArrayList<Edge>();
-		
+
 		// trovo il punto dove devo tornare dopo il traverse
 		Point stopPoint = incremental ? getEdge(j).p2 : getEdge(j).p1;
 		newHoleEdge.add(getEdge(c));
@@ -294,7 +298,6 @@ public class Hole {
 		else
 			return null;
 	}
-	
 
 	public void setEdges(ArrayList<Edge> e) {
 		edges = e;
@@ -361,7 +364,7 @@ public class Hole {
 		}
 
 		int leftMostEdge = -1;
-		
+
 		// finding upper, lower and rightmost edges
 		for (i = 0; i < edges.size(); i++) {
 			if (getEdge(i).isHorizontal()
@@ -373,7 +376,8 @@ public class Hole {
 			if (getEdge(i).isVertical()
 					&& (rightMost == -1 || getEdge(i).p1.x > getEdge(rightMost).p1.x))
 				rightMost = i;
-			if(getEdge(i).isVertical() && (leftMostEdge == -1 || getEdge(i).p1.x < getEdge(leftMostEdge).p1.x))
+			if (getEdge(i).isVertical()
+					&& (leftMostEdge == -1 || getEdge(i).p1.x < getEdge(leftMostEdge).p1.x))
 				leftMostEdge = i;
 		}
 
@@ -385,8 +389,6 @@ public class Hole {
 		else
 			clockWise = false;
 
-		
-		
 		if (!clockWise) {
 			// we have to revert the list
 			app = new ArrayList<Edge>();
@@ -419,14 +421,11 @@ public class Hole {
 		}
 
 		/*
-		for(i = leftMostEdge;i != rightMost; i = (i+1)%edges.size())
-		{
-			if(getEdge(i).p1.x > getEdge(i).p2.x)
-			{
-				throw new IllegalArgumentException("coming back edge");
-			}
-		}*/
-		
+		 * for(i = leftMostEdge;i != rightMost; i = (i+1)%edges.size()) {
+		 * if(getEdge(i).p1.x > getEdge(i).p2.x) { throw new
+		 * IllegalArgumentException("coming back edge"); } }
+		 */
+
 		ArrayList<Integer> leftMostEdges = new ArrayList<Integer>();
 		// find leftMostEdges, Qi and relative Qw
 		// scan the left side of the hole starting from down
@@ -503,7 +502,6 @@ public class Hole {
 					// search for a Qi & "jump over it".
 					if (Edge.Intersection(getEdge(i), Qi.get(qIndex)) != null) {
 						foundQn = true;
-						// sb.Q = Qi.get(qIndex);// SBAGLIATO!!
 						Point a = getEdge(i).getUpperPoint();
 						i = (i + 2) % edges.size();
 
@@ -526,74 +524,51 @@ public class Hole {
 				// non fa...
 				if (!foundQn) {// search for rightMost edge
 					boolean foundQw = false;
-
-					
-
-					/*if (lIndex == 0)// search rigthMost
-					{*/
-						if (Edge.equals(getEdge(i), getEdge(rightMost)))
-							foundQw = true;
-					/*}
-
-					Point appQw = null;
-					else// search for qW
-					{
-						appQw = Edge.Intersection(getEdge(i), Qw.get(lIndex));
-						if (appQw != null) {
-							foundQw = true;
-						}
-					}*/
+					/*Point stoppingPoint = lIndex == 0 ? getEdge(rightMost)
+							.getLowerPoint() : edgeOfQw;*/
+							
+					if (Edge.equals(getEdge(i), getEdge(rightMost)))
+						foundQw = true;
 
 					if (foundQw) {
 
-						//if (lIndex == 0)
-							sb.FT.add(getEdge(rightMost).getLowerPoint());
-						/*else
-							sb.FT.add(appQw);*/
+						sb.FT.add(getEdge(rightMost).getLowerPoint());
 
 						// ora trovo FB
-						Point stoppingPoint = lIndex == 0 ? getEdge(rightMost)
-								.getLowerPoint() : Qi.get(lIndex);
+
 
 						int j = edgeIndex;// lato del leftMost
 
-						// scorro la parte bassa del subhole fino a rightMostEdge saltando
+						// scorro la parte bassa del subhole fino a
+						// rightMostEdge saltando
 						// quando trovo un Qi precedente
 						sb.FB.add(getEdge(j).p2);
 						int interQi = -1;
 						while (j != rightMost) {
 							interQi = -1;
-							for(int i1=1;i1<Qi.size() && interQi == -1;i1++)
-							{
-								if(Point.equals(getEdge(j).p1,Qi.get(i1)))
-										interQi = i1;
+							for (int i1 = 1; i1 < Qi.size() && interQi == -1; i1++) {
+								if (Point.equals(getEdge(j).p1, Qi.get(i1)))
+									interQi = i1;
 							}
-							if(interQi!= -1)
-							{
-								j = (j -2 + edges.size())%edges.size();
+							if (interQi != -1) {
+								j = (j - 2 + edges.size()) % edges.size();
 								Edge half = Edge.rightHalfLine(Qi.get(interQi));
-								Edge app2 =Edge.Intersection(getEdge(j),half);
-								while(app2 == null){
-									j = (j -1 + edges.size())%edges.size();
-									app2 =Edge.Intersection(getEdge(j),half);
+								Edge app2 = Edge.Intersection(getEdge(j), half);
+								while (app2 == null) {
+									j = (j - 1 + edges.size()) % edges.size();
+									app2 = Edge.Intersection(getEdge(j), half);
 								}
 								sb.FB.add(app2.getLeftPoint());
-								
-							}
-							else{
-							sb.FB.add(getEdge(j).p1);
-							j = (j -1 + edges.size())%edges.size();
+
+							} else {
+								sb.FB.add(getEdge(j).p1);
+								if (j != rightMost)
+									j = (j - 1 + edges.size()) % edges.size();
 							}
 						}
 
-						/*// trovato stopping point
-						sb.FB.add(getEdge(j).p1);
-						if (lIndex == 0) {*/
-							sb.FB.add(getEdge(rightMost).getUpperPoint());
-						/*} else {
-							sb.FB.add(Qw.get(lIndex));
-							sb.FB.add(edgeOfQw.get(lIndex).getUpperPoint());
-						}*/
+						sb.FB.add(getEdge(rightMost).getUpperPoint());
+
 						stop = true;
 
 					} else {
@@ -603,8 +578,7 @@ public class Hole {
 					}
 				}
 			}
-			
-			
+
 			// correggo FT fermandola all'altezza dell'ultimo elemento di FB..
 			// per evitare
 			// che vada avanti e poi torni indietro..(da problemi nel placing)
