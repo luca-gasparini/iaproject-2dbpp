@@ -1,5 +1,6 @@
 package logic;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -69,6 +70,10 @@ public class Bin extends BinConfiguration implements Cloneable { // il nome non 
 			return true;
 		}
 		
+		if (!super.equals(b)) {
+			return false;
+		}
+		
 		if (!(b instanceof Bin))
 			return false;
 		
@@ -96,13 +101,14 @@ public class Bin extends BinConfiguration implements Cloneable { // il nome non 
 	@Override
 	public Bin clone() {
 		Bin copyBin = new Bin(this.id, this.getWidth(), this.getHeight());
-		copyBin.setDensity(this.getDensity());
 		
-		List<Packet> list = this.getList();
+		copyBin.density = this.density;
 		
-		for (Packet pac: list) {
-			copyBin.addPacket(pac.clone());
+		copyBin.packetList = new ArrayList<Packet>(this.packetList.size()+1);
+		for (Packet packet : this.packetList) {
+			copyBin.packetList.add(packet.clone());
 		}
+		
 		return copyBin;
 	}
 }

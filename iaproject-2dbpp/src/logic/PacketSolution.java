@@ -16,7 +16,15 @@ public class PacketSolution implements Packet {
 	}
 	
 	public PacketSolution(PacketDescriptor p, int x, int y) {
+		if (p == null) {
+			throw new NullPointerException("PacketDescriptor is null");
+		}
+		
 		this.pac = p;
+		
+		assert x >= 0 : "Negative X coordinate of BottomLeftPoint";
+		assert y >= 0 : "Negative Y coordinate of BottomLeftPoint";
+		
 		this.bottomLeftPoint = new Point(x, y);
 		this.rotate = false;
 	}
@@ -29,10 +37,6 @@ public class PacketSolution implements Packet {
 	@Override
 	public int getPointY() {
 		return this.bottomLeftPoint.y;
-	}
-	
-	private Point getPoint() {
-		return this.bottomLeftPoint;
 	}
 	
 	@Override
@@ -49,18 +53,14 @@ public class PacketSolution implements Packet {
 		this.bottomLeftPoint.y = y;
 	}
 	
-	private void setPoint(Point p) {
-		this.bottomLeftPoint = p;
-	}
-	
 	@Override
 	public int getWidth() {
-		return pac.getWidth(rotate);
+		return isRotate() ? pac.getHeight() : pac.getWidth();
 	}
 	
 	@Override
 	public int getHeight() {
-		return pac.getHeight(rotate);
+		return isRotate() ? pac.getWidth() : pac.getHeight();
 	}
 	
 	@Override
@@ -81,22 +81,47 @@ public class PacketSolution implements Packet {
 	@Override
 	public PacketSolution clone() {
 		PacketSolution n = new PacketSolution(this.pac);
-		n.setPoint(this.getPoint());
-		n.setRotate(this.isRotate());
+		
+		n.bottomLeftPoint = this.bottomLeftPoint;
+		n.rotate = this.rotate;
 		
 		return n;
 	}
-	
+
 	@Override
-	public boolean equals(Object p) {
-		if (!(p instanceof PacketSolution))
-			return false;
-   
-		PacketSolution app = (PacketSolution) p;
-		return (
-				this.pac.equals(app) &&
-				this.bottomLeftPoint.equals(app.getPoint()) &&
-				this.rotate == app.isRotate()
-				);
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((bottomLeftPoint == null) ? 0 : bottomLeftPoint.hashCode());
+		result = prime * result + ((pac == null) ? 0 : pac.hashCode());
+		result = prime * result + (rotate ? 1231 : 1237);
+		return result;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof PacketSolution)) {
+			return false;
+		}
+		PacketSolution other = (PacketSolution) obj;
+		if (!bottomLeftPoint.equals(other.bottomLeftPoint)) {
+			return false;
+		}
+		if (!pac.equals(other.pac)) {
+			return false;
+		}
+		if (rotate != other.rotate) {
+			return false;
+		}
+		return true;
+	}
+	
+	
 }

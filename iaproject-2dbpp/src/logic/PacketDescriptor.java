@@ -12,16 +12,13 @@ public class PacketDescriptor extends AbstractPacket {
 	
 	public PacketDescriptor(int id, int width, int height, Color col) {
 		super(width, height);
+		
+		if (col == null) {
+			throw new NullPointerException("Null color");
+		}
+		
 		this.id = id;
 		this.color = col;
-	}
-	
-	public int getWidth(boolean rot) {
-		return (rot==false)?this.getWidth():this.getHeight(); 
-	}
-	
-	public int getHeight(boolean rot) {
-		return this.getWidth(!rot);
 	}
 	
 	public int getId() {
@@ -31,19 +28,35 @@ public class PacketDescriptor extends AbstractPacket {
 	public Color getColor() {
 		return this.color;
 	}
-	
+
 	@Override
-	public boolean equals(Object p) {
-		if (!(p instanceof PacketDescriptor))
-			return false;
-		
-		PacketDescriptor pac = (PacketDescriptor) p;
-		
-		return (
-				this.id == pac.getId() &&
-				this.color == pac.getColor() &&
-				this.getWidth(false) == pac.getWidth(false) &&
-				this.getHeight(false) == pac.getHeight(false)
-				);
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((color == null) ? 0 : color.hashCode());
+		result = prime * result + id;
+		return result;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (!(obj instanceof PacketDescriptor)) {
+			return false;
+		}
+		PacketDescriptor other = (PacketDescriptor) obj;
+		if (!color.equals(other.color)) {
+			return false;
+		}
+		if (id != other.id) {
+			return false;
+		}
+		return true;
+	}
+	
 }
