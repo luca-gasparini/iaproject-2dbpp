@@ -1,6 +1,5 @@
 package core.genetic;
 
-import gui.GUIUtils;
 import gui.OptimumPainter;
 
 import java.util.ArrayList;
@@ -10,7 +9,6 @@ import java.util.Random;
 import logic.Bin;
 import logic.Packet;
 import logic.ProblemConfiguration;
-
 import core.AbstractCore;
 import core.Core2GuiTranslators;
 import core.CoreConfiguration;
@@ -52,7 +50,6 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 	}
 
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void doWork() {
 		
@@ -63,7 +60,7 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 			Individual mother = selectIndividual();
 			Individual child = crossover(father, mother, pCrossover);
 			child.mutate(pRotateMutation, pOrderMutation);
-			child.calculateLayout(problemConf.getBin()); 
+			child.calculateLayout(problemConf.getBin());
 			bestIndividual = replaceWorstIndividual(child);
 						
 			// publish results only if better

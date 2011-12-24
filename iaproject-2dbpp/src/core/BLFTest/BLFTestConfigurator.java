@@ -12,15 +12,14 @@ import javax.swing.JPanel;
 import logic.Packet;
 import core.AbstractConfigurator;
 import core.AbstractCore;
-import core.Core2GuiTranslators;
 import core.CoreConfiguration;
 import core.DataParsingException;
-import core.genetic.GeneticConfiguration;
-import core.genetic.GeneticCore;
 
 public class BLFTestConfigurator extends AbstractConfigurator<BLFTestCoreConfiguration> {
 	private static final JPanel confComp = new JPanel();
-	private JCheckBox rotateCheck;
+	
+	private final JCheckBox rotateCheck;
+	private List<Packet> packets;
 	
 	public BLFTestConfigurator() {
 
@@ -42,18 +41,18 @@ public class BLFTestConfigurator extends AbstractConfigurator<BLFTestCoreConfigu
 	
 	@Override
 	protected void setConfiguration(BLFTestCoreConfiguration config) {
-		rotateCheck.setSelected(config.getSelected());
+		rotateCheck.setSelected(config.isSelected());
+		this.packets = config.getPackets();
 	}
 
 	@Override
 	protected BLFTestCoreConfiguration createCoreConfiguration() throws DataParsingException {
-		/*if (this.packets == null) {
-			return Collections.emptyList();
-		} else {
-			return this.packets;
-		}*/
+		if (this.packets == null) {
+			packets = Collections.emptyList();
+		}
 		boolean rotate = rotateCheck.isSelected();
-		return new BLFTestCoreConfiguration(rotate);
+		
+		return new BLFTestCoreConfiguration(rotate, packets);
 	}
 	
 }

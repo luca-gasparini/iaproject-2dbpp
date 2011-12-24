@@ -5,6 +5,8 @@ import java.awt.Point;
 
 public class PacketSolution implements Packet {
 
+	private static final long serialVersionUID = -5591654086672849675L;
+	
 	private final PacketDescriptor pac;
 	private Point bottomLeftPoint;
 	private boolean rotate;

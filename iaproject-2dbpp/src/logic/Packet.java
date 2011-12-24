@@ -1,8 +1,9 @@
 package logic;
 
 import java.awt.Color;
+import java.io.Serializable;
 
-public interface Packet extends Cloneable {
+public interface Packet extends Cloneable, Serializable {
 
 	public Color getColor();
 	

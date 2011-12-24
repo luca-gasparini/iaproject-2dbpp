@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import core.BLFTest.BLFTestCoreConfiguration;
+
 import logic.Bin;
 import logic.BinConfiguration;
 import logic.ConfigurationManager;
@@ -342,24 +344,22 @@ public class PackingProcedures {
 		
 		boolean stopCondition = false;
 		String pathFile = null;
-		int i = 0;
 		File err = null;
 		int errorN = 0;
 		try {
 			while (!stopCondition) {
-				i++;
-				pathFile = "BLF_" + e.getClass().getSimpleName() + i + ".log";
+				errorN++;
+				pathFile = "BLF_" + e.getClass().getSimpleName() + errorN + ".log";
 				err = new File(pathFile);
 				stopCondition = err.createNewFile();
 			}
-			errorN = i;
 			
 			ConfigurationManager confManager = new ConfigurationManager();
 			// prepare a dummy ProblemConf
 			ProblemConfiguration problemConf = new ProblemConfiguration(bins, 
 					Collections.<PacketConfiguration>emptyList());
 			
-			confManager.setCoreConfiguration(packets);
+			confManager.setCoreConfiguration(new BLFTestCoreConfiguration(packets));
 			confManager.setProblemConfiguration(problemConf);
 			confManager.setCoreName("BLFTest");
 			confManager.saveToFile(err);
@@ -368,8 +368,7 @@ public class PackingProcedures {
 			ex.printStackTrace();
 		}
 
-		throw new BlfErrorException("Errore BLF... blfError" + errorN
-				+ ".log saved.. invialo ad urban...");
+		throw new BlfErrorException("Errore "+ err.getName() +" saved.. invialo ad urban...");
 	}
 
 	// metodo da utilizzare da fuori...
@@ -386,17 +385,19 @@ public class PackingProcedures {
 
 				} catch (RuntimeException e) {
 					saveErrorLog(e, packets, bins);
+					e.printStackTrace();
 				}
 				j++;
 			}
 			if (!inserito) {
 				coreBins.add(new CoreBin(bins.getWidth(), bins.getHeight()));
-				//try {
+				try {
 					if (!coreBins.get(j).insertPacket(packets.get(i)))
 						return null;
-				/*} catch (RuntimeException e) {
+				} catch (RuntimeException e) {
 					saveErrorLog(e, packets, bins);
-				}*/
+					e.printStackTrace();
+				}
 			}
 		}
 

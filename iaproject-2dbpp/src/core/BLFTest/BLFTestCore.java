@@ -9,7 +9,6 @@ import logic.BinConfiguration;
 import logic.ManageSolution;
 import logic.Packet;
 import logic.PacketConfiguration;
-import logic.PacketDescriptor;
 import logic.ProblemConfiguration;
 import BLFCore.BlfLayout;
 import core.AbstractCore;
@@ -20,15 +19,13 @@ import core.CoreResult;
 public class BLFTestCore extends AbstractCore<BLFTestCoreConfiguration, List<Bin>> {
 
 	private final ProblemConfiguration problemConf;
-	List<PacketConfiguration> pkConf;
-	private boolean rotate;
+	private final BLFTestCoreConfiguration coreConf;
 	
 	public BLFTestCore(CoreConfiguration<BLFTestCoreConfiguration> configuration, OptimumPainter painter) {
 		super(configuration, painter, Core2GuiTranslators.getBinListTranslator());
 
 		this.problemConf = configuration.getProblemConfiguration();
-		this.pkConf = problemConf.getPackets();
-		this.rotate = configuration.getCoreConfiguration().getSelected();
+		this.coreConf = configuration.getCoreConfiguration();
 	}
 
 	@Override
@@ -48,7 +45,13 @@ public class BLFTestCore extends AbstractCore<BLFTestCoreConfiguration, List<Bin
 		// example code;
 		BinConfiguration binConf = problemConf.getBin();
 		
-		List<Packet> packets = ManageSolution.buildPacketSolutionTestRotate(pkConf, this.rotate);
+		List<Packet> packets = coreConf.getPackets();
+		
+		if (packets == null || packets.isEmpty()) {
+			boolean rotate = coreConf.isSelected();
+			List<PacketConfiguration> pkConf = problemConf.getPackets();
+			packets = ManageSolution.buildPacketSolutionTestRotate(pkConf, rotate);
+		}
 				
 		BlfLayout layout = BLFCore.PackingProcedures.getLayout(packets, binConf);
 			

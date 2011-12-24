@@ -283,7 +283,7 @@ public class MainWindow extends AbstractFrame {
 	
 	private final ConfigurationManager configManager;
 	
-	private CoreController coreController;
+	private volatile CoreController coreController;
 	private ProblemConfiguration problemConf;
 	
 	private State actualState;
