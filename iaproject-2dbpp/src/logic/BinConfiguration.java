@@ -3,8 +3,11 @@ package logic;
 import java.awt.Dimension;
 import java.io.Serializable;
 
-
-public class BinConfiguration implements Serializable {
+/**
+ * Immutable class holding bin width & height
+ *
+ */
+public final class BinConfiguration implements Serializable {
 	
 	private static final long serialVersionUID = -6405019301884712946L;
 	

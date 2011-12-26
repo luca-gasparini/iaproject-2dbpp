@@ -190,6 +190,12 @@ public class MainWindow extends AbstractFrame {
 	}
 	
 	
+	/**
+	 * This class uses two delegate that will run on the EDT in order
+	 * to avoid concurrency problem (in fact, this way, all MainWindow's 
+	 * variables are instantiated and accessed only by EDT)
+	 *
+	 */
 	private class Signaler implements GUISignaler {
 		
 		/**
@@ -200,6 +206,7 @@ public class MainWindow extends AbstractFrame {
 			private final Object mutex = new Object();
 			private final AtomicBoolean shouldSubmit = new AtomicBoolean(true);
 			
+			private CoreController cc;
 			private int nIteration;
 			private long elapsedTime;
 
@@ -208,6 +215,11 @@ public class MainWindow extends AbstractFrame {
 				shouldSubmit.set(true);
 				
 				synchronized (mutex) {
+					if (MainWindow.this.coreController != cc) {
+						// spurious signalation, discard it
+						return;
+					}
+					
 					coreRunningBar.setString("It #" + this.nIteration + " @" + 
 								GUIUtils.elapsedTime2String(this.elapsedTime));
 				}
@@ -223,8 +235,9 @@ public class MainWindow extends AbstractFrame {
 			 * @param nIt
 			 * @param elapsed
 			 */
-			private void delegatePaint(int nIt, long elapsed) {
+			private void delegatePaint(CoreController cc, int nIt, long elapsed) {
 				synchronized (mutex) {
+					this.cc = cc;
 					this.nIteration = nIt;
 					this.elapsedTime = elapsed;
 				}
@@ -235,40 +248,52 @@ public class MainWindow extends AbstractFrame {
 			}
 		}
 		
+		private class EndOperationDelegate implements Runnable {
+			private final CoreController cc;
+			private final Throwable t;
+			
+			public EndOperationDelegate(CoreController cc, Throwable t) {
+				if (cc == null) {
+					throw new NullPointerException("Null CoreController");
+				}
+				
+				this.cc = cc;
+				this.t = t;
+			}
+
+			@Override
+			public void run() {
+				if (MainWindow.this.coreController != cc) {
+					// spurious signalation, discard it
+					return;
+				}
+				
+				if (t != null) {
+					GUIUtils.showErrorMessage(MainWindow.this, t.toString());
+				}
+				
+				MainWindow.this.coreController = null;
+				switchToState(State.ENDED);
+			}
+			
+		}
+		
 		private final PaintingDelegate delegate = new PaintingDelegate();
+		
 
 		@Override
 		public void signalIteration(CoreController cc, int nIteration, long elapsedTime) {
-			if (MainWindow.this.coreController != cc) {
-				// spurious signalation, discard it
-				return;
-			}
-			
-			delegate.delegatePaint(nIteration, elapsedTime);
+			delegate.delegatePaint(cc, nIteration, elapsedTime);
 		}
 
 		@Override
 		public void signalEnd(CoreController cc) {
-			if (MainWindow.this.coreController != cc) {
-				// spurious signalation, discard it
-				return;
-			}
-			
-			MainWindow.this.coreController = null;
-			switchToState(State.ENDED);
+			SwingUtilities.invokeLater(new EndOperationDelegate(cc, null));
 		}
 
 		@Override
 		public void signalError(CoreController cc, Throwable t) {
-			if (MainWindow.this.coreController != cc) {
-				// spurious signalation, discard it
-				return;
-			}
-			
-			GUIUtils.showErrorMessage(MainWindow.this, t.toString());
-			
-			MainWindow.this.coreController = null;
-			switchToState(State.ENDED);
+			SwingUtilities.invokeLater(new EndOperationDelegate(cc, t));
 		}
 		
 	}
@@ -296,7 +321,7 @@ public class MainWindow extends AbstractFrame {
 	
 	private final ConfigurationManager configManager;
 	
-	private volatile CoreController coreController;
+	private CoreController coreController;
 	private ProblemConfiguration problemConf;
 	
 	private State actualState;
@@ -312,10 +337,9 @@ public class MainWindow extends AbstractFrame {
 		
 		try {
 			loadConfiguration(configFile);
-		} catch (ClassCastException e) {
-			GUIUtils.showErrorMessage(MainWindow.this, e.toString());
 		} catch (Exception e) {
 			GUIUtils.showErrorMessage(MainWindow.this, e.toString());
+			this.switchToState(State.CONFIGURATION);
 		}
 	}
 	

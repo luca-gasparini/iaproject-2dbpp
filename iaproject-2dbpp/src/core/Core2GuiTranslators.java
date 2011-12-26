@@ -1,11 +1,15 @@
 package core;
 
 import gui.GUIBin;
+import gui.GUIPacket;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import logic.Bin;
+import logic.Packet;
 
 /**
  * Class made up by static methods each of them returning a specific
@@ -18,17 +22,28 @@ public final class Core2GuiTranslators {
 	public static final Core2GuiTranslator<List<Bin>> getBinListTranslator() {
 		
 		return new Core2GuiTranslator<List<Bin>>() {
-			// modificato per fare test sul disegno con core Dummy
+			
 			@Override
 			public List<GUIBin> copyAndTranslate(List<Bin> coreOptimum) {
 				
 				List<GUIBin> guiBinList = new LinkedList<GUIBin>();
-				
 				for (Bin itBin: coreOptimum) {
-					guiBinList.add(new GUIBin(itBin.clone()));
+					
+					// creates the list of GUIPackets
+					List<GUIPacket> guiPkts = new ArrayList<GUIPacket>();
+					for (Packet pkt : itBin.getList()) {
+						guiPkts.add(new GUIPacket(pkt.getPacketDescriptor(), 
+								pkt.getPoint(), pkt.isRotate()));
+					}
+					
+					guiBinList.add(new GUIBin(itBin.getBinConfiguration(),
+							itBin.getID(),
+							itBin.getDensity(),
+							guiPkts)
+					);
 				}
 				
-				return guiBinList;
+				return Collections.unmodifiableList(guiBinList);
 			}
 			
 		};

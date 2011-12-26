@@ -11,8 +11,9 @@ public abstract class ResizableRawGraphics extends JPanel {
 
 	private static final long serialVersionUID = -4256966040512380886L;
 	
+	private final Dimension baseDimension;
+	
 	private int magnificationFactor = 1;
-	private Dimension baseDimension;
 	private Dimension magnifiedDimension;
 	
 	/**
@@ -105,5 +106,39 @@ public abstract class ResizableRawGraphics extends JPanel {
 	 * the component
 	 */
 	protected abstract void doPaint(Graphics2D g2d, int factor);
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((baseDimension == null) ? 0 : baseDimension.hashCode());
+		result = prime * result + magnificationFactor;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof ResizableRawGraphics)) {
+			return false;
+		}
+		ResizableRawGraphics other = (ResizableRawGraphics) obj;
+		if (!baseDimension.equals(other.baseDimension)) {
+			return false;
+		}
+		if (magnificationFactor != other.magnificationFactor) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	
 	
 }

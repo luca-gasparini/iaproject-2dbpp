@@ -1,6 +1,7 @@
 package logic;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.io.Serializable;
 
 public interface Packet extends Cloneable, Serializable {
@@ -23,9 +24,9 @@ public interface Packet extends Cloneable, Serializable {
 	
 	public void setRotate(boolean rot);
 	
-	public Packet clone();
+	public PacketDescriptor getPacketDescriptor();
 	
-	@Override
-	public boolean equals(Object p);
+	public Point getPoint();
 	
+	public Packet clone(); 
 }

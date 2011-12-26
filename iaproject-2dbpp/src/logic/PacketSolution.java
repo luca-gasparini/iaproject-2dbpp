@@ -3,11 +3,15 @@ package logic;
 import java.awt.Color;
 import java.awt.Point;
 
+/**
+ * Mutable class!!
+ */
 public class PacketSolution implements Packet {
 
 	private static final long serialVersionUID = -5591654086672849675L;
 	
 	private final PacketDescriptor pac;
+	
 	private Point bottomLeftPoint;
 	private boolean rotate;
 	
@@ -79,49 +83,17 @@ public class PacketSolution implements Packet {
 	}
 	
 	@Override
-	public PacketSolution clone() {
-		PacketSolution n = new PacketSolution(this.pac);
-		
-		n.bottomLeftPoint = this.bottomLeftPoint;
-		n.rotate = this.rotate;
-		
-		return n;
+	public PacketDescriptor getPacketDescriptor() {
+		return pac;
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((bottomLeftPoint == null) ? 0 : bottomLeftPoint.hashCode());
-		result = prime * result + ((pac == null) ? 0 : pac.hashCode());
-		result = prime * result + (rotate ? 1231 : 1237);
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (!(obj instanceof PacketSolution)) {
-			return false;
-		}
-		PacketSolution other = (PacketSolution) obj;
-		if (!bottomLeftPoint.equals(other.bottomLeftPoint)) {
-			return false;
-		}
-		if (!pac.equals(other.pac)) {
-			return false;
-		}
-		if (rotate != other.rotate) {
-			return false;
-		}
-		return true;
+	public Point getPoint() {
+		return new Point(this.bottomLeftPoint);
 	}
 	
-	
+	public Packet clone() {
+		PacketSolution ps = new PacketSolution(this.pac, this.getPointX(), this.getPointY());
+		return ps;
+	}
 }

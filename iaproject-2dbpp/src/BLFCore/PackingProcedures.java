@@ -410,7 +410,7 @@ public class PackingProcedures {
 		ArrayList<Bin> resultBins = new ArrayList<Bin>();
 		double fitness = 0;
 		for (int i = 0; i < coreBins.size(); i++) {
-			Bin appBin = new Bin(i, bins.getWidth(), bins.getHeight());
+			Bin appBin = new Bin(bins, i);
 			for (int j = 0; j < coreBins.get(i).packets.size(); j++) {
 				appBin.addPacket(coreBins.get(i).packets.get(j));
 			}

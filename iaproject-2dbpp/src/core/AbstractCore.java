@@ -5,6 +5,7 @@ import gui.GUIOptimum;
 import gui.GUISignaler;
 import gui.OptimumPainter;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -19,11 +20,12 @@ import core.dummy.DummyCore;
  * @param <K> Core-specific configuration class
  * @param <T> Core-specific result class
  */
-public abstract class AbstractCore<K, T> extends SwingWorker<Void, GUIOptimum> {
+public abstract class AbstractCore<K extends Serializable, T> extends SwingWorker<Void, GUIOptimum> {
 	
 	private class Controller implements CoreController {
 		
 		private final Object signalerMutex = new Object();
+		
 		private GUISignaler signaler;
 		
 		@Override
@@ -246,10 +248,10 @@ public abstract class AbstractCore<K, T> extends SwingWorker<Void, GUIOptimum> {
 		
 		try {
 			doWork();
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 			this.controller.signalError(e);
-			throw e;
+			return null;
 		}
 		
 		this.controller.signalEnd();

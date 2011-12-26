@@ -190,7 +190,7 @@ public class OptimumPaintingPanel extends JPanel {
 					boolean cellHasFocus) {
 				GUIBin bin = (GUIBin) value;
 				sBuilder.setLength(START_STR.length());
-				sBuilder.append(bin.getID()).append("  [").append(bin.getBin().getNPackets()).
+				sBuilder.append(bin.getID()).append("  [").append(bin.getNPackets()).
 						append(']');
 				return super.getListCellRendererComponent(list, sBuilder.toString(), index, isSelected,
 						cellHasFocus);

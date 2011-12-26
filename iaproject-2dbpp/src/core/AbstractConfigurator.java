@@ -1,9 +1,11 @@
 package core;
 
+import java.io.Serializable;
+
 import logic.ProblemConfiguration;
 import gui.OptimumPainter;
 
-public abstract class AbstractConfigurator<T> implements CoreDescriptor {
+public abstract class AbstractConfigurator<T extends Serializable> implements CoreDescriptor {
 	
 	public AbstractConfigurator() {
 		/* force the existence of a no-parameter constructor (in fact all

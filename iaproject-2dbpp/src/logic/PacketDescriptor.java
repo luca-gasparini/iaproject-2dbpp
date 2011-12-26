@@ -4,7 +4,11 @@ import java.awt.Color;
 
 import logic.AbstractPacket;
 
-public class PacketDescriptor extends AbstractPacket {
+/**
+ * Immutable class holding a packet configuration (width & height) plus its ID
+ * and color.
+ */
+public final class PacketDescriptor extends AbstractPacket {
 
 	private static final long serialVersionUID = 8582320694102744871L;
 	private final int id;

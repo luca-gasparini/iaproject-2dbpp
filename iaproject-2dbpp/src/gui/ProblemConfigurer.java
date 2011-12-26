@@ -143,18 +143,17 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		packetListModel.copyInto(tmp);
 		
 		/*
-		 * check max
+		 * check if packet can be inserted into the Bin, rotated or not.
 		 */
-		int maxW = 0;
-		int maxH = 0;
 		for (int i=0; i<tmp.length; i++) {
-			if (maxW<tmp[i].getWidth())
-				maxW = tmp[i].getWidth();
-			if (maxH<tmp[i].getHeight())
-				maxH = tmp[i].getHeight();
-		}
-		if (maxW>binH || maxH>binH) {
-			throw new DataParsingException("Bin TOO small");
+			PacketConfiguration pc = tmp[i];
+			boolean widthErr = pc.getWidth() > bc.getWidth() && pc.getWidth() > bc.getHeight();
+			boolean heightErr = pc.getHeight() > bc.getHeight() && pc.getHeight() > bc.getWidth();
+			
+			if (widthErr || heightErr) {
+				throw new DataParsingException("Packet " + i + ": unplaceable "
+						+ ((widthErr) ? "width" : "height"));
+			}
 		}
 		
 		List<PacketConfiguration> packets = Arrays.asList(tmp);

@@ -9,12 +9,13 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextAttribute;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import logic.Bin;
-import logic.Packet;
+import logic.BinConfiguration;
 
 /**
  * Da decidere con Nicola C.
@@ -24,16 +25,30 @@ public class GUIBin extends ResizableRawGraphics {
 
 	private static final long serialVersionUID = -6647245677472183286L; 
 	
-	private final Bin singleBin;
 	private static final int defaultFontSize = 16;
 	private static final int minFontSize = 6;
 	
-	public GUIBin (Bin s) {
-		super(new Dimension(s.getWidth(), s.getHeight()));
-		this.singleBin = s;
+	private final BinConfiguration binConf;
+	private final int binID;
+	private final float density;
+	private final List<GUIPacket> packets;
+	
+	public GUIBin (BinConfiguration binConf, int binID, float density, List<GUIPacket> packets) {
+		super(binConf.getSize());
+		
+		if (packets == null) {
+			throw new NullPointerException("null packets");
+		}
+		
+		this.binConf = binConf;
+		this.binID = binID;
+		this.density = density;
+		
+		this.packets = Collections.unmodifiableList(new ArrayList<GUIPacket>(packets));
+		
 		this.setToolTipText("<HTML>"+
-				"<p>N. packets = "+s.getNPackets()+"</p>"+
-				"<p>Density = "+s.getDensity()+"</p>"+
+				"<p>N. packets = "+packets.size()+"</p>"+
+				"<p>Density = "+density+"</p>"+
 				"</HTML>"
 				);
 	}
@@ -48,8 +63,8 @@ public class GUIBin extends ResizableRawGraphics {
 		
 		// disegno bin
 		Dimension dimBorderBin = new Dimension(
-				singleBin.getWidth()*super.getMagnificationFactor(),
-				singleBin.getHeight()*super.getMagnificationFactor());
+				binConf.getWidth()*super.getMagnificationFactor(),
+				binConf.getHeight()*super.getMagnificationFactor());
 		
 		Rectangle borderBin = new Rectangle(dimBorderBin);
 		
@@ -59,9 +74,7 @@ public class GUIBin extends ResizableRawGraphics {
 		g2d.draw(borderBin);
 		
 		// disegno packet
-		List<Packet> listPacket = singleBin.getList();
-		
-		for (Packet currentPacket: listPacket) {
+		for (GUIPacket currentPacket: this.packets) {
 						
 			// rettangolo packet
 			g2d.setColor(currentPacket.getColor());
@@ -76,17 +89,17 @@ public class GUIBin extends ResizableRawGraphics {
 		
 	}
 
-	private int getPosYCorrect(Packet p) {
+	private int getPosYCorrect(GUIPacket p) {
 		//if (!(p.isRotate()))
-		return (singleBin.getHeight()-p.getHeight()-p.getPointY())*super.getMagnificationFactor();
+		return (binConf.getHeight()-p.getHeight()-p.getPointY())*super.getMagnificationFactor();
 		/*else
 			return (singleBin.getHeight()-p.getWidth()-p.getPointY())*super.getMagnificationFactor();*/
 	}
 	
-	private Rectangle buildRectangleFromPacket(Packet p) {
+	private Rectangle buildRectangleFromPacket(GUIPacket p) {
 		
 		Dimension d;
-		Point coordinate = new java.awt.Point(p.getPointX()*super.getMagnificationFactor(), getPosYCorrect(p));
+		Point coordinate = new Point(p.getPointX()*super.getMagnificationFactor(), getPosYCorrect(p));
 		
 		int height = p.getHeight()*super.getMagnificationFactor();
 		int width = p.getWidth()*super.getMagnificationFactor();
@@ -102,43 +115,23 @@ public class GUIBin extends ResizableRawGraphics {
 	}
 	
 	public String getID() {
-		return Integer.toString(this.singleBin.getID());
+		return Integer.toString(binID);
 	}
 	
-	public Bin getBin() {
-		return this.singleBin;
-	}
-	
-	/**
-	 * Two {@link GUIBin} are the same when have same magnification factor and
-	 * contained {@link Bin}.
-	 */
-	@Override
-	public boolean equals(Object gb) {
-		if (gb == null)
-			return false;
-		
-		if (this == gb)
-			return true;
-		
-		if (!(gb instanceof GUIBin))
-			return false;
-		
-		GUIBin gbp = (GUIBin) gb;
-		return this.getMagnificationFactor() == gbp.getMagnificationFactor() && 
-				this.singleBin.equals(gbp.getBin());
+	public int getNPackets() {
+		return this.packets.size();
 	}
 	
 	private Map<TextAttribute, Object> getTextAttributes(int size) {
 		Map<TextAttribute, Object> atbs = new HashMap<TextAttribute, Object>();
 		
 		atbs.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
-		atbs.put(TextAttribute.SIZE, size);
+		atbs.put(TextAttribute.SIZE, Integer.valueOf(size));
 		atbs.put(TextAttribute.FAMILY, "Arial");
 		return atbs;
 	}
 	
-	private void drawNumberIntoPacket(Graphics2D g2d, Font font, Packet currentPacket, Rectangle packetRect) {
+	private void drawNumberIntoPacket(Graphics2D g2d, Font font, GUIPacket currentPacket, Rectangle packetRect) {
 		
 		int textWidth, textHeight;
 		String idString;
@@ -147,7 +140,7 @@ public class GUIBin extends ResizableRawGraphics {
 		
 		// resize if necessary
 		do {
-			idString = Integer.toString(currentPacket.getId());
+			idString = Integer.toString(currentPacket.getID());
 			textWidth = (int)font.getStringBounds(idString, frc).getWidth();
 			textHeight = (int)font.getStringBounds(idString, frc).getHeight();
 			font = new Font(getTextAttributes(font.getSize()-2));
@@ -160,5 +153,53 @@ public class GUIBin extends ResizableRawGraphics {
 		g2d.setFont(font);
 		g2d.drawString(idString, (int)packetRect.getCenterX()-textWidth/2, (int)packetRect.getCenterY()+textHeight/2);
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((binConf == null) ? 0 : binConf.hashCode());
+		result = prime * result + binID;
+		result = prime * result + Float.floatToIntBits(density);
+		result = prime * result + ((packets == null) ? 0 : packets.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (!(obj instanceof GUIBin)) {
+			return false;
+		}
+		GUIBin other = (GUIBin) obj;
+		if (!binConf.equals(other.binConf)) {
+			return false;
+		}
+		if (binID != other.binID) {
+			return false;
+		}
+		if (Float.floatToIntBits(density) != Float
+				.floatToIntBits(other.density)) {
+			return false;
+		}
+		
+		if (this.packets.size() != other.packets.size()) {
+			return false;
+		}
+		for (GUIPacket packet : other.packets) {
+			if (!this.packets.contains(packet)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	
 	
 }
