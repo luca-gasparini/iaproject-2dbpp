@@ -56,6 +56,7 @@ public class CoreBin {
 
 		rect = new CoreRectangle(p, packet.getHeight(), packet.getWidth());
 		packet.setPoint((int) p.x, (int) p.y);
+		
 		packets.add(packet);
 		
 		if(p.y + packet.getHeight() > higherPoint.y)

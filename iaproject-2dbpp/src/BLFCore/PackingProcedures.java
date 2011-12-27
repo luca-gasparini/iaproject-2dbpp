@@ -385,14 +385,15 @@ public class PackingProcedures {
 		for (int i = 0; i < packets.size(); i++) {
 			int j = 0;
 			boolean inserito = false;
+			//if(packets.get(i).getId() == 37){break;}
 			while (!inserito && j < coreBins.size()) {
-				// try {
-				inserito = coreBins.get(j).insertPacket(packets.get(i));
+				//try {
+					inserito = coreBins.get(j).insertPacket(packets.get(i));
 
-				/*
-				 * } catch (RuntimeException e) { saveErrorLog(e, packets,bins);
-				 * e.printStackTrace(); }
-				 */
+				/*} catch (RuntimeException e) {
+					saveErrorLog(e, packets, bins);
+					e.printStackTrace();
+				}*/
 				j++;
 			}
 			if (!inserito) {
@@ -410,10 +411,10 @@ public class PackingProcedures {
 		ArrayList<Bin> resultBins = new ArrayList<Bin>();
 		double fitness = 0;
 		for (int i = 0; i < coreBins.size(); i++) {
-			Bin appBin = new Bin(bins, i);
+			Bin appBin =new Bin(bins,i);
 			for (int j = 0; j < coreBins.get(i).packets.size(); j++) {
 				appBin.addPacket(coreBins.get(i).packets.get(j));
-			}
+			} 
 			fitness += coreBins.get(i).getFitness();
 			resultBins.add(appBin);
 		}

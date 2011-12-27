@@ -507,7 +507,7 @@ public class Hole {
 
 						Edge Eb = Edge.Intersection(Edge.upHalfLine(a),
 								getEdge(i));
-						while (Eb == null || Eb.isPoint() == null) {
+						while (Eb == null || Eb.isPoint() == null || Point.equals(Eb.isPoint(),getEdge(i).getRightPoint())) {
 							i = (i + 1) % edges.size();
 							Eb = Edge.Intersection(Edge.upHalfLine(a),
 									getEdge(i));
@@ -517,6 +517,11 @@ public class Hole {
 						sb.FT.add(b);
 						sb.FT.add(getEdge(i).getRightPoint());
 						i = (i + 1) % edges.size();
+						//TODO delete the next rows.. this is only for debug
+						/*if(sb.FT.size() > edges.size())
+						{
+							throw new BlfErrorException("FT is growing too much..");
+						}*/
 					}
 				}
 
@@ -544,21 +549,27 @@ public class Hole {
 						// quando trovo un Qi precedente
 						sb.FB.add(getEdge(j).p2);
 						int interQi = -1;
-						while (j != rightMost) {
+						boolean jumpedRightMost = false;
+						while (j != rightMost && !jumpedRightMost) {
 							interQi = -1;
 							for (int i1 = 1; i1 < Qi.size() && interQi == -1; i1++) {
 								if (Point.equals(getEdge(j).p1, Qi.get(i1)))
 									interQi = i1;
 							}
+							
 							if (interQi != -1) {
 								j = (j - 2 + edges.size()) % edges.size();
 								Edge half = Edge.rightHalfLine(Qi.get(interQi));
 								Edge app2 = Edge.Intersection(getEdge(j), half);
-								while (app2 == null) {
+								while (app2 == null || app2.isPoint() == null || Point.equals(app2.isPoint(),getEdge(j).getUpperPoint())) {
 									j = (j - 1 + edges.size()) % edges.size();
+									if(j == rightMost)
+										jumpedRightMost = true;
 									app2 = Edge.Intersection(getEdge(j), half);
 								}
-								sb.FB.add(app2.getLeftPoint());
+								sb.FB.add(app2.isPoint());
+								if(jumpedRightMost)
+									sb.FB.add(getEdge(j).getUpperPoint());
 
 							} else {
 								sb.FB.add(getEdge(j).p1);
