@@ -288,7 +288,7 @@ public class PackingProcedures {
 			while (i < p) {
 				if (d.get(p - 1).y <= d.get(i).y
 						&& d.get(p - 1).x <= d.get(i).x + length) {
-					Point u = new Point(d.get(p - 1).x - length, h.get(i).y);
+					Point u = new Point(d.get(p - 1).x - length, d.get(i).y);
 					Point v = new Point(d.get(p - 1).x - length, d.get(p - 1).y);
 					Point z = new Point(h.get(p).x - length, h.get(p).y);
 					D.add(u);
@@ -385,15 +385,15 @@ public class PackingProcedures {
 		for (int i = 0; i < packets.size(); i++) {
 			int j = 0;
 			boolean inserito = false;
-			//if(packets.get(i).getId() == 37){break;}
+			//if(packets.get(i).getId() == 1){break;}
 			while (!inserito && j < coreBins.size()) {
-				//try {
+				try {
 					inserito = coreBins.get(j).insertPacket(packets.get(i));
 
-				/*} catch (RuntimeException e) {
+				} catch (RuntimeException e) {
 					saveErrorLog(e, packets, bins);
 					e.printStackTrace();
-				}*/
+				}
 				j++;
 			}
 			if (!inserito) {
