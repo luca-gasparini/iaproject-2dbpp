@@ -441,7 +441,7 @@ public class Hole {
 		Qw.add(null);
 		edgeOfQw.add(null);
 
-		i = (lowerEdge + 1 + edges.size()) % edges.size();
+		i = (rightMost + 1 + edges.size()) % edges.size();
 		while (i != upperEdge) {
 			Edge currentEdge = getEdge(i);
 			Edge previousEdge = getEdge(i - 1);

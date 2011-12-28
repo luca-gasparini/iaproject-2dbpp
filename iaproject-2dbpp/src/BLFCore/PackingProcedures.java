@@ -385,15 +385,15 @@ public class PackingProcedures {
 		for (int i = 0; i < packets.size(); i++) {
 			int j = 0;
 			boolean inserito = false;
-			// if(packets.get(i).getId() == 1){break;}
+			//if(i==9){break;}
 			while (!inserito && j < coreBins.size()) {
-				try {
+				//try {
 					inserito = coreBins.get(j).insertPacket(packets.get(i));
 
-				} catch (RuntimeException e) {
+				/*} catch (RuntimeException e) {
 					saveErrorLog(e, packets, bins);
 					e.printStackTrace();
-				}
+				}*/
 				j++;
 			}
 			if (!inserito) {
