@@ -387,13 +387,13 @@ public class PackingProcedures {
 			boolean inserito = false;
 			//if(i==9){break;}
 			while (!inserito && j < coreBins.size()) {
-				//try {
+				try {
 					inserito = coreBins.get(j).insertPacket(packets.get(i));
 
-				/*} catch (RuntimeException e) {
+				} catch (RuntimeException e) {
 					saveErrorLog(e, packets, bins);
 					e.printStackTrace();
-				}*/
+				}
 				j++;
 			}
 			if (!inserito) {
