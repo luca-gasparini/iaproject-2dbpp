@@ -31,8 +31,8 @@ public class PackingProcedures {
 		int i = 0;
 		int j = 0;
 
-		LinkedList<Edge> C = new LinkedList<Edge>();
-		LinkedList<Edge> D = new LinkedList<Edge>();
+		ArrayList<Edge> C = new ArrayList<Edge>();
+		ArrayList<Edge> D = new ArrayList<Edge>();
 		C.add(null);
 		D.add(null); // gli indici nel paper partono da 1
 		// converto in liste di lati orizzontali
@@ -51,6 +51,7 @@ public class PackingProcedures {
 		}
 
 		for (i = 0; i < Dp.size() - 1; i++) {
+			
 			Edge app = new Edge(Dp.get(i), Dp.get(i + 1));
 			if (app.isHorizontal())
 				D.add(app);
@@ -75,13 +76,14 @@ public class PackingProcedures {
 				Point M = new Point(D.get(j).getLeftPoint().x, C.get(i)
 						.getLeftPoint().y);
 				E.add(new CandidatePoint(M, D.get(j).getLeftPoint().y
-						- C.get(i).getLeftPoint().y > h));
+						- C.get(i).getLeftPoint().y >= h));
 			}
 			while (i < m
 					&& C.get(i).getRightPoint().x <= D.get(j).getRightPoint().x) {
 				i++;
 				boolean test = D.get(j).getLeftPoint().y
 						- C.get(i).getLeftPoint().y >= h;
+						
 				E.add(new CandidatePoint(C.get(i - 1).getRightPoint(), test));
 				E.add(new CandidatePoint(C.get(i).getLeftPoint(), test));
 			}
@@ -101,6 +103,20 @@ public class PackingProcedures {
 				i--;
 			}
 		}
+		
+		//aggiungo alcuni casi particolari
+		for(int i1 = 0; i1<Cp.size();i1++)
+		{
+			int j1;
+			for(j1 =0; j1<Dp.size() && Dp.get(j1).x < Cp.get(i1).x;j1++);
+			while(j1<Dp.size() && Cp.get(i1).x == Dp.get(j1).x)
+			{
+				if(Dp.get(j1).y - Cp.get(i1).y >= h)
+					E.add(new CandidatePoint(Cp.get(i1),true));
+				j1++;
+			}
+		}
+		
 		return E;
 	}
 
@@ -385,7 +401,7 @@ public class PackingProcedures {
 		for (int i = 0; i < packets.size(); i++) {
 			int j = 0;
 			boolean inserito = false;
-			//if(i==9){break;}
+			//if(i==14){break;}
 			while (!inserito && j < coreBins.size()) {
 				try {
 					inserito = coreBins.get(j).insertPacket(packets.get(i));
