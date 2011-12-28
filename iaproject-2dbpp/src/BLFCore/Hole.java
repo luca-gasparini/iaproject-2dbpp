@@ -70,6 +70,7 @@ public class Hole {
 							holes.add(new Hole(li));
 						}
 
+						//intersezione che non coincide con nessuno dei due lati
 					} else {
 
 						ArrayList<Edge> li = new ArrayList<Edge>();
@@ -88,9 +89,12 @@ public class Hole {
 							Point stopPoint;
 							if (Edge.Intersection(intersection,
 									rect.getEdge(i).p1) != null)
+							{
 								stopPoint = rect.getEdge(i).p1;
-							else
+							}
+							else{
 								stopPoint = rect.getEdge(i).p2;
+							}
 
 							li = new ArrayList<Edge>();
 							li.add(new Edge(stopPoint, getEdge(j).p2));
@@ -99,7 +103,6 @@ public class Hole {
 								holes.add(new Hole(li));
 							}
 						} else {
-							// TODO cambia qua????
 							li.add(getEdge(j + 1));
 							if (this.traverse(li, getEdge(j).p2, j + 1, rect,
 									flags, true))
@@ -320,7 +323,7 @@ public class Hole {
 		ArrayList<Edge> app = new ArrayList<Edge>();
 		for (int i = 0; i < edges.size(); i++) {
 			if (getEdge(i).isPoint() == null)
-				app.add(getEdge(i));
+				app.add(new Edge(getEdge(i)));
 		}
 
 		edges = app;
@@ -358,7 +361,7 @@ public class Hole {
 			if ((getEdge(i).isVertical() && getEdge(i + 1).isVertical())
 					|| (getEdge(i).isHorizontal() && getEdge(i + 1)
 							.isHorizontal())) {
-				getEdge(i).p2 = getEdge(i + 1).p2;
+				getEdge(i).p2 = new Point(getEdge(i + 1).p2);
 				edges.remove((i + 1 + edges.size()) % edges.size());
 			}
 		}

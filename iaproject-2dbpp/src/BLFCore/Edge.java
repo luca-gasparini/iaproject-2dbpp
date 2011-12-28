@@ -8,8 +8,8 @@ public class Edge {
 		if (p1.x != p2.x && p1.y != p1.y) {
 			this.p1 = this.p2 = null;
 		} else {
-			this.p1 = p1;
-			this.p2 = p2;
+			this.p1 = new Point(p1);
+			this.p2 = new Point(p2);
 		}
 	}
 
@@ -49,19 +49,19 @@ public class Edge {
 	}
 
 	public Point getUpperPoint() {
-		return p1.y > p2.y ? p1 : p2;
+		return p1.y > p2.y ? new Point(p1) : new Point(p2);
 	}
 
 	public Point getLowerPoint() {
-		return p1.y > p2.y ? p2 : p1;
+		return p1.y > p2.y ? new Point(p2) : new Point(p1);
 	}
 
 	public Point getRightPoint() {
-		return p1.x < p2.x ? p2 : p1;
+		return p1.x < p2.x ? new Point(p2) : new Point(p1);
 	}
 
 	public Point getLeftPoint() {
-		return p1.x < p2.x ? p1 : p2;
+		return p1.x < p2.x ? new Point(p1) : new Point(p2);
 	}
 
 	public Point isPoint()//se il lato coincide con un punto ritorna il punto. altrimenti null
@@ -71,20 +71,20 @@ public class Edge {
 	
 	public static Edge upHalfLine(Point x)//semiretta da x verso l'alto
 	{
-		return new Edge(x,new Point(x.x,Double.MAX_VALUE));
+		return new Edge(new Point(x),new Point(x.x,Double.MAX_VALUE));
 	}
 	
 	public static Edge rightHalfLine(Point x)//semiretta da x verso destra
 	{
-		return new Edge(x,new Point(Double.MAX_VALUE,x.y));
+		return new Edge(new Point(x),new Point(Double.MAX_VALUE,x.y));
 	}
 	
 	//scambia i punti, utile per tenere le varie liste in clockwise
 	public void swapPoints()
 	{
 		Point app = p1;
-		p1 = p2;
-		p2 = app;
+		p1 = new Point(p2);
+		p2 = new Point(app);
 	}
 	
 	// ritorna il segmento intersezione tra i due lati, null se lati disgiunti
@@ -125,7 +125,7 @@ public class Edge {
 					e2.getRightPoint().x >= e1.p1.x)
 			{
 				Point app = new Point(e1.p1.x,e2.p1.y);
-				return new Edge(app,app);
+				return new Edge(app,new Point(app));
 			}
 			else return null;
 		}
@@ -152,7 +152,7 @@ public class Edge {
 	{
 		return e1.getLeftPoint().x <= x.x && e1.getRightPoint().x >= x.x && 
 				e1.getUpperPoint().y >= x.y &&  e1.getLowerPoint().y <= x.y ?
-						x : null;
+						new Point(x) : null;
 	}
 	
 	public static boolean equals(Edge e1, Edge e2)
