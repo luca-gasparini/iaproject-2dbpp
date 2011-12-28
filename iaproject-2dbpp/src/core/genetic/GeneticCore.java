@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import javax.swing.JOptionPane;
+
+import com.sun.org.apache.xml.internal.security.utils.JavaUtils;
+
 import logic.Bin;
 import logic.Packet;
 import logic.ProblemConfiguration;
@@ -170,19 +174,22 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 			probSelection[i] = population[i].getFitness() / fitnessSum;
 		}
 		
-		int i = 0; // candidate individual
-		float randValue = rand.nextFloat();
-		float probSum = probSelection[0];
-		
 		// divide [0,1) in subintervals [0,p0),[p0,p1),...,[p(m-1),1)
 		// each subinterval represent one of the m individuals.
 		// extraxt a random value and select the related individual
-		while ( randValue >= probSum ) {
-			probSum += probSelection[i + 1];
+		int i = 0; // candidate individual
+		float randValue = rand.nextFloat();
+		float rightBound = 0;
+		
+		while ( i < populationSize ) {
+			rightBound += probSelection[i];
+			if (randValue < rightBound) return population[i];
 			i++;
 		}
-		
-		return population[i];
+	//	JOptionPane.showMessageDialog(null, "L'ultimo rightBound = " + rightBound + " mentre randValue = " + randValue);
+		// rightBound should be < 1 due to approximations. So if randValue is
+		// greater than the last rightBound finded, choose the last individual
+		return population[populationSize - 1];
 	}
 
 	@Override
