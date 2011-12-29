@@ -401,7 +401,7 @@ public class PackingProcedures {
 		for (int i = 0; i < packets.size(); i++) {
 			int j = 0;
 			boolean inserito = false;
-			//if(i==14){break;}
+			//if(i==43){break;}
 			while (!inserito && j < coreBins.size()) {
 				try {
 					inserito = coreBins.get(j).insertPacket(packets.get(i));

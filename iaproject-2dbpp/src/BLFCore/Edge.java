@@ -49,19 +49,19 @@ public class Edge {
 	}
 
 	public Point getUpperPoint() {
-		return p1.y > p2.y ? new Point(p1) : new Point(p2);
+		return p1.y > p2.y ? p1 : p2;
 	}
 
 	public Point getLowerPoint() {
-		return p1.y > p2.y ? new Point(p2) : new Point(p1);
+		return p1.y > p2.y ? p2 : p1;
 	}
 
 	public Point getRightPoint() {
-		return p1.x < p2.x ? new Point(p2) : new Point(p1);
+		return p1.x < p2.x ? p2 : p1;
 	}
 
 	public Point getLeftPoint() {
-		return p1.x < p2.x ? new Point(p1) : new Point(p2);
+		return p1.x < p2.x ? p1 : p2;
 	}
 
 	public Point isPoint()//se il lato coincide con un punto ritorna il punto. altrimenti null
