@@ -6,18 +6,21 @@ import java.util.List;
 
 public class ManageSolution {
 
-	public static List<Packet> buildPacketList(List<PacketConfiguration> packetsInfo) {
+	public static List<Packet> buildPacketList(List<PacketConfiguration> packetsInfo, BinConfiguration bin) {
 		
 		List<Packet> lps = new ArrayList<Packet>();
 		
 		int id=0;
 		for(int i=0; i < packetsInfo.size(); i++ ) {
+			boolean canRotate = ManageSolution.canRotate(packetsInfo.get(i), bin);
+			
 			for( int j=0; j < packetsInfo.get(i).getMolteplicity(); j++ ) {
 				PacketDescriptor pd = new PacketDescriptor(
 						id++,
 						packetsInfo.get(i).getWidth(),
 						packetsInfo.get(i).getHeight(),
-						packetsInfo.get(i).getColor()
+						packetsInfo.get(i).getColor(),
+						canRotate
 						);
 				lps.add(new PacketSolution(pd));
 			}
@@ -25,12 +28,21 @@ public class ManageSolution {
 		return lps;
 	}
 	
+	
+	private static boolean canRotate(PacketConfiguration p, BinConfiguration bin) {
+		
+		/*
+		 * INSERIRE LOGICA PER VEDERE SE UN PEZZO È RUOTABILE O MENO
+		 * INSERIRE LOGICA PER VEDERE SE UN PEZZO È RUOTABILE O MENO
+		 * INSERIRE LOGICA PER VEDERE SE UN PEZZO È RUOTABILE O MENO
+		 */
+		
+		return true;
+	}
+	
+	
 	/*
-	 * METODO MIO (NICOLA C.) PER TEST SU ROTAZIONE 
-	 *                   |
-	 *                   |      (freccetta xD)
-	 *                   \/
-	 * 
+	 * metodo per test su rotazione
 	 * */
 	
 	public static List<Packet> buildPacketSolutionTestRotate(List<PacketConfiguration> packetsInfo, boolean torotate) {
@@ -44,7 +56,8 @@ public class ManageSolution {
 						id++,
 						packetsInfo.get(i).getWidth(),
 						packetsInfo.get(i).getHeight(),
-						packetsInfo.get(i).getColor()
+						packetsInfo.get(i).getColor(),
+						true
 						);
 				if (torotate)
 					rotate = !rotate;

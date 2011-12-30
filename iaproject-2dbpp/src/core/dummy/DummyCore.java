@@ -101,7 +101,8 @@ public class DummyCore extends AbstractCore<DummyConfiguration, List<Bin>> {
 		
 		Color color = new Color(rand.nextInt());
 		
-		return new PacketSolution(new PacketDescriptor(id, pW, pH, color), blpX, blpY);
+		// always rotatable for test use only
+		return new PacketSolution(new PacketDescriptor(id, pW, pH, color, true), blpX, blpY);
 	}
 	
 	@Override

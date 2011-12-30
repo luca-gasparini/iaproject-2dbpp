@@ -28,5 +28,7 @@ public interface Packet extends Cloneable, Serializable {
 	
 	public Point getPoint();
 	
-	public Packet clone(); 
+	public Packet clone();
+	
+	public boolean isRotatable();
 }

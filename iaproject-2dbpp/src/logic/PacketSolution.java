@@ -96,4 +96,9 @@ public class PacketSolution implements Packet {
 		PacketSolution ps = new PacketSolution(this.pac, this.getPointX(), this.getPointY());
 		return ps;
 	}
+
+	@Override
+	public boolean isRotatable() {
+		return pac.isRotatable();
+	}
 }
