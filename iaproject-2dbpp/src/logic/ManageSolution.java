@@ -1,6 +1,7 @@
 package logic;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ManageSolution {
@@ -53,6 +54,21 @@ public class ManageSolution {
 			}
 		}
 		return lps;
+	}
+	
+		
+	public static List<Packet> getNewPacketList(List<Packet> packetList) {
+		
+		if (packetList.isEmpty())
+			return Collections.emptyList();
+		
+		List<Packet> lps = new ArrayList<Packet>(packetList.size());
+		
+		for (Packet p: packetList) {
+			lps.add(new PacketSolution(p.getPacketDescriptor()));
+		}
+		return lps;
+		
 	}
 	
 	/*
