@@ -6,13 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.swing.JOptionPane;
-
-import com.sun.org.apache.xml.internal.security.utils.JavaUtils;
-
 import logic.Bin;
+import logic.BinConfiguration;
+import logic.ManageSolution;
 import logic.Packet;
-import logic.ProblemConfiguration;
 import core.AbstractCore;
 import core.Core2GuiTranslators;
 import core.CoreConfiguration;
@@ -20,36 +17,48 @@ import core.CoreResult;
 
 public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 	
+	// core configuration fields
 	private final int populationSize;
 	private final float pRotateMutation;
 	private final float pOrderMutation;
 	private final float pCrossover;
-	private final ProblemConfiguration problemConf;
-	
-	private float currentFitness;
-	private Individual bestIndividual;
+	// problem fields
+	/*	private final int binsWidth;
+	private final int binsHeight;*/
+	private final BinConfiguration binsDim;
+	private final List<Packet> packetList;
+	// core vars
 	private Individual[] population;
+	private Individual bestIndividual;
+	private float currentFitness;
 	
 	private final Random rand = new Random(System.currentTimeMillis());
 	
 	public GeneticCore(CoreConfiguration<GeneticConfiguration> conf, OptimumPainter painter) {
+		
 		super(conf, painter, Core2GuiTranslators.getBinListTranslator());
-		this.problemConf = conf.getProblemConfiguration();
+		
+		// get core configuration
 		this.populationSize = conf.getCoreConfiguration().getPopulationSize();
 		this.pRotateMutation = conf.getCoreConfiguration().getRotateMutationProbability();
 		this.pOrderMutation = conf.getCoreConfiguration().getOrderMutationProbability();
 		this.pCrossover = conf.getCoreConfiguration().getCrossoverProbability();
 		
-		this.population = new Individual[this.populationSize];
+		// get problem configuration
+		this.binsDim = conf.getProblemConfiguration().getBin();
+		this.packetList = ManageSolution.buildPacketList(
+				conf.getProblemConfiguration().getPackets() , binsDim );
+/*		this.binsWidth = conf.getProblemConfiguration().getBin().getWidth();
+		this.binsHeight = conf.getProblemConfiguration().getBin().getHeight(); */
 		
-		// initialize population from problem configuration
+		// initialize core 
+		this.population = new Individual[this.populationSize];
 		for( int i=0 ; i < this.populationSize; i++ ) {
-			this.population[i] = new Individual(this.problemConf.getPackets(), this.problemConf.getBin());
-		//	this.population[i].setFitness(i);
+			this.population[i] = new Individual(packetList);
+			this.population[i].calculateLayout(binsDim);
+			if (i!=0) this.population[i].shuffleGenome();
 		}
-		// arrivato qui sono sicuro che ogni individuo della popolazione ha un suo layout blf e una fitness associata
-//		this.bestIndividual = findBest();
-//		this.currentFitness = bestIndividual.getFitness();
+		this.bestIndividual = null;
 		this.currentFitness = Float.MAX_VALUE;
 	}
 
@@ -64,7 +73,7 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 			Individual mother = selectIndividual();
 			Individual child = crossover(father, mother, pCrossover);
 			child.mutate(pRotateMutation, pOrderMutation);
-			child.calculateLayout(problemConf.getBin());
+			child.calculateLayout(binsDim);
 			bestIndividual = replaceWorstIndividual(child);
 						
 			// publish results only if better

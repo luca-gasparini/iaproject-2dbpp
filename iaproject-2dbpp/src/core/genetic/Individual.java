@@ -5,9 +5,7 @@ import java.util.Random;
 
 import logic.Bin;
 import logic.BinConfiguration;
-import logic.ManageSolution;
 import logic.Packet;
-import logic.PacketConfiguration;
 
 import BLFCore.BlfLayout;
 import BLFCore.PackingProcedures;
@@ -18,14 +16,14 @@ class Individual {
 	private BlfLayout layout;
 	private final Random rand = new Random(System.currentTimeMillis());
 
-	public Individual(List<PacketConfiguration> packetsInfo, BinConfiguration binsInfo) {		
+/*	public Individual(List<PacketConfiguration> packetsInfo, BinConfiguration binsInfo) {		
 		// translate input from List<PacketConfigutation> to List<Packet>
 		this.sequence = ManageSolution.buildPacketList(packetsInfo);
 		java.util.Collections.shuffle(this.sequence, rand);
 		// calculate blf layout and related fitness of the individual
 		this.calculateLayout(binsInfo);
 		
-	}
+	}*/
 
 	public Individual(List<Packet> sequence) {
 		this.sequence = sequence;
@@ -37,7 +35,7 @@ class Individual {
 
 		// rotation based mutation
 		for (Packet gene: sequence) {
-			if (rand.nextFloat() < pRotate) {
+			if (rand.nextFloat() < pRotate && gene.isRotatable()) {
 				gene.setRotate( !gene.isRotate() );
 			}
 		}
@@ -63,19 +61,16 @@ class Individual {
 		return this.layout.getBins();
 	}
 
-	public float calculateLayout(BinConfiguration binConfiguration) {
-
-		this.layout = PackingProcedures.getLayout(this.sequence,binConfiguration);
+	public float calculateLayout(BinConfiguration binsDim) {
+		this.layout = PackingProcedures.getLayout( this.sequence, binsDim);
 		return this.layout.getFitness();
 	}
 
 	public List<Packet> getSequence() {
 		return this.sequence;
 	}
-/*
-	// debug method
-	public void setFitness(int i) {
-		this.layout.setFitness(i);
+
+	public void shuffleGenome() {
+		java.util.Collections.shuffle(this.sequence, rand);
 	}
-*/
 }
