@@ -36,7 +36,7 @@ public final class PacketDescriptor extends AbstractPacket {
 	}
 	
 	public boolean isRotatable() {
-		return this.isRotatable();
+		return this.rotatable;
 	}
 
 	@Override
