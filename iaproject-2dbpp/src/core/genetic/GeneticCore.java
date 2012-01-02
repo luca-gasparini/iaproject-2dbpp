@@ -31,7 +31,6 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 	private Individual[] population;
 	private Individual bestIndividual;
 	private float currentFitness;
-	
 	private final Random rand = new Random(System.currentTimeMillis());
 	
 	public GeneticCore(CoreConfiguration<GeneticConfiguration> conf, OptimumPainter painter) {
@@ -53,10 +52,13 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 		
 		// initialize core 
 		this.population = new Individual[this.populationSize];
-		for( int i=0 ; i < this.populationSize; i++ ) {
+		// the first individual is initialized as the sequence of packets comes
+		this.population[0] = new Individual(packetList);
+		this.population[0].calculateLayout(binsDim);
+		for( int i=1 ; i < this.populationSize; i++ ) {
 			this.population[i] = new Individual(packetList);
+			this.population[i].shuffleGenome();
 			this.population[i].calculateLayout(binsDim);
-			if (i!=0) this.population[i].shuffleGenome();
 		}
 		this.bestIndividual = null;
 		this.currentFitness = Float.MAX_VALUE;

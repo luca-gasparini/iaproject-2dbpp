@@ -1,5 +1,6 @@
 package core.genetic;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -25,8 +26,11 @@ class Individual {
 		
 	}*/
 
-	public Individual(List<Packet> sequence) {
-		this.sequence = sequence;
+	public Individual(List<Packet> packetList) {
+		this.sequence = new ArrayList<Packet>(packetList.size());
+		for (Packet gene: packetList) {
+			this.sequence.add(gene.clone());
+		}
 		this.layout = null;
 	}
 
