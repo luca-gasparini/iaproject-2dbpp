@@ -1,0 +1,37 @@
+\thispagestyle{empty}
+\begin{center}
+	\leavevmode
+	\large
+	\begin{tabular}{ r l }
+		\multirow{2}{*}{\includegraphics[width=2cm]{img/unipd_logo.png}} & \textsc{Università degli studi di Padova}\par \\
+			& \textsc{Corso di laurea magistrale in Ingegneria Informatica} \\
+	\end{tabular}
+		
+	\vfill
+	\textbf{{\Large Relazione del progetto del corso di Intelligenza Artificiale}}\par
+	\textbf{{\LARGE 2D Bin Packing Problem}}\par
+	\vskip 3cm
+	\normalfont
+	
+	\begin{tabular}{ c c c c c }
+		\large Luca \textsc{Gasparini} & Alberto \textsc{Boccato} &
+				Nicola \textsc{Chessa} & Nicola \textsc{Dalla Benetta} &
+				Nicola \textsc{Gobbo} \\
+		\normalsize 999999 & 999999 & 999999 & 999999 & 1014195 \\[1cm]
+	\end{tabular}
+	\normalfont
+	\vskip 4cm
+	
+	\begin{flushright}
+		\emph{Docente:}\\
+		Prof. Silvana \textsc{Badaloni}\\
+	 \vskip 2cm
+		\emph{Collaboratori:}\\
+		Dott. Francesco \textsc{Sambo}\\
+	\end{flushright}
+
+	
+	\vfill
+	{\large AA 2010-11}
+\end{center}
+\cleardoublepage

@@ -1,0 +1,58 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage{enumitem}
+\usepackage[utf8]{inputenc}
+\usepackage{textcomp}
+\usepackage{xspace}
+\usepackage[italian]{babel}
+\usepackage[pdftex]{graphicx}
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{subfig}
+\usepackage{multirow}
+
+\usepackage{listings}
+\lstset{
+	basicstyle=\fontsize{8}{12}\ttfamily,
+	inputencoding=utf8,
+	language=Java,
+	numbers=left,
+	numberstyle=\tiny,
+	tabsize=2,
+	frame=single,
+	backgroundcolor=\color{gray},
+}
+
+
+\setenumerate[2]{label=\alph*.}
+
+\usepackage{color}
+\definecolor{gray}{gray}{0.9}
+
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true
+}
+\usepackage{hypcap}
+
+\begin{document}
+
+\include{titlepage}
+
+\begingroup
+	\hypersetup{linkcolor=black}
+	\setcounter{tocdepth}{2}
+	\tableofcontents
+\endgroup
+
+\newpage
+
+\section{Introduzione}
+\input{section/introduzione.tex}
+
+
+
+\section{Conclusione}
+\input{section/conclusione.tex}
+
+\end{document}
