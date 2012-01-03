@@ -4,11 +4,14 @@ import gui.OptimumPainter;
 import gui.common.JFloatTextField;
 import gui.common.JIntegerTextField;
 
+import java.awt.Dimension;
 import java.awt.GridLayout;
 
+import javax.swing.GroupLayout;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 import core.AbstractConfigurator;
 import core.AbstractCore;
@@ -27,8 +30,65 @@ public class GeneticConfigurator extends AbstractConfigurator<GeneticConfigurati
 	public GeneticConfigurator() {
 //		throw new IllegalArgumentException("Test Exception");
 
-		completePane = new JPanel(new GridLayout( 0, 2 ));
+		Dimension textFieldDim = new Dimension(100,30);
+		populationField.setPreferredSize(textFieldDim);
+		populationField.setMinimumSize(textFieldDim);
+		populationField.setMaximumSize(textFieldDim);
+		pRotationField.setPreferredSize(textFieldDim);
+		pRotationField.setMinimumSize(textFieldDim);
+		pRotationField.setMaximumSize(textFieldDim);
+		pOrderField.setPreferredSize(textFieldDim);
+		pOrderField.setMinimumSize(textFieldDim);
+		pOrderField.setMaximumSize(textFieldDim);
+		pCrossoverField.setPreferredSize(textFieldDim);
+		pCrossoverField.setMinimumSize(textFieldDim);
+		pCrossoverField.setMaximumSize(textFieldDim);
+
+		JLabel populationLbl = new JLabel("Population size");
+		JLabel pRotationLbl = new JLabel("<html>Mutation probability<br/>(rotation based)</html>");
+		JLabel pOrderLbl = new JLabel("<html>Mutation probability<br/>(order based)</html>");
+		JLabel pCrossoverLbl = new JLabel("Crossover probability");
+
+		completePane = new JPanel();
+		GroupLayout layout = new GroupLayout(completePane);
+		completePane.setLayout(layout);
+		layout.setAutoCreateContainerGaps(true);
+		layout.setAutoCreateGaps(true);
 		
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+						.addComponent(populationLbl)
+						.addComponent(pRotationLbl)
+						.addComponent(pOrderLbl)
+						.addComponent(pCrossoverLbl)
+				)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+						.addComponent(populationField)
+						.addComponent(pRotationField)
+						.addComponent(pOrderField)
+						.addComponent(pCrossoverField)
+				)
+		);
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(populationLbl)
+						.addComponent(populationField)
+				)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(pRotationLbl)
+						.addComponent(pRotationField)
+				)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(pOrderLbl)
+						.addComponent(pOrderField)
+				)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(pCrossoverLbl)
+						.addComponent(pCrossoverField)
+				)
+		);
+		
+/*
 		completePane.add(new JLabel("Population size"));
 		populationField.setColumns(10);
 		completePane.add(populationField);
@@ -44,6 +104,7 @@ public class GeneticConfigurator extends AbstractConfigurator<GeneticConfigurati
 		completePane.add(new JLabel("Crossover probability"));
 		pCrossoverField.setColumns(10);
 		completePane.add(pCrossoverField);
+*/
 	}
 	
 	@Override
