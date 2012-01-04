@@ -199,7 +199,7 @@ public abstract class AbstractCore<K extends Serializable, T> extends SwingWorke
 		/* we are interested only in painting the last optimum (this
 		 * increases performance)
 		 */
-		displayer.paint(chunks.get(chunks.size() - 1));
+		displayer.paint(chunks);
 	}
 	
 	protected final boolean canContinue() {

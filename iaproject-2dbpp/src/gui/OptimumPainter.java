@@ -1,8 +1,10 @@
 package gui;
 
+import java.util.List;
+
 
 public interface OptimumPainter {
 	
-	public void paint(GUIOptimum newOptimum);
+	public void paint(List<GUIOptimum> newOptimums);
 	
 }

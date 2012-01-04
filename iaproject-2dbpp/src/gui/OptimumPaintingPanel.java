@@ -7,6 +7,7 @@ import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -35,10 +36,9 @@ public class OptimumPaintingPanel extends JPanel {
 	
 	private class TokenPainter implements OptimumPainter {
 		@Override
-		public void paint(GUIOptimum newOptimum) {
-			OptimumPaintingPanel.this.askPaint(newOptimum, TokenPainter.this);
+		public void paint(List<GUIOptimum> newOptimums) {
+			OptimumPaintingPanel.this.askPaint(newOptimums, this);
 		}
-
 	}
 	
 	private class BinListModel extends AbstractListModel {
@@ -72,6 +72,38 @@ public class OptimumPaintingPanel extends JPanel {
 		public Object getElementAt(int index) {
 			return actualList.get(index);
 		}
+	}
+	
+	private class OptimumListModel extends AbstractListModel {
+		
+		private static final long serialVersionUID = 226008869736676280L;
+		
+		private final ArrayList<GUIOptimum> optimums = new ArrayList<GUIOptimum>();
+		
+		public void addAll(List<? extends GUIOptimum> newOptimums) {
+			if (newOptimums.isEmpty()) {
+				return;
+			}
+			
+			int startIndex = this.optimums.size();
+			this.optimums.addAll(newOptimums);
+			fireIntervalAdded(this, startIndex, startIndex + newOptimums.size() - 1);
+		}
+		
+		public void removeAllElements() {
+			this.optimums.clear();
+		}
+		
+		@Override
+		public int getSize() {
+			return this.optimums.size();
+		}
+
+		@Override
+		public Object getElementAt(int index) {
+			return this.optimums.get(this.optimums.size() - 1 - index);
+		}
+		
 	}
 	
 	private class BinDisplayerPane extends JPanel implements Scrollable {
@@ -145,7 +177,7 @@ public class OptimumPaintingPanel extends JPanel {
 	 * they are printed backwards by overriding the 
 	 * {@link DefaultListModel#getElementAt(int)} method.
 	 */
-	private DefaultListModel optimumList;
+	private OptimumListModel optimumList;
 	// use unmodifiable JTextField so text can be selected but not modified
 	private JTextField nIteration;
 	private JTextField fitnessValue;
@@ -210,13 +242,7 @@ public class OptimumPaintingPanel extends JPanel {
 		binListScroller.setBorder(binTitle);
 		
 		final JList optimumJList = new JList();
-		optimumList = new DefaultListModel() {
-			private static final long serialVersionUID = 6446790039057560056L;
-			@Override
-			public Object getElementAt(int index) {
-				return super.getElementAt(size() - 1 - index);
-			}
-		};
+		optimumList = new OptimumListModel();
 		optimumJList.setModel(optimumList);
 		optimumJList.setCellRenderer(new DefaultListCellRenderer() {
 			private static final long serialVersionUID = 9056812305053790194L;
@@ -357,15 +383,17 @@ public class OptimumPaintingPanel extends JPanel {
 		
 	}
 	
-	public void askPaint(GUIOptimum newOptimum, OptimumPainter painter) {
+	public void askPaint(List<GUIOptimum> newOptimums, OptimumPainter painter) {
 		// print only if given painter is the last one (avoid spurious)
 		if (this.lastToken == null || !this.lastToken.equals(painter)) {
 			return;
 		}
 		
-		this.optimumList.addElement(newOptimum);
+		// add all new optimum to the history...
+		this.optimumList.addAll(newOptimums);
 		
-		paintOptimum(newOptimum);
+		// ...but print only the last one!
+		paintOptimum(newOptimums.get(newOptimums.size() - 1));
 	}
 	
 	private GUIOptimum lastPaintedOpt;
