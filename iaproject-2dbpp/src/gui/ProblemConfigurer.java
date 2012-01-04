@@ -35,6 +35,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
 import logic.BinConfiguration;
+import logic.ManageSolution;
 import logic.PacketConfiguration;
 import logic.ProblemConfiguration;
 import core.DataParsingException;
@@ -146,14 +147,16 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		 * check if packet can be inserted into the Bin, rotated or not.
 		 */
 		for (int i=0; i<tmp.length; i++) {
-			PacketConfiguration pc = tmp[i];
-			boolean widthErr = pc.getWidth() > bc.getWidth() && pc.getWidth() > bc.getHeight();
+			/*boolean widthErr = pc.getWidth() > bc.getWidth() && pc.getWidth() > bc.getHeight();
 			boolean heightErr = pc.getHeight() > bc.getHeight() && pc.getHeight() > bc.getWidth();
 			
 			if (widthErr || heightErr) {
 				throw new DataParsingException("Packet " + i + ": unplaceable "
 						+ ((widthErr) ? "width" : "height"));
-			}
+			}*/
+			PacketConfiguration pc = tmp[i];
+			if (!ManageSolution.canInsert(pc, bc))
+				throw new DataParsingException("Packet " + i + ": unplaceable: too big ");
 		}
 		
 		List<PacketConfiguration> packets = Arrays.asList(tmp);

@@ -2,6 +2,7 @@ package logic;
 
 import java.util.ArrayList;
 import java.util.List;
+import core.DataParsingException;
 
 public class ManageSolution {
 
@@ -11,9 +12,17 @@ public class ManageSolution {
 		
 		int id=0;
 		for(int i=0; i < packetsInfo.size(); i++ ) {
-			RotationInfo rotInfo = ManageSolution.canRotate(packetsInfo.get(i), bin);
+			int j=0;
+			RotationInfo rotInfo = null;
 			
-			for( int j=0; j < packetsInfo.get(i).getMolteplicity(); j++ ) {
+			try {
+				rotInfo = ManageSolution.canRotate(packetsInfo.get(i), bin);
+			} catch (DataParsingException ex) {
+				// jump to the next packet (exception unreachable)
+				j = packetsInfo.get(i).getMolteplicity();
+			}
+			
+			for(; j < packetsInfo.get(i).getMolteplicity(); j++ ) {
 				PacketDescriptor pd = new PacketDescriptor(
 						id++,
 						packetsInfo.get(i).getWidth(),
@@ -28,8 +37,8 @@ public class ManageSolution {
 	}
 	
 	private static class RotationInfo {
-		private final boolean mustBeRotated;
-		private final boolean canRotate;
+		private boolean mustBeRotated;
+		private boolean canRotate;
 		
 		public RotationInfo(boolean mustBeRotated, boolean canRotate) {
 			this.mustBeRotated = mustBeRotated;
@@ -37,15 +46,38 @@ public class ManageSolution {
 		}
 	}
 	
-	private static RotationInfo canRotate(PacketConfiguration p, BinConfiguration bin) {
+	private static RotationInfo canRotate(PacketConfiguration p, BinConfiguration bin) throws DataParsingException {
 		
-		/*
-		 * INSERIRE LOGICA PER VEDERE SE UN PEZZO È RUOTABILE O MENO
-		 * INSERIRE LOGICA PER VEDERE SE UN PEZZO È RUOTABILE O MENO
-		 * INSERIRE LOGICA PER VEDERE SE UN PEZZO È RUOTABILE O MENO
-		 */
+		int tot = 0;
+		RotationInfo rotInf = null;
 		
-		return new RotationInfo(true, true);
+		if ((p.getWidth() <= bin.getWidth()) && (p.getHeight()<= bin.getHeight())) tot+=1;
+		if ((p.getWidth() <= bin.getHeight()) && (p.getHeight()<= bin.getWidth())) tot+=2;
+		
+		switch (tot) {
+			case 0:
+				throw new DataParsingException("Packet too big");
+			case 1:
+				rotInf = new RotationInfo(false, false);
+				break;
+			case 2:
+				rotInf = new RotationInfo(true, false);
+				break;
+			case 3:
+				rotInf = new RotationInfo(false, true);
+				break;
+		}
+		
+		return rotInf;
+	}
+	
+	public static boolean canInsert(PacketConfiguration p, BinConfiguration bin) {
+		try {
+			ManageSolution.canRotate(p, bin);
+		} catch (DataParsingException e) {
+			return false;
+		}
+		return true;
 	}
 	
 	
