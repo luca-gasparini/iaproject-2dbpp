@@ -331,13 +331,14 @@ public class PackingProcedures {
 		}
 
 		double xLimit = s.FT.get(0).x;
+		Point p2 = null;
 		while (D.size() > 0 && D.getFirst().x < xLimit) {
-			D.removeFirst();
+			p2 = D.removeFirst();
 		}
 		if (D.size() > 0) {
 			Point p = D.getFirst();
 			if (p.x > xLimit) {
-				p = new Point(xLimit, p.y);
+				p = new Point(xLimit, p2.y);
 				D.addFirst(p);
 			}
 		}
@@ -401,7 +402,8 @@ public class PackingProcedures {
 		for (int i = 0; i < packets.size(); i++) {
 			int j = 0;
 			boolean inserito = false;
-			//if(i==43){break;}
+
+			//if(packets.get(i).getId() == 83){break;}
 			while (!inserito && j < coreBins.size()) {
 				try {
 					inserito = coreBins.get(j).insertPacket(packets.get(i));

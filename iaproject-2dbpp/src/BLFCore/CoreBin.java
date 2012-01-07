@@ -42,8 +42,8 @@ public class CoreBin {
 		for (int i = 0; i < holes.size(); i++) {
 			app = holes.get(i).getCandidates(rect);
 			for (int j = 0; j < app.size(); j++) {
-				// mi salvo la posizione piï¿½ bassa tra i candidati
-				// a paritï¿½ di altezza privilegio la leftmost
+				// mi salvo la posizione pi bassa tra i candidati
+				// a paritˆ di altezza privilegio la leftmost
 				if (p == null || app.get(j).y < p.y
 						|| (app.get(j).y == p.y && app.get(j).x < p.x)) {
 					hole = i;

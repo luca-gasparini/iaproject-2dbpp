@@ -423,12 +423,6 @@ public class Hole {
 			edges = app;
 		}
 
-		/*
-		 * for(i = leftMostEdge;i != rightMost; i = (i+1)%edges.size()) {
-		 * if(getEdge(i).p1.x > getEdge(i).p2.x) { throw new
-		 * IllegalArgumentException("coming back edge"); } }
-		 */
-
 		ArrayList<Integer> leftMostEdges = new ArrayList<Integer>();
 		// find leftMostEdges, Qi and relative Qw
 		// scan the left side of the hole starting from down
@@ -520,11 +514,6 @@ public class Hole {
 						sb.FT.add(b);
 						sb.FT.add(getEdge(i).getRightPoint());
 						i = (i + 1) % edges.size();
-						//TODO delete the next rows.. this is only for debug
-						/*if(sb.FT.size() > edges.size())
-						{
-							throw new BlfErrorException("FT is growing too much..");
-						}*/
 					}
 				}
 
@@ -532,8 +521,6 @@ public class Hole {
 				// non fa...
 				if (!foundQn) {// search for rightMost edge
 					boolean foundQw = false;
-					/*Point stoppingPoint = lIndex == 0 ? getEdge(rightMost)
-							.getLowerPoint() : edgeOfQw;*/
 							
 					if (Edge.equals(getEdge(i), getEdge(rightMost)))
 						foundQw = true;
@@ -639,4 +626,14 @@ public class Hole {
 		return li;
 	}
 
+	public double getArea()
+	{
+		double area = 0;
+		for(int i = 0;i< edges.size();i++)
+			area += getEdge(i).p1.x * getEdge(i+1).p1.y - getEdge(i+1).p1.x * getEdge(i).p1.y;
+		area = area/2;
+		return area;
+	}
+	
+	
 }
