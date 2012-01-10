@@ -134,7 +134,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			}
 			
 			if (sr.diversify) {
-				DiversificationResult dr = DIVERSIFICATION(bins, d);
+				DiversificationResult dr = DIVERSIFICATION(bins, d, packets.size());
 				d = dr.d;
 				if (dr.targetBin >= 0) {
 					targetBin = dr.targetBin;
@@ -160,13 +160,12 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		return new SearchResult(false, -1, null);
 	}
 	
-	private DiversificationResult DIVERSIFICATION(ArrayList<TabooBin> bins, int d) {
+	private DiversificationResult DIVERSIFICATION(ArrayList<TabooBin> bins, int d, int totPkts) {
 		if ((d <= bins.size()) && (d < tabooConf.D_MAX)) {
+			d++;
 			// let t be the bin with d-th smallest value of filling function
-			// TODO
-			int newTarget = -1;
-			
-			return new DiversificationResult(d+1, newTarget, null, false);
+			int newTarget = searchTargetBin(bins, totPkts, d);
+			return new DiversificationResult(d, newTarget, null, false);
 		} else {
 			/* remove from the solution the floor(bins.size()/2) bins with
 			 * smallest filling function value
@@ -193,8 +192,9 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 	 * @return
 	 */
 	private int searchTargetBin(ArrayList<TabooBin> bins, int totPkts, int i_th) {
-		assert i_th < bins.size() : "non-existent " + i_th + " bin: " + bins.size() + " total";
+		assert i_th >= 1 && i_th <= bins.size() : "non-existent " + i_th + " bin: " + bins.size() + " total";
 		assert !bins.isEmpty() : "there's no bins";
+		assert totPkts >= 0 : "wrong number of packets " + totPkts;
 		
 		LinkedList<Couple> mins = new LinkedList<TabooCore.Couple>();
 		float value = calculateFillingFunction(tabooConf.ALPHA, bins.get(0), binConf, totPkts);
@@ -220,7 +220,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			}
 		}
 		
-		assert !mins.isEmpty() : "mins is empty";
+		assert !mins.isEmpty() : "mins is still empty";
 		return mins.getLast().index;
 	}
 	
@@ -237,7 +237,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		
 		for (TabooBin bin : tabooBins) {
 			BlfLayout binLayout = PackingProcedures.getLayout(bin.getPackets(), binConf);
-			assert binLayout.getBins().size() == 1 : "A taboo bin packed in more bins";
+			assert binLayout.getBins().size() == 1 : "A TabooBin pack in >1 bins";
 			
 			binList.addAll(binLayout.getBins());
 			fitness += binLayout.getFitness();
