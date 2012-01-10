@@ -389,6 +389,10 @@ public class OptimumPaintingPanel extends JPanel {
 			return;
 		}
 		
+		if (newOptimums.isEmpty()) {
+			return;
+		}
+		
 		// add all new optimum to the history...
 		this.optimumList.addAll(newOptimums);
 		
