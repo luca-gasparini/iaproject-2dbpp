@@ -236,7 +236,8 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		float fitness = 0;
 		
 		for (TabooBin bin : tabooBins) {
-			BlfLayout binLayout = PackingProcedures.getLayout(bin.getPackets(), binConf);
+			BlfLayout binLayout = PackingProcedures.getLayout(bin.getPackets(), 
+					binConf, tabooConf.HEIGHT_FACTOR, tabooConf.DENSITY_FACTOR);
 			assert binLayout.getBins().size() == 1 : "A TabooBin pack in >1 bins";
 			
 			binList.addAll(binLayout.getBins());
