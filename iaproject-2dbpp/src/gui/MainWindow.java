@@ -600,9 +600,11 @@ public class MainWindow extends AbstractFrame {
 		
 		this.configManager.loadFromFile(configFile);
 		
-		CoreItem item = this.ecp.setChoosedCore(configManager.getCoreName());
-		item.getDescriptor().setCoreConfiguration(configManager.getCoreConfiguration());
 		this.problemConf = this.configManager.getProblemConfiguration();
+		CoreItem item = this.ecp.setChoosedCore(configManager.getCoreName());
+		if (configManager.getCoreConfiguration() != null) {
+			item.getDescriptor().setCoreConfiguration(configManager.getCoreConfiguration());
+		}
 		
 		this.switchToState(State.READY);
 	}
