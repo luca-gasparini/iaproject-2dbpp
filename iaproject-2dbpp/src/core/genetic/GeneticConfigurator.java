@@ -54,8 +54,8 @@ public class GeneticConfigurator extends AbstractConfigurator<GeneticConfigurati
 		JLabel pRotationLbl = new JLabel("<html>Mutation probability<br/>(rotation based)</html>");
 		JLabel pOrderLbl = new JLabel("<html>Mutation probability<br/>(order based)</html>");
 		JLabel pCrossoverLbl = new JLabel("Crossover probability");
-		JLabel alphaLbl = new JLabel("Fitness I param (alpha)");
-		JLabel betaLbl = new JLabel("Fitness II param (beta)");
+		JLabel alphaLbl = new JLabel("Fitness height weight (alpha)");
+		JLabel betaLbl = new JLabel("Fitness density weight (beta)");
 
 		completePane = new JPanel();
 		GroupLayout layout = new GroupLayout(completePane);
