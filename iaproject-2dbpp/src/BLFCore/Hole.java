@@ -2,7 +2,6 @@ package BLFCore;
 
 import java.util.LinkedList;
 import java.util.ArrayList;
-import BLFCore.*;
 
 public class Hole {
 

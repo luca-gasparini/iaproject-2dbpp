@@ -7,12 +7,16 @@ public class CoreBin {
 	ArrayList<Packet> packets;
 	ArrayList<Hole> holes;
 	double heigth;
+	double width;
+	double occupiedArea;
 	Point higherPoint;//higher Point occupied by a packet;
 
 	CoreBin(double binWidth, double binHeigth) {
 		packets = new ArrayList<Packet>();
 		holes = new ArrayList<Hole>();
 		heigth = binHeigth;
+		width = binWidth;
+		occupiedArea = 0;
 		
 		// creo i lati del bin
 		ArrayList<Edge> edges = new ArrayList<Edge>();
@@ -58,6 +62,7 @@ public class CoreBin {
 		packet.setPoint((int) p.x, (int) p.y);
 		
 		packets.add(packet);
+		occupiedArea += packet.getHeight() * packet.getWidth();
 		
 		if(p.y + packet.getHeight() > higherPoint.y)
 		{
@@ -78,4 +83,8 @@ public class CoreBin {
 		return 100 * higherPoint.y/heigth;
 	}
 	
+	public double getOccupiedArea()
+	{
+		return occupiedArea;
+	}
 }

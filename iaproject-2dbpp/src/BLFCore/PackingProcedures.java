@@ -396,7 +396,7 @@ public class PackingProcedures {
 
 	// metodo da utilizzare da fuori...
 	public static BlfLayout getLayout(List<Packet> packets,
-			BinConfiguration bins) {
+			BinConfiguration bins,float alfa,float beta) {
 		ArrayList<CoreBin> coreBins = new ArrayList<CoreBin>();
 
 		for (int i = 0; i < packets.size(); i++) {
@@ -427,20 +427,39 @@ public class PackingProcedures {
 		}
 
 		ArrayList<Bin> resultBins = new ArrayList<Bin>();
-		double fitness = 0;
+		double oldFitness = 0;
+		double minOccupiedArea = Double.MAX_VALUE;
+		int minAreaIndex = -1;
+		
+		double binArea = bins.getHeight() * bins.getWidth();
+		
 		for (int i = 0; i < coreBins.size(); i++) {
 			Bin appBin = new Bin(bins, i);
 			for (int j = 0; j < coreBins.get(i).packets.size(); j++) {
 				appBin.addPacket(coreBins.get(i).packets.get(j));
 			}
-			fitness += coreBins.get(i).getFitness();
+			appBin.setDensity((float) (coreBins.get(i).occupiedArea /binArea));
+			if(coreBins.get(i).occupiedArea < minOccupiedArea)
+			{
+				minOccupiedArea = coreBins.get(i).occupiedArea;
+				minAreaIndex = i;
+			}
 			resultBins.add(appBin);
 		}
-
-		fitness = fitness / coreBins.size();
-		fitness = fitness + 100 * coreBins.size();
-
-		return new BlfLayout(resultBins, (int) fitness);
+		
+		/*oldFitness = oldFitness / coreBins.size();
+		oldFitness = oldFitness + 100 * coreBins.size();
+		 */
+		
+		
+		//fitness relativa al bin pi vuoto
+		double minBinFitness = alfa * (coreBins.get(minAreaIndex).higherPoint.y/bins.getHeight()) 
+				- beta * (minOccupiedArea/binArea);
+		
+		double newFitness = 100 * (coreBins.size()) + 50 + 50 *minBinFitness;
+		
+		
+		return new BlfLayout(resultBins, (int) newFitness);
 	}
 
 }
