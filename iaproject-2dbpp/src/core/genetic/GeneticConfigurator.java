@@ -5,13 +5,11 @@ import gui.common.JFloatTextField;
 import gui.common.JIntegerTextField;
 
 import java.awt.Dimension;
-import java.awt.GridLayout;
 
 import javax.swing.GroupLayout;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 
 import core.AbstractConfigurator;
 import core.AbstractCore;
@@ -24,6 +22,8 @@ public class GeneticConfigurator extends AbstractConfigurator<GeneticConfigurati
 	private final JFloatTextField pRotationField = new JFloatTextField();
 	private final JFloatTextField pOrderField = new JFloatTextField();
 	private final JFloatTextField pCrossoverField = new JFloatTextField();
+	private final JFloatTextField alphaField = new JFloatTextField();
+	private final JFloatTextField betaField = new JFloatTextField();
 	
 	private final JPanel completePane;
 	
@@ -43,11 +43,19 @@ public class GeneticConfigurator extends AbstractConfigurator<GeneticConfigurati
 		pCrossoverField.setPreferredSize(textFieldDim);
 		pCrossoverField.setMinimumSize(textFieldDim);
 		pCrossoverField.setMaximumSize(textFieldDim);
+		alphaField.setPreferredSize(textFieldDim);
+		alphaField.setMinimumSize(textFieldDim);
+		alphaField.setMaximumSize(textFieldDim);
+		betaField.setPreferredSize(textFieldDim);
+		betaField.setMinimumSize(textFieldDim);
+		betaField.setMaximumSize(textFieldDim);
 
 		JLabel populationLbl = new JLabel("Population size");
 		JLabel pRotationLbl = new JLabel("<html>Mutation probability<br/>(rotation based)</html>");
 		JLabel pOrderLbl = new JLabel("<html>Mutation probability<br/>(order based)</html>");
 		JLabel pCrossoverLbl = new JLabel("Crossover probability");
+		JLabel alphaLbl = new JLabel("Fitness I param (alpha)");
+		JLabel betaLbl = new JLabel("Fitness II param (beta)");
 
 		completePane = new JPanel();
 		GroupLayout layout = new GroupLayout(completePane);
@@ -61,12 +69,18 @@ public class GeneticConfigurator extends AbstractConfigurator<GeneticConfigurati
 						.addComponent(pRotationLbl)
 						.addComponent(pOrderLbl)
 						.addComponent(pCrossoverLbl)
+						.addComponent(alphaLbl)
+						.addComponent(betaLbl)
+
 				)
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
 						.addComponent(populationField)
 						.addComponent(pRotationField)
 						.addComponent(pOrderField)
 						.addComponent(pCrossoverField)
+						.addComponent(alphaField)
+						.addComponent(betaField)
+
 				)
 		);
 		layout.setVerticalGroup(layout.createSequentialGroup()
@@ -86,25 +100,16 @@ public class GeneticConfigurator extends AbstractConfigurator<GeneticConfigurati
 						.addComponent(pCrossoverLbl)
 						.addComponent(pCrossoverField)
 				)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(alphaLbl)
+						.addComponent(alphaField)
+				)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(betaLbl)
+						.addComponent(betaField)
+				)
 		);
 		
-/*
-		completePane.add(new JLabel("Population size"));
-		populationField.setColumns(10);
-		completePane.add(populationField);
-		
-		completePane.add(new JLabel("<html>Mutation probability<br/>(rotation based)</html>"));
-		pRotationField.setColumns(10);
-		completePane.add(pRotationField);
-		
-		completePane.add(new JLabel("<html>Mutation probability<br/>(order based)</html>"));
-		pOrderField.setColumns(10);
-		completePane.add(pOrderField);
-		
-		completePane.add(new JLabel("Crossover probability"));
-		pCrossoverField.setColumns(10);
-		completePane.add(pCrossoverField);
-*/
 	}
 	
 	@Override
@@ -155,7 +160,26 @@ public class GeneticConfigurator extends AbstractConfigurator<GeneticConfigurati
 			throw new DataParsingException("Probability should be in [0,1]");
 		}
 		
-		return new GeneticConfiguration(ps,rp,op,cp);
+		
+		Float a = alphaField.getValue();
+		if (a == null) {
+			throw new DataParsingException("No Alpha value specified ");
+		}
+		if (a.floatValue() < 0 || a.floatValue() > 1) {
+			throw new DataParsingException("Alpha should be in [0,1]");
+		}
+		
+		
+		Float b = betaField.getValue();
+		if (b == null) {
+			throw new DataParsingException("No Beta value specified");
+		}
+		if (b.floatValue() < 0 || b.floatValue() > 1) {
+			throw new DataParsingException("Beta should be in [0,1]");
+		}
+		
+		
+		return new GeneticConfiguration(ps,rp,op,cp,a,b);
 	}
 
 	@Override
@@ -164,7 +188,8 @@ public class GeneticConfigurator extends AbstractConfigurator<GeneticConfigurati
 		pRotationField.setValue(config.getRotateMutationProbability());
 		pOrderField.setValue(config.getOrderMutationProbability());
 		pCrossoverField.setValue(config.getCrossoverProbability());
-		
+		alphaField.setValue(config.getAlpha());
+		alphaField.setValue(config.getBeta());
 	}
 
 }

@@ -17,15 +17,6 @@ class Individual {
 	private BlfLayout layout;
 	private final Random rand = new Random(System.currentTimeMillis());
 
-/*	public Individual(List<PacketConfiguration> packetsInfo, BinConfiguration binsInfo) {		
-		// translate input from List<PacketConfigutation> to List<Packet>
-		this.sequence = ManageSolution.buildPacketList(packetsInfo);
-		java.util.Collections.shuffle(this.sequence, rand);
-		// calculate blf layout and related fitness of the individual
-		this.calculateLayout(binsInfo);
-		
-	}*/
-
 	public Individual(List<Packet> packetList) {
 		this.sequence = new ArrayList<Packet>(packetList.size());
 		for (Packet gene: packetList) {
@@ -65,8 +56,8 @@ class Individual {
 		return this.layout.getBins();
 	}
 
-	public float calculateLayout(BinConfiguration binsDim) {
-		this.layout = PackingProcedures.getLayout( this.sequence, binsDim);
+	public float calculateLayout(BinConfiguration binsDim, float alpha, float beta) {
+		this.layout = PackingProcedures.getLayout( this.sequence, binsDim, alpha, beta);
 		return this.layout.getFitness();
 	}
 

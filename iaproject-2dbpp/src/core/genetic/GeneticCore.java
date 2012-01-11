@@ -22,9 +22,9 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 	private final float pRotateMutation;
 	private final float pOrderMutation;
 	private final float pCrossover;
+	private final float alpha;
+	private final float beta;
 	// problem fields
-	/*	private final int binsWidth;
-	private final int binsHeight;*/
 	private final BinConfiguration binsDim;
 	private final List<Packet> packetList;
 	// core vars
@@ -42,23 +42,23 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 		this.pRotateMutation = conf.getCoreConfiguration().getRotateMutationProbability();
 		this.pOrderMutation = conf.getCoreConfiguration().getOrderMutationProbability();
 		this.pCrossover = conf.getCoreConfiguration().getCrossoverProbability();
+		this.alpha = conf.getCoreConfiguration().getAlpha();
+		this.beta = conf.getCoreConfiguration().getBeta();
 		
 		// get problem configuration
 		this.binsDim = conf.getProblemConfiguration().getBin();
 		this.packetList = ManageSolution.buildPacketList(
 				conf.getProblemConfiguration().getPackets() , binsDim );
-/*		this.binsWidth = conf.getProblemConfiguration().getBin().getWidth();
-		this.binsHeight = conf.getProblemConfiguration().getBin().getHeight(); */
 		
 		// initialize core 
 		this.population = new Individual[this.populationSize];
 		// the first individual is initialized as the sequence of packets comes
 		this.population[0] = new Individual(packetList);
-		this.population[0].calculateLayout(binsDim);
+		this.population[0].calculateLayout(binsDim, alpha, beta);
 		for( int i=1 ; i < this.populationSize; i++ ) {
 			this.population[i] = new Individual(packetList);
 			this.population[i].shuffleGenome();
-			this.population[i].calculateLayout(binsDim);
+			this.population[i].calculateLayout(binsDim, alpha, beta);
 		}
 		this.bestIndividual = null;
 		this.currentFitness = Float.MAX_VALUE;
@@ -75,7 +75,7 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 			Individual mother = selectIndividual();
 			Individual child = crossover(father, mother, pCrossover);
 			child.mutate(pRotateMutation, pOrderMutation);
-			child.calculateLayout(binsDim);
+			child.calculateLayout(binsDim, alpha, beta);
 			bestIndividual = replaceWorstIndividual(child);
 						
 			// publish results only if better

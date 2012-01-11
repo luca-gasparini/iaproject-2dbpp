@@ -9,13 +9,18 @@ public class GeneticConfiguration implements Serializable {
 	private Float pRotateMutation;
 	private Float pOrderMutation;
 	private Float pCrossover;
+	private Float alpha;
+	private Float beta;
+	
 
 	
-	public GeneticConfiguration(Integer ps, Float rp, Float op, Float cp) {
+	public GeneticConfiguration(Integer ps, Float rp, Float op, Float cp,Float a,Float b) {
 		this.populationSize = ps;
 		this.pRotateMutation = rp;
 		this.pOrderMutation = op;
 		this.pCrossover = cp;
+		this.alpha = a;
+		this.beta = b;
 	}
 
 	public int getPopulationSize() {
@@ -34,4 +39,11 @@ public class GeneticConfiguration implements Serializable {
 		return pCrossover;
 	}
 
+	public float getAlpha() {
+		return alpha;
+	}
+	
+	public float getBeta() {
+		return beta;
+	}
 }
