@@ -80,8 +80,8 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 	@Override
 	protected void doWork() {
 		
-		List<Packet> packets = Collections.unmodifiableList(ManageSolution.buildPacketList(
-				problemConf.getPackets(), binConf));
+		List<Packet> packets = ManageSolution.buildPacketList(
+				problemConf.getPackets(), binConf);
 		
 		/* create an initial dummy solution:
 		 * this step is not done using PackingProcedures because resulting
@@ -107,6 +107,8 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			TabooBin bin = new TabooBin(packet);
 			bins.add(bin);
 		}
+		// in order to prevent further modifications to packet list
+		packets = Collections.unmodifiableList(packets);
 		// search first target bin
 		int targetBin = searchTargetBin(bins, packets.size(), 1);
 		// prepare some needed variables

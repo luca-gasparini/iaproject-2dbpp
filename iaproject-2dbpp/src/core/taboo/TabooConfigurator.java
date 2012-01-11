@@ -4,7 +4,9 @@ import gui.OptimumPainter;
 import gui.common.JFloatTextField;
 import gui.common.JIntegerTextField;
 
+import javax.swing.GroupLayout;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import core.AbstractConfigurator;
@@ -28,6 +30,68 @@ public class TabooConfigurator extends AbstractConfigurator<TabooConfiguration> 
 	public TabooConfigurator() {
 		configurationPanel = new JPanel();
 		
+		JLabel alphaLbl = new JLabel("<html>ALPHA<br/>(Filling func. parm [def 20])</html>");
+		JLabel densityFactorLbl = new JLabel("<html>Density gain<br/>(Fitness func. parm)</html>");
+		JLabel heightFactorLbl = new JLabel("<html>Height gain<br/>(Fitness function parm)</html>");
+		JLabel maxNeighSizeLbl = new JLabel("<html>Max neighbours size</html>");
+		JLabel dMaxLbl = new JLabel("<html>d_max</html>");
+		JLabel firstListTenureLbl = new JLabel("<html>First list tenure</html>");
+		JLabel otherListTenureLbl = new JLabel("<html>Other list tenure</html>");
+		
+		GroupLayout gp = new GroupLayout(configurationPanel);
+		configurationPanel.setLayout(gp);
+		gp.setAutoCreateContainerGaps(true);
+		gp.setAutoCreateGaps(true);
+		gp.setHorizontalGroup(gp.createSequentialGroup()
+				.addGroup(gp.createParallelGroup(GroupLayout.Alignment.TRAILING)
+						.addComponent(alphaLbl)
+						.addComponent(densityFactorLbl)
+						.addComponent(heightFactorLbl)
+						.addComponent(maxNeighSizeLbl)
+						.addComponent(dMaxLbl)
+						.addComponent(firstListTenureLbl)
+						.addComponent(otherListTenureLbl)
+						)
+				.addGroup(gp.createParallelGroup(GroupLayout.Alignment.LEADING)
+						.addComponent(ALPHA)
+						.addComponent(DENSITY_FACTOR)
+						.addComponent(HEIGHT_FACTOR)
+						.addComponent(MAX_NEIGH_SIZE)
+						.addComponent(D_MAX)
+						.addComponent(FIRST_LIST_TENURE)
+						.addComponent(OTHER_LIST_TENURE)
+						)
+		);
+		gp.setVerticalGroup(gp.createSequentialGroup()
+				.addGroup(gp.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(alphaLbl)
+						.addComponent(ALPHA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						)
+				.addGroup(gp.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(densityFactorLbl)
+						.addComponent(DENSITY_FACTOR, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						)
+				.addGroup(gp.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(heightFactorLbl)
+						.addComponent(HEIGHT_FACTOR, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						)
+				.addGroup(gp.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(maxNeighSizeLbl)
+						.addComponent(MAX_NEIGH_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						)
+				.addGroup(gp.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(dMaxLbl)
+						.addComponent(D_MAX, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						)
+				.addGroup(gp.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(firstListTenureLbl)
+						.addComponent(FIRST_LIST_TENURE, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						)
+				.addGroup(gp.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(otherListTenureLbl)
+						.addComponent(OTHER_LIST_TENURE, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						)
+		);
 	}
 	
 	@Override
