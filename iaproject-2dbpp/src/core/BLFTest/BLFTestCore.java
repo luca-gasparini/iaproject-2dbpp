@@ -53,7 +53,7 @@ public class BLFTestCore extends AbstractCore<BLFTestCoreConfiguration, List<Bin
 			packets = ManageSolution.buildPacketSolutionTestRotate(pkConf, rotate);
 		}
 				
-		BlfLayout layout = BLFCore.PackingProcedures.getLayout(packets, binConf);
+		BlfLayout layout = BLFCore.PackingProcedures.getLayout(packets, binConf,1,1);
 			
 		final List<Bin> bins = layout.getBins();
 		final float fitness = layout.getFitness();

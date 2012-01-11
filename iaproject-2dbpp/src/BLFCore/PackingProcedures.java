@@ -427,7 +427,6 @@ public class PackingProcedures {
 		}
 
 		ArrayList<Bin> resultBins = new ArrayList<Bin>();
-		double oldFitness = 0;
 		double minOccupiedArea = Double.MAX_VALUE;
 		int minAreaIndex = -1;
 		
@@ -447,9 +446,7 @@ public class PackingProcedures {
 			resultBins.add(appBin);
 		}
 		
-		/*oldFitness = oldFitness / coreBins.size();
-		oldFitness = oldFitness + 100 * coreBins.size();
-		 */
+
 		
 		
 		//fitness relativa al bin più vuoto
