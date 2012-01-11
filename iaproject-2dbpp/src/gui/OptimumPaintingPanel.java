@@ -91,7 +91,13 @@ public class OptimumPaintingPanel extends JPanel {
 		}
 		
 		public void removeAllElements() {
+			if (optimums.isEmpty()) {
+				return;
+			}
+			
+			int size = optimums.size();
 			this.optimums.clear();
+			fireIntervalRemoved(this, 0, size - 1);
 		}
 		
 		@Override
