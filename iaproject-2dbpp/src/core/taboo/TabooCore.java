@@ -7,8 +7,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Set;
-import java.util.TreeSet;
 
 import logic.Bin;
 import logic.BinConfiguration;
@@ -161,8 +159,10 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 	private SearchResult SEARCH(ArrayList<TabooBin> bins, int targetBin, int neighSize) {
 		// MUST NOT MODIFY bins: use SearchResult to return new bin configuration (good ;))
 		
+		// same variable names of SEARCH pseudocode 
+
 		float penaltyStar = Float.POSITIVE_INFINITY;
-		// Doing.. ;)
+
 		int k = neighSize;
 		List<Packet> packetsIntoTargetBin = bins.get(targetBin).getPackets();
 		
@@ -170,10 +170,34 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			List<Kupla> ktuple = buildKupleSetWithoutTargetBin(k, targetBin, bins).getList();
 			
 			for (Kupla u: ktuple) {
+				
+				List<Packet> s = this.buildS(getPacketsFromBins(u, bins), j);
 				float penalty = Float.POSITIVE_INFINITY;
+				
+				// call BLF Layout
+				BlfLayout layout = PackingProcedures.getLayout(s, binConf, 1, 1);
+				List<Bin> binsLayout = layout.getBins();
+				int as = bins.size();
+				
+				if (as < k) {
+					List<TabooBin> newSolution = updateSolution(u, bins, binsLayout, targetBin, j, 1);
+					k = Math.max(1, k-1);
+					return new SearchResult(false, -1, null, -1); // TODO
+				}
+				
+				if (as == k) {
+					// TODO
+					return new SearchResult(false, -1, null, -1);
+				}
+				
+				if (as == k+1 && k>1) {
+					// TODO
+				}
+				penaltyStar = Math.min(penaltyStar, penalty); 
 			}
 		}
-		
+	
+		// TODO
 		return new SearchResult(false, -1, null, -1);
 	}
 	
@@ -339,6 +363,15 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			return true;
 		}
 		
+		public boolean containsInteger(int value) {
+			
+			for (Integer num: this.singleUpla) {
+				if (num==value)
+					return true;
+			}
+			return false;
+		}
+		
 		public String toString() {
 			String str = new String();
 			
@@ -459,6 +492,87 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			}
 		}
 		return setK;		
+	}
+	
+	private List<Packet> getPacketsFromBins(Kupla si, ArrayList<TabooBin> bins) {
+		
+		List<Packet> s = new ArrayList<Packet>();
+		
+		for (int i=0; i<si.getSize(); i++) {
+			TabooBin kbin = bins.get(si.getIntegerAtIndex(i));
+			List<Packet> kbinPackets = kbin.getPackets();
+			
+			for(Packet p: kbinPackets) {
+				s.add(p);
+			}
+		}
+		
+		return s;
+	}
+	
+	/*
+	 * Crea Lista Pacchetti S
+	 * per ora, il pacchetto j viene inserito alla fine della lista
+	 * (la posizione del pacchetto varia la soluzione prodotta dall'algoritmo BLF)
+	 */
+	private List<Packet> buildS (List<Packet> lp, Packet j) {
+		List<Packet> lpn = new ArrayList<Packet>();
+		
+		for(Packet p: lp)
+			lpn.add(p);
+		
+		lpn.add(j);
+		return lpn;
+	}
+	
+	/*
+	 * Crea la nuovaSoluzione trovata dall'algoritmo Search
+	 */
+	private List<TabooBin> updateSolution(
+			Kupla u,
+			ArrayList<TabooBin> bins,
+			List<Bin> binsLayout,
+			int targetBin,
+			Packet j,
+			int situation) {
+	
+		List<TabooBin> newSolution = new ArrayList<TabooBin>();
+		
+		if (situation==1) {
+			
+			// copy inhalterated bins
+			for (int i=0; i<bins.size(); i++) {
+				if (!u.containsInteger(i) && i!=targetBin) {
+					newSolution.add(bins.get(i));
+				}
+			}
+			
+			// copy targetBin without Packet j
+			List<Packet> packTargetBin = bins.get(targetBin).getPackets();
+			TabooBin newTargetBin = new TabooBin();
+			
+			for (Packet p: packTargetBin) {
+				if (p.getId() == j.getId())
+					continue;
+				
+				newTargetBin.addPacket(p);
+			}
+			newSolution.add(newTargetBin);
+			
+			// copy bins NewLayout
+			for (Bin b: binsLayout) {
+				TabooBin newBin = new TabooBin();
+				
+				for (Packet p: b.getList()) {
+					newBin.addPacket(p);
+				}
+				newSolution.add(newBin);
+			}
+			
+			return newSolution;
+		}
+		
+		return null;
 	}
 	
 	/* evaluate binomial (n,k) - unused till now */
