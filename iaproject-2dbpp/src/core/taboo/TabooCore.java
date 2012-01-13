@@ -212,7 +212,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 					int at = binsLayoutat.size();
 					
 					if (at==1) {
-						Float valueFF = calculateFillingFunction(tabooConf.ALPHA, binsLayout.get(0).getList(), binConf, totPkts);
+						Float valueFF = calculateFillingFunction(tabooConf.ALPHA, binsLayout.get(0).getList(), binConf, totPackets);
 						/* if (???????????) */
 					}
 					
