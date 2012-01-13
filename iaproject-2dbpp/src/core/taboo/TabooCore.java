@@ -66,6 +66,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 	private final BinConfiguration binConf;
 	private final TabooConfiguration tabooConf;
 	private final TabooListsManager tabuLists;
+	private int totPackets;
 	
 	public TabooCore(CoreConfiguration<TabooConfiguration> configuration,
 			OptimumPainter painter, Core2GuiTranslator<List<Bin>> translator) {
@@ -83,7 +84,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			
 		List<Packet> packets = ManageSolution.buildPacketList(
 				problemConf.getPackets(), binConf);
-		
+		this.totPackets = packets.size();
 		/* create an initial dummy solution:
 		 * this step is not done using PackingProcedures because resulting
 		 * fitness may be calculated in a different way than our one.
@@ -164,34 +165,57 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		float penaltyStar = Float.POSITIVE_INFINITY;
 
 		int k = neighSize;
-		List<Packet> packetsIntoTargetBin = bins.get(targetBin).getPackets();
+		TabooBin target = bins.get(targetBin);
+		List<Packet> packetsIntoTargetBin = target.getPackets();
 		
 		for (Packet j: packetsIntoTargetBin) {
 			List<Kupla> ktuple = buildKupleSetWithoutTargetBin(k, targetBin, bins).getList();
 			
 			for (Kupla u: ktuple) {
 				
-				List<Packet> s = this.buildS(getPacketsFromBins(u, bins), j);
+				List<Packet> s = buildS(getPacketsFromBins(u, bins), j);
 				float penalty = Float.POSITIVE_INFINITY;
 				
 				// call BLF Layout
-				BlfLayout layout = PackingProcedures.getLayout(s, binConf, 1, 1);
+				BlfLayout layout = PackingProcedures.getLayout(s, binConf, tabooConf.HEIGHT_FACTOR, tabooConf.DENSITY_FACTOR);
 				List<Bin> binsLayout = layout.getBins();
-				int as = bins.size();
+				int as = binsLayout.size();
 				
 				if (as < k) {
-					List<TabooBin> newSolution = updateSolution(u, bins, binsLayout, targetBin, j, 1);
+					ArrayList<TabooBin> newSolution = updateSolution(u, bins, binsLayout, targetBin, j);
 					k = Math.max(1, k-1);
-					return new SearchResult(false, -1, null, -1); // TODO
+					/*float move = prepareResult(newSolution).getFitness();
+					tabuLists.addMove(k, move);*/
+					return new SearchResult(false, k, newSolution, newSolution.size());
 				}
 				
-				if (as == k) {
-					// TODO
-					return new SearchResult(false, -1, null, -1);
+				if (as == k) { // unico caso in cui k può valere 1
+					/*
+					ArrayList<TabooBin> newSolution = updateSolution(u, bins, binsLayout, targetBin, j);
+					float move = prepareResult(newSolution).getFitness();
+					if (!tabuLists.isTabu(k, move) || // mossa non in tabu
+							(target.size()==1 && target.getPackets().get(0).getId()==j.getId())) { // targetBin={j}
+						if (target.size()==1 && target.getPackets().get(0).getId()==j.getId())
+							k = Math.max(1, k-1);
+						
+						return new SearchResult(false, k, newSolution, move);	
+					}*/
 				}
 				
 				if (as == k+1 && k>1) {
-					// TODO
+					Integer tsig = argminFillingFunctionAmongBins(binsLayout);
+					List<Packet> t = buildT(target.getPackets(), j, binsLayout.get(tsig).getList());
+					
+					// calcolo at
+					BlfLayout layoutat = PackingProcedures.getLayout(t, binConf, tabooConf.HEIGHT_FACTOR, tabooConf.DENSITY_FACTOR);
+					List<Bin> binsLayoutat = layoutat.getBins();
+					int at = binsLayoutat.size();
+					
+					if (at==1) {
+						Float valueFF = calculateFillingFunction(tabooConf.ALPHA, binsLayout.get(0).getList(), binConf, totPkts);
+						/* if (???????????) */
+					}
+					
 				}
 				penaltyStar = Math.min(penaltyStar, penalty); 
 			}
@@ -238,11 +262,11 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		assert totPkts >= 0 : "wrong number of packets " + totPkts;
 		
 		LinkedList<Couple> mins = new LinkedList<TabooCore.Couple>();
-		float value = calculateFillingFunction(tabooConf.ALPHA, bins.get(0), binConf, totPkts);
+		float value = calculateFillingFunction(tabooConf.ALPHA, bins.get(0).getPackets(), binConf, totPkts);
 		mins.add(new Couple(value, 0));
 		
 		for (int i = 1; i < bins.size(); i++) {
-			float ff = calculateFillingFunction(tabooConf.ALPHA, bins.get(i), binConf, totPkts);
+			float ff = calculateFillingFunction(tabooConf.ALPHA, bins.get(i).getPackets(), binConf, totPkts);
 			
 			// we want the bin that minimize filling function
 			if (Float.compare(ff, mins.getLast().value) < 0) {
@@ -265,12 +289,20 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		return mins.getLast().index;
 	}
 	
-	private static float calculateFillingFunction(float ALPHA, TabooBin bin, BinConfiguration binConf, int totPkts) {
+	private static float calculateFillingFunction(float ALPHA, List<Packet> pkts, BinConfiguration binConf, int totPkts) {
 		int binArea = binConf.getWidth() * binConf.getHeight();
 		
-		return ALPHA * (bin.sumPktAreas() / binArea) - (bin.size() / totPkts);
+		return ALPHA * (sumPktAreas(pkts) / binArea) - (pkts.size() / totPkts);
 	}
 	
+	private static float sumPktAreas(List<Packet> pkts) {
+		int area = 0;
+		for (Packet pkt : pkts) {
+			area += pkt.getWidth() * pkt.getHeight();
+		}
+		
+		return area;
+	}
 	
 	private CoreResult<List<Bin>> prepareResult(final List<TabooBin> tabooBins) {
 		final List<Bin> binList = new LinkedList<Bin>();
@@ -298,6 +330,21 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 				return binList;
 			}
 		};
+	}
+	
+	private Integer argminFillingFunctionAmongBins(List<Bin> binsA) {
+		
+		Float minFF = calculateFillingFunction(tabooConf.ALPHA, binsA.get(0).getList(), binConf, this.totPackets);
+		int minInd = 0;
+		
+		for (int i=1; i<binsA.size(); i++) {
+			Float currentFF = calculateFillingFunction(tabooConf.ALPHA, binsA.get(i).getList(), binConf, this.totPackets);
+			if (currentFF < minFF) {
+				minFF = currentFF;
+				minInd=i;
+			}
+		}
+		return minInd;
 	}
 
 	@Override
@@ -525,54 +572,64 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		return lpn;
 	}
 	
+	private List<Packet> buildT (List<Packet> s1, Packet j, List<Packet> s2) {
+		
+		List<Packet> lpn = new ArrayList<Packet>();
+		
+		for(Packet p: s1) {
+			if (p.getId() == j.getId())
+				continue;
+			lpn.add(p);
+		}
+			
+		for(Packet p: s2)
+			lpn.add(p);
+		
+		return lpn;
+	}
+	
 	/*
 	 * Crea la nuovaSoluzione trovata dall'algoritmo Search
 	 */
-	private List<TabooBin> updateSolution(
+	private ArrayList<TabooBin> updateSolution(
 			Kupla u,
 			ArrayList<TabooBin> bins,
 			List<Bin> binsLayout,
 			int targetBin,
-			Packet j,
-			int situation) {
+			Packet j) {
 	
-		List<TabooBin> newSolution = new ArrayList<TabooBin>();
+		ArrayList<TabooBin> newSolution = new ArrayList<TabooBin>();
 		
-		if (situation==1) {
-			
-			// copy inhalterated bins
-			for (int i=0; i<bins.size(); i++) {
-				if (!u.containsInteger(i) && i!=targetBin) {
-					newSolution.add(bins.get(i));
-				}
+		// copy inhalterated bins
+		for (int i=0; i<bins.size(); i++) {
+			if (!u.containsInteger(i) && i!=targetBin) {
+				newSolution.add(bins.get(i));
 			}
-			
-			// copy targetBin without Packet j
-			List<Packet> packTargetBin = bins.get(targetBin).getPackets();
-			TabooBin newTargetBin = new TabooBin();
-			
-			for (Packet p: packTargetBin) {
-				if (p.getId() == j.getId())
-					continue;
-				
-				newTargetBin.addPacket(p);
-			}
-			newSolution.add(newTargetBin);
-			
-			// copy bins NewLayout
-			for (Bin b: binsLayout) {
-				TabooBin newBin = new TabooBin();
-				
-				for (Packet p: b.getList()) {
-					newBin.addPacket(p);
-				}
-				newSolution.add(newBin);
-			}
-			
-			return newSolution;
 		}
+			
+		// copy targetBin without Packet j
+		List<Packet> packTargetBin = bins.get(targetBin).getPackets();
+		TabooBin newTargetBin = new TabooBin();
 		
-		return null;
+		for (Packet p: packTargetBin) {
+			if (p.getId() == j.getId())
+				continue;
+					
+			newTargetBin.addPacket(p);
+		}
+		newSolution.add(newTargetBin);
+			
+		// copy bins NewLayout
+		for (Bin b: binsLayout) {
+			TabooBin newBin = new TabooBin();
+			
+			for (Packet p: b.getList()) {
+				newBin.addPacket(p);
+			}
+			newSolution.add(newBin);
+		}
+			
+		return newSolution;
 	}
 	
 	/* evaluate binomial (n,k) - unused till now */
