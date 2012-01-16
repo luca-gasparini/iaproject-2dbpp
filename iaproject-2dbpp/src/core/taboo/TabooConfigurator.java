@@ -18,8 +18,8 @@ import core.DataParsingException;
 public class TabooConfigurator extends AbstractConfigurator<TabooConfiguration> {
 	
 	public final JFloatTextField ALPHA = new JFloatTextField();
-	public final JIntegerTextField DENSITY_FACTOR = new JIntegerTextField();
-	public final JIntegerTextField HEIGHT_FACTOR = new JIntegerTextField();
+	public final JFloatTextField DENSITY_FACTOR = new JFloatTextField();
+	public final JFloatTextField HEIGHT_FACTOR = new JFloatTextField();
 	public final JIntegerTextField MAX_NEIGH_SIZE = new JIntegerTextField();
 	public final JIntegerTextField D_MAX = new JIntegerTextField();
 	public final JIntegerTextField FIRST_LIST_TENURE = new JIntegerTextField();
@@ -102,8 +102,8 @@ public class TabooConfigurator extends AbstractConfigurator<TabooConfiguration> 
 	@Override
 	protected void setConfiguration(TabooConfiguration config) {
 		ALPHA.setValue(Float.valueOf(config.ALPHA));
-		DENSITY_FACTOR.setValue(Integer.valueOf(config.DENSITY_FACTOR));
-		HEIGHT_FACTOR.setValue(Integer.valueOf(config.HEIGHT_FACTOR));
+		DENSITY_FACTOR.setValue(Float.valueOf(config.DENSITY_FACTOR));
+		HEIGHT_FACTOR.setValue(Float.valueOf(config.HEIGHT_FACTOR));
 		MAX_NEIGH_SIZE.setValue(Integer.valueOf(config.MAX_NEIGH_SIZE));
 		D_MAX.setValue(Integer.valueOf(config.D_MAX));
 		FIRST_LIST_TENURE.setValue(Integer.valueOf(config.FIRST_LIST_TENURE));
@@ -125,12 +125,12 @@ public class TabooConfigurator extends AbstractConfigurator<TabooConfiguration> 
 			throw new DataParsingException("Alpha must be positive");
 		}
 		
-		int density_factor = DENSITY_FACTOR.getValue().intValue();
+		float density_factor = DENSITY_FACTOR.getValue().floatValue();
 		if (density_factor < 0 || density_factor > 1) {
 			throw new DataParsingException("Density factor must be [0, 1]");
 		}
 		
-		int height_factor = HEIGHT_FACTOR.getValue().intValue();
+		float height_factor = HEIGHT_FACTOR.getValue().floatValue();
 		if (height_factor < 0 || height_factor > 1) {
 			throw new DataParsingException("Height factor must be [0, 1]");
 		}

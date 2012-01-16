@@ -175,7 +175,14 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			while (ktuple.hasNext()) {
 				List<TabooBin> u = ktuple.next();
 				
-				List<Packet> s = buildS(getPacketsFromBins(u), j);
+				/*
+				 * Crea Lista Pacchetti S
+				 * per ora, il pacchetto j viene inserito alla fine della lista
+				 * (la posizione del pacchetto varia la soluzione prodotta dall'algoritmo BLF)
+				 */
+				List<Packet> s = getPacketsFromBins(u);
+				s.add(j);
+				
 				float penalty = Float.POSITIVE_INFINITY;
 				
 				// call BLF Layout
@@ -607,21 +614,6 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		}
 		
 		return s;
-	}
-	
-	/*
-	 * Crea Lista Pacchetti S
-	 * per ora, il pacchetto j viene inserito alla fine della lista
-	 * (la posizione del pacchetto varia la soluzione prodotta dall'algoritmo BLF)
-	 */
-	private List<Packet> buildS (List<Packet> lp, Packet j) {
-		List<Packet> lpn = new ArrayList<Packet>();
-		
-		for(Packet p: lp)
-			lpn.add(p);
-		
-		lpn.add(j);
-		return lpn;
 	}
 	
 	private List<Packet> buildT (List<Packet> s1, Packet j, List<Packet> s2) {

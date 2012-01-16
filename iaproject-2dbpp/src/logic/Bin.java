@@ -28,7 +28,7 @@ public class Bin { // il nome non è il massimo;
 	
 	public void addPacket(Packet p) {
 		if (containsPacket(p))
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("already contained");
 		
 		packetList.add(p);
 	}
