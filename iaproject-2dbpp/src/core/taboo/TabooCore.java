@@ -3,10 +3,14 @@ package core.taboo;
 import gui.OptimumPainter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.NoSuchElementException;
 
 import logic.Bin;
 import logic.BinConfiguration;
@@ -38,14 +42,12 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 	
 	private class DiversificationResult {
 		private final int d;
-		private final int targetBin;
 		private final ArrayList<TabooBin> newBins;
 		private final boolean shouldResetTabuLists;
 		
-		public DiversificationResult(int d, int targetBin,
+		public DiversificationResult(int d,
 				ArrayList<TabooBin> newBins, boolean shouldResetTabuLists) {
 			this.d = d;
-			this.targetBin = targetBin;
 			this.newBins = newBins;
 			this.shouldResetTabuLists = shouldResetTabuLists;
 		}
@@ -110,15 +112,15 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		}
 		// in order to prevent further modifications to packet list
 		packets = Collections.unmodifiableList(packets);
-		// search first target bin
-		int targetBin = searchTargetBin(bins, packets.size(), 1);
+		
 		// prepare some needed variables
 		int d = 1;
 		
-		//SearchResult sr = SEARCH(bins, targetBin, 1);
-		
 		while (canContinue()) {
 			int neighSize = 1;
+			
+			// search target bin
+			int targetBin = searchTargetBin(bins, packets.size(), d);
 			
 			SearchResult sr = SEARCH(bins, targetBin, neighSize);
 			// check if we have a new move
@@ -141,9 +143,6 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			if (sr.diversify) {
 				DiversificationResult dr = DIVERSIFICATION(bins, d, packets.size());
 				d = dr.d;
-				if (dr.targetBin >= 0) {
-					targetBin = dr.targetBin;
-				}
 				if (dr.newBins != null) {
 					bins = dr.newBins;
 				}
@@ -171,11 +170,15 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		ArrayList<TabooBin> packetsMovePenalty = new ArrayList<TabooBin>();
 		
 		for (Packet j: packetsIntoTargetBin) {
-			List<Kupla> ktuple = buildKupleSetWithoutTargetBin(k, targetBin, bins).getList();
+			List<TabooBin> tmpBins = new LinkedList<TabooBin>(bins);
+			tmpBins.remove(targetBin);
 			
-			for (Kupla u: ktuple) {
+			TupleIterator<TabooBin> ktuple = new TupleIterator<TabooBin>(neighSize, tmpBins);
+			
+			while (ktuple.hasNext()) {
+				List<TabooBin> u = ktuple.next();
 				
-				List<Packet> s = buildS(getPacketsFromBins(u, bins), j);
+				List<Packet> s = buildS(getPacketsFromBins(u), j);
 				float penalty = Float.POSITIVE_INFINITY;
 				
 				// call BLF Layout
@@ -256,25 +259,47 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		}
 	}
 	
-	private DiversificationResult DIVERSIFICATION(ArrayList<TabooBin> bins, int d, int totPkts) {
+	private DiversificationResult DIVERSIFICATION(final ArrayList<TabooBin> bins, int d, final int totPkts) {
 		if ((d <= bins.size()) && (d < tabooConf.D_MAX)) {
 			d++;
-			// let t be the bin with d-th smallest value of filling function
-			int newTarget = searchTargetBin(bins, totPkts, d);
-			return new DiversificationResult(d, newTarget, null, false);
+			return new DiversificationResult(d, null, false);
 		} else {
-			/* remove from the solution the floor(bins.size()/2) bins with
-			 * smallest filling function value
+			/* PHASE1: remove from the solution the floor(bins.size()/2) bins 
+			 * with smallest filling function value
 			 */
-			// TODO
-			
-			/* pack into a separate bin each item currently packed into a
-			 * removed bin
+			/* sort bins in ascending order (bins with lower ff at the begin):
+			 * computational cost O(n*log(n)) due to merge sort usage
 			 */
-			// TODO
-			ArrayList<TabooBin> newBins = null;
+			ArrayList<TabooBin> newBins = new ArrayList<TabooBin>(bins);
+			Collections.sort(newBins, new Comparator<TabooBin>() {
+				@Override
+				public int compare(TabooBin o1, TabooBin o2) {
+					float o1ff = calculateFillingFunction(tabooConf.ALPHA, o1.getPackets(), binConf, totPkts);
+					float o2ff = calculateFillingFunction(tabooConf.ALPHA, o2.getPackets(), binConf, totPkts);
+					
+					return Float.compare(o1ff, o2ff);
+				}
+			});
+			/* now remove floor(bins.size()/2) bins and save contained
+			 * pkts in removedPkts: computational cost O(n) because JDK 
+			 * specification assure that remotion from an ArrayList runs 
+			 * in constant time 
+			 */
+			List<Packet> removedPkts = new ArrayList<Packet>();
+			for (int i = 0; i < bins.size() / 2; i++) {
+				TabooBin remBin = newBins.remove(0);
+				removedPkts.addAll(remBin.getPackets());
+			}
 			
-			return new DiversificationResult(1, -1, newBins, true);
+			/* PHASE2: pack into a separate bin each item currently packed 
+			 * into a removed bin
+			 */
+			for (Packet packet : removedPkts) {
+				TabooBin addedBin = new TabooBin(packet);
+				newBins.add(addedBin);
+			}
+			
+			return new DiversificationResult(1, newBins, true);
 		}
 	}
 	
@@ -387,206 +412,285 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		return false;
 	}
 	
-	private class Kupla {
-		private List<Integer> singleUpla;
+	/**
+	 * Returns all possible <code>T_size</code>-uples from given collection.
+	 * Each t-uple is created only on demand, that is, when {@link #next()}
+	 * is called.
+	 * 
+	 * @param <E>
+	 */
+	public class TupleIterator<E> implements Iterator<List<E>> {
 		
-		public Kupla() {
-			this.singleUpla = new ArrayList<Integer>();
-		}
+		private final Collection<? extends E> collection;
+		private final Iterator<List<E>> subIterator;
 		
-		public Kupla(List<Integer> l) {
-			List<Integer> newList = new ArrayList<Integer>();
-			
-			for (Integer num: l) {
-				newList.add(num);
+		private List<E> currentSubElement = null;
+		private Iterator<E> remElmIt = null;
+		
+		public TupleIterator(int T_size, Collection<E> collection) {
+			if (T_size <= 0) {
+				throw new IllegalArgumentException("T must be positive");
 			}
-			this.singleUpla = newList;
-		}
-		
-		public List<Integer> getList() {
-			return this.singleUpla;
-		}
-		
-		public void add(Integer num) {
-			singleUpla.add(num);
-		}
-		
-		public int getSize() {
-			return singleUpla.size();
-		}
-		
-		public Integer getIntegerAtIndex(int i) {
-			if (singleUpla.isEmpty() || i>=this.getSize())
-				throw new IllegalStateException();
-			
-			return singleUpla.get(i);
-		}
-		
-		public Integer getLast() {
-			return this.getIntegerAtIndex(singleUpla.size()-1);
-		}
-		
-		public Kupla getPrefix() {
-			
-			if (this.getSize()==0 || this.getSize()==1)
-				return new Kupla();
-						
-			return new Kupla(singleUpla.subList(0, this.getSize()-1));
-		}
-		
-		public boolean equals(Kupla compareUpla) {
-			if (singleUpla.size() != compareUpla.getSize())
-				return false;
-			
-			for (int i=0; i<this.getSize(); i++) {
-				if (this.getIntegerAtIndex(i) != compareUpla.getIntegerAtIndex(i))
-					return false;
-			}
-			return true;
-		}
-		
-		public boolean containsInteger(int value) {
-			
-			for (Integer num: this.singleUpla) {
-				if (num==value)
-					return true;
-			}
-			return false;
-		}
-		
-		public String toString() {
-			String str = new String();
-			
-			for (int i=0; i<singleUpla.size(); i++)
-				str = str.concat(singleUpla.get(i).toString());
-			
-			return str;
-		}
-	}
-	
-	private class SetKupla {
-	
-		private List<Kupla> set;
-		
-		public SetKupla() {
-			set = new ArrayList<Kupla>();
-		}
-		
-		public void add(Kupla u) {
-			set.add(u);
-		}
-		
-		public int size() {
-			return set.size();
-		}
-		
-		public Kupla get(int index) {
-			return set.get(index);
-		}
-		
-		public List<Kupla> getList() {
-			return this.set;
-		}
-		
-		public String toString() {
-			
-			String printSet = new String();
-			
-			for (Kupla upla: set) {
-				printSet = printSet.concat(upla.toString());
-				printSet = printSet.concat("\n");
+			if (collection == null) {
+				throw new IllegalArgumentException("Null collection");
 			}
 			
-			return printSet;
-		}
-	}
-	
-	private class ManageListUple {
-		
-		private List<SetKupla> subSets;
-		
-		public ManageListUple() {
-			this.subSets = new ArrayList<SetKupla>();
-		}
-		
-		public void addSubSets(SetKupla subset) {
-			subSets.add(subset);
-		}
-		
-		public SetKupla getKSubSet(int k) {
-			return subSets.get(k);
-		}
-		
-		public void printSets() {
-			for (int k=0; k<subSets.size(); k++) {
-				System.out.println("k = "+k);
-				System.out.println(subSets.get(k).toString());
-			}
-		}
-	}
-	
-	private SetKupla buildKupleSetWithoutTargetBin(int k, int target, ArrayList<TabooBin> bins) {
-		if (k==0)
-			return new SetKupla();
-		
-		if (target<0)
-			return new SetKupla();
-		
-		ManageListUple mlp = new ManageListUple();
-		
-		// singleton TabooBin
-		SetKupla singleTons = new SetKupla();
-		
-		for (int j=0; j<bins.size(); j++) {
-			if (j!=target) {
-				Kupla u = new Kupla();
-				u.add(j);
-				singleTons.add(u);
-			}
-		}
-		mlp.addSubSets(singleTons);
-		
-		// nosingleton TabooBin
-		for (int i=2; i<=k; i++) {
-			mlp.addSubSets(buildSetKUple(i, mlp.getKSubSet(i-2)));
-		}
-		//mlp.printSets();
-		return mlp.getKSubSet(k-1);
-	}
-	
-	private SetKupla buildSetKUple (int k, SetKupla listSetKLessOne) {
-		
-		int dimList = listSetKLessOne.size();
-		SetKupla setK = new SetKupla();
-		
-		for (int i=0; i<dimList-1; i++) {
-			Kupla pre1 = listSetKLessOne.get(i).getPrefix();
+			this.collection = collection;
 			
-			for (int j=i+1; j<dimList; j++) {
-				Kupla pre2 = listSetKLessOne.get(j).getPrefix();
-				
-				if (pre1.equals(pre2)) {
-					Kupla newUpla = new Kupla(pre1.getList());
-					newUpla.add(listSetKLessOne.get(i).getLast());
-					newUpla.add(listSetKLessOne.get(j).getLast());
-					setK.add(newUpla);
+			if (T_size > 1) {
+				this.subIterator = new TupleIterator<E>(T_size - 1, collection);
+				this.currentSubElement = subIterator.next();
+				this.remElmIt = prepareRemainingElements(currentSubElement).iterator();
+			} else {
+				this.subIterator = Collections.<List<E>>emptyList().iterator();
+				this.currentSubElement = Collections.emptyList();
+				this.remElmIt = collection.iterator();
+			}
+		}
+		
+		/**
+		 * Perform set difference <code>{@link #collection} \ currentSubElement</code> 
+		 * returning resulting set.
+		 * 
+		 * @param currentSubElement
+		 * @return
+		 */
+		private List<E> prepareRemainingElements(List<E> currentSubElement) {
+			assert currentSubElement != null : "null currentSubElement";
+			
+			// calculate remainingElements
+			LinkedList<E> remainingElements = new LinkedList<E>(collection);
+			remainingElements.removeAll(currentSubElement);
+			
+			return remainingElements;
+		}
+		
+		public boolean hasNext() {
+			return remElmIt.hasNext() || subIterator.hasNext();
+		}
+
+		public List<E> next() {
+			assert remElmIt != null : "null remElmIt";
+			assert subIterator != null : "null subIterator";
+			assert currentSubElement != null : "null currentSubElement";
+			
+			if (!remElmIt.hasNext()) {
+				if (subIterator.hasNext()) {
+					currentSubElement = subIterator.next();
+					this.remElmIt = prepareRemainingElements(currentSubElement).iterator();
+				} else {
+					throw new NoSuchElementException();
 				}
 			}
+			
+			E elm = remElmIt.next();
+			
+			List<E> toRet = new ArrayList<E>(currentSubElement);
+			toRet.add(elm);
+			
+			return toRet;
 		}
-		return setK;		
+
+		public void remove() {
+			throw new UnsupportedOperationException("Cannot remove");
+		}
 	}
 	
-	private List<Packet> getPacketsFromBins(Kupla si, ArrayList<TabooBin> bins) {
+//	private class Kupla {
+//		private List<Integer> singleUpla;
+//		
+//		public Kupla() {
+//			this.singleUpla = new ArrayList<Integer>();
+//		}
+//		
+//		public Kupla(List<Integer> l) {
+//			List<Integer> newList = new ArrayList<Integer>();
+//			
+//			for (Integer num: l) {
+//				newList.add(num);
+//			}
+//			this.singleUpla = newList;
+//		}
+//		
+//		public List<Integer> getList() {
+//			return this.singleUpla;
+//		}
+//		
+//		public void add(Integer num) {
+//			singleUpla.add(num);
+//		}
+//		
+//		public int getSize() {
+//			return singleUpla.size();
+//		}
+//		
+//		public Integer getIntegerAtIndex(int i) {
+//			if (singleUpla.isEmpty() || i>=this.getSize())
+//				throw new IllegalStateException();
+//			
+//			return singleUpla.get(i);
+//		}
+//		
+//		public Integer getLast() {
+//			return this.getIntegerAtIndex(singleUpla.size()-1);
+//		}
+//		
+//		public Kupla getPrefix() {
+//			
+//			if (this.getSize()==0 || this.getSize()==1)
+//				return new Kupla();
+//						
+//			return new Kupla(singleUpla.subList(0, this.getSize()-1));
+//		}
+//		
+//		public boolean equals(Kupla compareUpla) {
+//			if (singleUpla.size() != compareUpla.getSize())
+//				return false;
+//			
+//			for (int i=0; i<this.getSize(); i++) {
+//				if (this.getIntegerAtIndex(i) != compareUpla.getIntegerAtIndex(i))
+//					return false;
+//			}
+//			return true;
+//		}
+//		
+//		public boolean containsInteger(int value) {
+//			
+//			for (Integer num: this.singleUpla) {
+//				if (num==value)
+//					return true;
+//			}
+//			return false;
+//		}
+//		
+//		public String toString() {
+//			String str = new String();
+//			
+//			for (int i=0; i<singleUpla.size(); i++)
+//				str = str.concat(singleUpla.get(i).toString());
+//			
+//			return str;
+//		}
+//	}
+//	
+//	private class SetKupla {
+//	
+//		private List<Kupla> set;
+//		
+//		public SetKupla() {
+//			set = new ArrayList<Kupla>();
+//		}
+//		
+//		public void add(Kupla u) {
+//			set.add(u);
+//		}
+//		
+//		public int size() {
+//			return set.size();
+//		}
+//		
+//		public Kupla get(int index) {
+//			return set.get(index);
+//		}
+//		
+//		public List<Kupla> getList() {
+//			return this.set;
+//		}
+//		
+//		public String toString() {
+//			
+//			String printSet = new String();
+//			
+//			for (Kupla upla: set) {
+//				printSet = printSet.concat(upla.toString());
+//				printSet = printSet.concat("\n");
+//			}
+//			
+//			return printSet;
+//		}
+//	}
+//	
+//	private class ManageListUple {
+//		
+//		private List<SetKupla> subSets;
+//		
+//		public ManageListUple() {
+//			this.subSets = new ArrayList<SetKupla>();
+//		}
+//		
+//		public void addSubSets(SetKupla subset) {
+//			subSets.add(subset);
+//		}
+//		
+//		public SetKupla getKSubSet(int k) {
+//			return subSets.get(k);
+//		}
+//		
+//		public void printSets() {
+//			for (int k=0; k<subSets.size(); k++) {
+//				System.out.println("k = "+k);
+//				System.out.println(subSets.get(k).toString());
+//			}
+//		}
+//	}
+//	
+//	private SetKupla buildKupleSetWithoutTargetBin(int k, int target, ArrayList<TabooBin> bins) {
+//		if (k==0)
+//			return new SetKupla();
+//		
+//		if (target<0)
+//			return new SetKupla();
+//		
+//		ManageListUple mlp = new ManageListUple();
+//		
+//		// singleton TabooBin
+//		SetKupla singleTons = new SetKupla();
+//		
+//		for (int j=0; j<bins.size(); j++) {
+//			if (j!=target) {
+//				Kupla u = new Kupla();
+//				u.add(j);
+//				singleTons.add(u);
+//			}
+//		}
+//		mlp.addSubSets(singleTons);
+//		
+//		// nosingleton TabooBin
+//		for (int i=2; i<=k; i++) {
+//			mlp.addSubSets(buildSetKUple(i, mlp.getKSubSet(i-2)));
+//		}
+//		//mlp.printSets();
+//		return mlp.getKSubSet(k-1);
+//	}
+//	
+//	private SetKupla buildSetKUple (int k, SetKupla listSetKLessOne) {
+//		
+//		int dimList = listSetKLessOne.size();
+//		SetKupla setK = new SetKupla();
+//		
+//		for (int i=0; i<dimList-1; i++) {
+//			Kupla pre1 = listSetKLessOne.get(i).getPrefix();
+//			
+//			for (int j=i+1; j<dimList; j++) {
+//				Kupla pre2 = listSetKLessOne.get(j).getPrefix();
+//				
+//				if (pre1.equals(pre2)) {
+//					Kupla newUpla = new Kupla(pre1.getList());
+//					newUpla.add(listSetKLessOne.get(i).getLast());
+//					newUpla.add(listSetKLessOne.get(j).getLast());
+//					setK.add(newUpla);
+//				}
+//			}
+//		}
+//		return setK;		
+//	}
+//	
+	private List<Packet> getPacketsFromBins(List<TabooBin> bins) {
 		
 		List<Packet> s = new ArrayList<Packet>();
 		
-		for (int i=0; i<si.getSize(); i++) {
-			TabooBin kbin = bins.get(si.getIntegerAtIndex(i));
-			List<Packet> kbinPackets = kbin.getPackets();
-			
-			for(Packet p: kbinPackets) {
-				s.add(p);
-			}
+		for (TabooBin tabooBin : bins) {
+			s.addAll(tabooBin.getPackets());
 		}
 		
 		return s;
@@ -627,20 +731,15 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 	 * Crea la nuovaSoluzione trovata dall'algoritmo Search
 	 */
 	private ArrayList<TabooBin> updateSolution(
-			Kupla u, // lista di bin presi che potrebbero essere stati modificati
+			List<TabooBin> u, // lista di bin presi che potrebbero essere stati modificati
 			ArrayList<TabooBin> bins, // tutti i bin della soluzione NON aggiornata
 			List<Bin> binsLayout, // lista di bin aggiornati
 			int targetBin, // bin target
 			Packet j) { // pacchetto j che è stato spostato
 	
-		ArrayList<TabooBin> newSolution = new ArrayList<TabooBin>(); // nuova soluzione
-		
-		// copy inhalterated bins
-		for (int i=0; i<bins.size(); i++) {
-			if (!u.containsInteger(i) && i!=targetBin) {
-				newSolution.add(bins.get(i));
-			}
-		}
+		// create new solution copying inhalterated bins
+		ArrayList<TabooBin> newSolution = new ArrayList<TabooBin>(bins);
+		newSolution.removeAll(u);
 			
 		// copy targetBin without Packet j iif targetBin contains other packets than packet j
 		List<Packet> packTargetBin = bins.get(targetBin).getPackets();
@@ -660,33 +759,29 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		
 		// copy bins NewLayout
 		for (Bin b: binsLayout) {
-			TabooBin newBin = new TabooBin();
-			
-			for (Packet p: b.getList()) {
-				newBin.addPacket(p);
-			}
+			TabooBin newBin = new TabooBin(b.getList());
 			newSolution.add(newBin);
 		}
 			
 		return newSolution;
 	}
 	
-	/* evaluate binomial (n,k) - unused till now */
-	private static int doBinomial(int n, int k) {
-		if (n<=0 || k<0)
-			throw new java.lang.IllegalArgumentException();
-		
-		if (k==0)
-			return 1;
-		
-		int num=1;
-		int den=1;
-				
-		for (int i=0; i<k; i++) {
-			num = num*(n--);
-			den = den*(k--);
-		}
-		return num/den;
-	}
+//	/* evaluate binomial (n,k) - unused till now */
+//	private static int doBinomial(int n, int k) {
+//		if (n<=0 || k<0)
+//			throw new java.lang.IllegalArgumentException();
+//		
+//		if (k==0)
+//			return 1;
+//		
+//		int num=1;
+//		int den=1;
+//				
+//		for (int i=0; i<k; i++) {
+//			num = num*(n--);
+//			den = den*(k--);
+//		}
+//		return num/den;
+//	}
 	
 }
