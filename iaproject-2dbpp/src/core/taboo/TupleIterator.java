@@ -21,7 +21,16 @@ public class TupleIterator<E> implements Iterator<List<E>> {
 	private final Collection<? extends E> collection;
 	private final Iterator<List<E>> subIterator;
 	
+	/**
+	 * The element, returned by {@link #subIterator} and used as <i>base</i>
+	 * for the current tuple.
+	 */
 	private List<E> currentSubElement = null;
+	/**
+	 * An iterator through elements not already present in 
+	 * {@link #currentSubElement}. These elements will be added, one by one,
+	 * at the end of {@link #currentSubElement} generating different tuples.
+	 */
 	private Iterator<E> remElmIt = null;
 	
 	/**
@@ -88,6 +97,7 @@ public class TupleIterator<E> implements Iterator<List<E>> {
 		
 		E elm = remElmIt.next();
 		
+		// create the new tuple by adding elm to the end of currentSubElement
 		List<E> toRet = new ArrayList<E>(currentSubElement);
 		toRet.add(elm);
 		

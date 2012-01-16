@@ -109,4 +109,9 @@ public class PacketSolution implements Packet {
 	public boolean isRotatable() {
 		return this.isRotatable;
 	}
+	
+	@Override
+	public String toString() {
+		return pac + "_[" + bottomLeftPoint.x + "," + bottomLeftPoint.y + "]" + (rotate ? "R" : "");
+	}
 }

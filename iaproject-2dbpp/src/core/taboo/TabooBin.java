@@ -43,4 +43,9 @@ public class TabooBin {
 		return area;
 	}
 	
+	@Override
+	public String toString() {
+		return "TabooBin@" + this.hashCode() + pkts.toString();
+	}
+	
 }

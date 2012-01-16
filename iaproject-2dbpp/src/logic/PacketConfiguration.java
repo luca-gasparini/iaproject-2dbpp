@@ -29,4 +29,9 @@ public class PacketConfiguration extends AbstractPacket {
 		return this.color;
 	}
 	
+	@Override
+	public String toString() {
+		return super.toString() + ":M" + molteplicity;
+	}
+	
 }
