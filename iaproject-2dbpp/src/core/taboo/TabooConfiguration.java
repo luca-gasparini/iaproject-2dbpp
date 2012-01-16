@@ -5,6 +5,8 @@ import java.io.Serializable;
 public class TabooConfiguration implements Serializable {
 
 	private static final long serialVersionUID = -1688023669983960748L;
+
+	public static final int MAX_NON_CHANGING_MOVES = 50;
 	
 	public final float ALPHA;
 	public final float DENSITY_FACTOR;

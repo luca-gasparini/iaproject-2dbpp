@@ -30,6 +30,7 @@ public class TabooListsManager {
 		if (k == 1) {
 			return firstList.isTabu(move);
 		} else {
+			ensureCapacity(otherLists, otherListTenure, k - 2);
 			return otherLists.get(k - 2).isTabu(move);
 		}
 	}
@@ -50,13 +51,16 @@ public class TabooListsManager {
 			firstList.addMove(move);
 		} else {
 			// ensure capacity of otherLists
-			if (otherLists.size() <= k - 2) {
-				for (int i = otherLists.size(); i <= k - 2; i++) {
-					otherLists.add(new TabooList(otherListTenure));
-				}
-			}
-			
+			ensureCapacity(otherLists, otherListTenure, k - 2);
 			otherLists.get(k - 2).addMove(move);
+		}
+	}
+	
+	private static void ensureCapacity(List<TabooList> tl, int tTenure, int index) {
+		if (tl.size() <= index) {
+			for (int i = tl.size(); i <= index; i++) {
+				tl.add(new TabooList(tTenure));
+			}
 		}
 	}
 

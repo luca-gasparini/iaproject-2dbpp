@@ -112,14 +112,25 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		
 		// prepare some needed variables
 		int d = 1;
+		int neighSize = 1;
+		int nonChangingCounter = 0;
+		boolean forceDiversification = false;
+		boolean findNewTarget = false;
+		
+		int targetBin = searchTargetBin(bins, packets.size(), d);
 		
 		while (canContinue()) {
-			int neighSize = 1;
-			
-			// search target bin
-			int targetBin = searchTargetBin(bins, packets.size(), d);
 			
 			SearchResult sr = SEARCH(bins, targetBin, neighSize);
+			
+			// check if it is a nonChanging move
+			if (((sr.newStep == null) || (bins.size() == sr.newStep.size())) && 
+					(neighSize == sr.neighSize)) {
+				nonChangingCounter++;
+			} else {
+				nonChangingCounter = 0;
+			}
+			
 			// check if we have a new move
 			if (sr.newStep != null) {
 				// check if fitness is better...
@@ -128,16 +139,40 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 					// ... and publish & set new optimum
 					currentOptimum = result;
 					publishResult(currentOptimum);
+					
+					// reset variables
+					nonChangingCounter = 0;
+					d = neighSize = 1;
 				}
+				
 				// set bin list to the current move
 				bins = sr.newStep;
 			}
 			
+			findNewTarget = false;
 			if (sr.neighSize <= neighSize) {
+				findNewTarget = true;
+			}
+			neighSize = sr.neighSize;
+			
+			// check if we got maximum nonChanging moves
+			if (nonChangingCounter >= TabooConfiguration.MAX_NON_CHANGING_MOVES) {
+				nonChangingCounter = 0;
+				if (neighSize == tabooConf.MAX_NEIGH_SIZE) {
+					forceDiversification = true;
+				} else {
+					neighSize++;
+					findNewTarget = true;
+				}
+			}
+			
+			if (findNewTarget && !sr.diversify && !forceDiversification) {
 				targetBin = searchTargetBin(bins, packets.size(), 1);
 			}
 			
-			if (sr.diversify) {
+			if (sr.diversify || forceDiversification) {
+				forceDiversification = false;
+				
 				DiversificationResult dr = DIVERSIFICATION(bins, d, packets.size());
 				d = dr.d;
 				if (dr.newBins != null) {
@@ -146,6 +181,8 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 				if (dr.shouldResetTabuLists) {
 					tabuLists.clearAll();
 				}
+				
+				targetBin = searchTargetBin(bins, packets.size(), d);
 			}
 		}
 		
@@ -163,14 +200,18 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		TabooBin target = bins.get(targetBin);
 		List<Packet> packetsIntoTargetBin = target.getPackets();
 		
+		/* create the collection of all bins without target one (needed to
+		 * build k-tuples)
+		 */
+		List<TabooBin> binsWOtarget = new LinkedList<TabooBin>(bins);
+		binsWOtarget.remove(targetBin);
+		
 		ArrayList<TabooBin> packetsMovePenaltyStar = new ArrayList<TabooBin>();
 		ArrayList<TabooBin> packetsMovePenalty = new ArrayList<TabooBin>();
 		
 		for (Packet j: packetsIntoTargetBin) {
-			List<TabooBin> tmpBins = new LinkedList<TabooBin>(bins);
-			tmpBins.remove(targetBin);
 			
-			TupleIterator<TabooBin> ktuple = new TupleIterator<TabooBin>(neighSize, tmpBins);
+			TupleIterator<TabooBin> ktuple = new TupleIterator<TabooBin>(k, binsWOtarget);
 			
 			while (ktuple.hasNext()) {
 				List<TabooBin> u = ktuple.next();
@@ -241,19 +282,19 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 				}
 				
 				// penaltyStar = min(penaltyStar, penalty);
-				if (penalty < penaltyStar) {
+				if (Float.compare(penalty, penaltyStar) < 0) {
 					penaltyStar = penalty;
 					packetsMovePenaltyStar = packetsMovePenalty;
 				}
 			}
 		}
 		
-		if (penaltyStar != Float.POSITIVE_INFINITY) {
+		if (Float.compare(penaltyStar, Float.POSITIVE_INFINITY) != 0) {
 			return new SearchResult(false, k, packetsMovePenaltyStar);
 		} else {
 			boolean diversify = false;
 			
-			if (k==this.tabooConf.MAX_NEIGH_SIZE)
+			if (k == this.tabooConf.MAX_NEIGH_SIZE)
 				diversify = true;
 			else
 				k++;
@@ -644,6 +685,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 	
 		// create new solution copying inhalterated bins
 		ArrayList<TabooBin> newSolution = new ArrayList<TabooBin>(bins);
+		newSolution.remove(targetBin);
 		newSolution.removeAll(u);
 			
 		// copy targetBin without Packet j iif targetBin contains other packets than packet j
