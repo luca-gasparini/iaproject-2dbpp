@@ -30,7 +30,7 @@ public class ManageSolution {
 						packetsInfo.get(i).getColor()
 						);
 				
-				lps.add(new PacketSolution(pd, rotInfo.mustBeRotated, rotInfo.canRotate));
+				lps.add(new Packet(pd, rotInfo.mustBeRotated, rotInfo.canRotate));
 			}
 		}
 		return lps;
@@ -100,9 +100,8 @@ public class ManageSolution {
 						);
 				if (torotate)
 					rotate = !rotate;
-				PacketSolution ps = new PacketSolution(pd, true, true);
-				ps.setRotate(rotate);
-				lps.add(ps);
+				Packet ps = new Packet(pd, true, true);
+				lps.add(ps.getRotated());
 			}
 		}
 		return lps;

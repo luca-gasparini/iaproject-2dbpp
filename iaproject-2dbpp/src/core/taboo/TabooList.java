@@ -20,18 +20,20 @@ public class TabooList {
 	
 	public boolean isTabu(float move) {
 		//return moves.contains(Float.valueOf(move));
-		return moves.contains(new BigDecimal(move).setScale(precision, BigDecimal.ROUND_HALF_UP));
+		return moves.contains(BigDecimal.valueOf(move).setScale(precision, BigDecimal.ROUND_HALF_UP));
 	}
 	
 	public void addMove(float move) {
-		assert !moves.contains(Float.valueOf(move)) : "already contained move";
+		BigDecimal moveBD = BigDecimal.valueOf(move).setScale(precision, BigDecimal.ROUND_HALF_UP);
+		
+		assert !moves.contains(moveBD) : "already contained move";
 		
 		if (moves.size() == tenure) {
 			moves.removeLast();
 		}
 		
 		//moves.addFirst(Float.valueOf(move));
-		moves.addFirst(new BigDecimal(move).setScale(precision, BigDecimal.ROUND_HALF_UP));
+		moves.addFirst(moveBD);
 	}
 	
 	public void clear() {

@@ -31,6 +31,10 @@ public final class BinConfiguration implements Serializable {
 		return height;
 	}
 	
+	public int getArea() {
+		return this.width * this.height;
+	}
+	
 	public Dimension getSize() {
 		return new Dimension(this.width, this.height);
 	}

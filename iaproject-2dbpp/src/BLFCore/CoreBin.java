@@ -1,10 +1,12 @@
 package BLFCore;
 
 import java.util.ArrayList;
+
 import logic.Packet;
+import logic.PlaceablePacket;
 
 public class CoreBin {
-	ArrayList<Packet> packets;
+	ArrayList<PlaceablePacket> packets;
 	ArrayList<Hole> holes;
 	double heigth;
 	double width;
@@ -12,7 +14,7 @@ public class CoreBin {
 	Point higherPoint;//higher Point occupied by a packet;
 
 	CoreBin(double binWidth, double binHeigth) {
-		packets = new ArrayList<Packet>();
+		packets = new ArrayList<PlaceablePacket>();
 		holes = new ArrayList<Hole>();
 		heigth = binHeigth;
 		width = binWidth;
@@ -32,7 +34,7 @@ public class CoreBin {
 		higherPoint = new Point(0,0);
 	}
 
-	public ArrayList<Packet> getPackets() {
+	public ArrayList<PlaceablePacket> getPackets() {
 		return packets;
 	}
 
@@ -46,8 +48,8 @@ public class CoreBin {
 		for (int i = 0; i < holes.size(); i++) {
 			app = holes.get(i).getCandidates(rect);
 			for (int j = 0; j < app.size(); j++) {
-				// mi salvo la posizione pi bassa tra i candidati
-				// a paritˆ di altezza privilegio la leftmost
+				// mi salvo la posizione piï¿½ bassa tra i candidati
+				// a paritï¿½ di altezza privilegio la leftmost
 				if (p == null || app.get(j).y < p.y
 						|| (app.get(j).y == p.y && app.get(j).x < p.x)) {
 					hole = i;
@@ -59,9 +61,8 @@ public class CoreBin {
 			return false;
 
 		rect = new CoreRectangle(p, packet.getHeight(), packet.getWidth());
-		packet.setPoint((int) p.x, (int) p.y);
 		
-		packets.add(packet);
+		packets.add(new PlaceablePacket(packet, (int) p.x, (int) p.y));
 		occupiedArea += packet.getHeight() * packet.getWidth();
 		
 		if(p.y + packet.getHeight() > higherPoint.y)

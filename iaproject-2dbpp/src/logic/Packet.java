@@ -1,34 +1,122 @@
 package logic;
 
 import java.awt.Color;
-import java.awt.Point;
-import java.io.Serializable;
 
-public interface Packet extends Cloneable, Serializable {
+/**
+ * Mutable class!!
+ */
+public class Packet {
 
-	public Color getColor();
+	private final PacketDescriptor pac;
+	private final boolean isRotatable;
+	private final boolean rotate;
 	
-	public void setPoint(int x, int y);
+	private Packet rotatedPkt;
 	
-	public int getPointX();
+	public Packet(PacketDescriptor p, boolean rotated, boolean isRotatable) {
+		if (p == null) {
+			throw new NullPointerException("PacketDescriptor is null");
+		}
+		
+		this.pac = p;
+		this.rotate = rotated;
+		this.isRotatable = isRotatable;
+	}
 	
-	public int getPointY();
+	/**
+	 * Create a rotated packet given the nonRotated one. NEVER flag as public.
+	 * @param nonRotated
+	 */
+	private Packet(Packet nonRotated) {
+		assert nonRotated.isRotatable() : "Given packet isn't rotatable";
+		
+		this.isRotatable = true;
+		this.pac = nonRotated.pac;
+		this.rotate = !nonRotated.rotate;
+		this.rotatedPkt = nonRotated;
+	}
 	
-	public int getWidth();
+	public Color getColor() {
+		return pac.getColor();
+	}
 	
-	public int getHeight();
+	public int getWidth() {
+		return isRotate() ? pac.getHeight() : pac.getWidth();
+	}
 	
-	public int getId();
+	public int getHeight() {
+		return isRotate() ? pac.getWidth() : pac.getHeight();
+	}
 	
-	public boolean isRotate();
+	public int getId() {
+		return pac.getId();
+	}
 	
-	public void setRotate(boolean rot);
+	public boolean isRotate() {
+		return this.rotate;
+	}
 	
-	public PacketDescriptor getPacketDescriptor();
+	public int getArea() {
+		return pac.getArea();
+	}
+
+	public Packet getRotated() {
+		if (!this.isRotatable) {
+			throw new IllegalStateException("Packet not rotatable");
+		}
+		
+		if (this.rotatedPkt == null) {
+			this.rotatedPkt = new Packet(this);
+		}
+		
+		return this.rotatedPkt;
+	}
 	
-	public Point getPoint();
+	public PacketDescriptor getPacketDescriptor() {
+		return pac;
+	}
+
+	public boolean isRotatable() {
+		return this.isRotatable;
+	}
 	
-	public Packet clone();
+	public String toString() {
+		return pac + (rotate ? "R" : "");
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (isRotatable ? 1231 : 1237);
+		result = prime * result + ((pac == null) ? 0 : pac.hashCode());
+		result = prime * result + (rotate ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof Packet)) {
+			return false;
+		}
+		Packet other = (Packet) obj;
+		if (isRotatable != other.isRotatable) {
+			return false;
+		}
+		if (!pac.equals(other.pac)) {
+			return false;
+		}
+		if (rotate != other.rotate) {
+			return false;
+		}
+		return true;
+	}
 	
-	public boolean isRotatable();
+	
 }

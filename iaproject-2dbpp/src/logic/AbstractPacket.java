@@ -25,6 +25,10 @@ public abstract class AbstractPacket implements Serializable {
 		return this.height;
 	}
 	
+	public int getArea() {
+		return this.height * this.width;
+	}
+	
 	public Dimension getSize() {
 		return new Dimension(this.width, this.getHeight());
 	}

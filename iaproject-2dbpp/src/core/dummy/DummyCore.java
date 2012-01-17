@@ -3,6 +3,7 @@ package core.dummy;
 import gui.OptimumPainter;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -11,7 +12,7 @@ import logic.Bin;
 import logic.BinConfiguration;
 import logic.Packet;
 import logic.PacketDescriptor;
-import logic.PacketSolution;
+import logic.PlaceablePacket;
 import logic.ProblemConfiguration;
 import core.AbstractCore;
 import core.Core2GuiTranslators;
@@ -92,9 +93,10 @@ public class DummyCore extends AbstractCore<DummyConfiguration, List<Bin>> {
 		return newBin;
 	}
 	
-	private Packet createRandomPacket(int id, int binW, int binH) {
+	private PlaceablePacket createRandomPacket(int id, int binW, int binH) {
 		int blpX = rand.nextInt(binW);
 		int blpY = rand.nextInt(binH);
+		Point point = new Point(blpX, blpY);
 		
 		int pW = rand.nextInt(binW - blpX) + 1;
 		int pH = rand.nextInt(binH - blpY) + 1;
@@ -102,7 +104,7 @@ public class DummyCore extends AbstractCore<DummyConfiguration, List<Bin>> {
 		Color color = new Color(rand.nextInt());
 		
 		// always rotatable for test use only
-		return new PacketSolution(new PacketDescriptor(id, pW, pH, color), blpX, blpY, false, true);
+		return new PlaceablePacket(new Packet(new PacketDescriptor(id, pW, pH, color), false, true), point);
 	}
 	
 	@Override

@@ -1,5 +1,6 @@
 package logic;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -7,9 +8,10 @@ public class Bin { // il nome non è il massimo;
 
 	private final BinConfiguration binConf;
 	private final int id;
+	private final List<PlaceablePacket> placeablePktList;
+	private final List<Packet> packetList;
 	
-	private List<Packet> packetList;
-	private float density;
+	private int occupiedArea;
 	
 	public Bin(BinConfiguration binC, int id) {
 		if (binC == null) {
@@ -17,49 +19,39 @@ public class Bin { // il nome non è il massimo;
 		}
 		
 		this.binConf = binC;
+		placeablePktList = new LinkedList<PlaceablePacket>();
 		packetList = new LinkedList<Packet>();
 		this.id = id;
-		this.density = 0;
+		this.occupiedArea = 0;
 	}
 	
 	public int getID() {
 		return this.id;
 	}
 	
-	public void addPacket(Packet p) {
-		if (containsPacket(p))
-			throw new IllegalArgumentException("already contained");
-		
-		packetList.add(p);
+	public void addPacket(PlaceablePacket p) {
+		placeablePktList.add(p);
+		packetList.add(p.getPacket());
+		this.occupiedArea += p.getArea();
 	}
 	
 	public float getDensity() {
-		return this.density;
-	}
-	
-	public void setDensity(float d) {
-		this.density = d;
-	}
-	
-	public void deletePacket(Packet p) {
-		if (!packetList.remove(p)) {
-			throw new IllegalArgumentException("Given packte is not present");
-		}
+		return ((float) this.occupiedArea) / binConf.getArea();
 	}
 	
 	public BinConfiguration getBinConfiguration() {
 		return this.binConf;
 	}
 	
-	public boolean containsPacket(Packet p) {
-		return packetList.contains(p);
-	}
-	
 	public int getNPackets() {
-		return this.packetList.size();
+		return this.placeablePktList.size();
 	}
 	
-	public List<Packet> getList() {
-		return this.packetList;
+	public List<PlaceablePacket> getPlaceableList() {
+		return Collections.unmodifiableList(this.placeablePktList);
+	}
+	
+	public List<Packet> getPacketList() {
+		return Collections.unmodifiableList(this.packetList);
 	}
 }

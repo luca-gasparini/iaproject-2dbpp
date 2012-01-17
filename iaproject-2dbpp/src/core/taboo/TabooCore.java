@@ -266,7 +266,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 					ArrayList<TabooBin> newSolution = updateSolution(u, bins, binsLayout, targetBin, j);
 					
 					Couple tsig = argminFillingFunctionAmongBins(binsLayout);
-					List<Packet> t = buildT(target.getPackets(), j, binsLayout.get(tsig.index).getList());
+					List<Packet> t = buildT(target.getPackets(), j, binsLayout.get(tsig.index).getPacketList());
 					
 					// calcolo at
 					BlfLayout layoutat = PackingProcedures.getLayout(t, binConf, tabooConf.HEIGHT_FACTOR, tabooConf.DENSITY_FACTOR);
@@ -423,8 +423,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			return lnr;
 
 		s.remove(s.size()-1); // rimuovo j ruotato
-		j.setRotate(true);
-		s.add(j); // aggiungo j ruotatto
+		s.add(j.getRotated()); // aggiungo j ruotatto
 		
 		// layout j rotate
 		BlfLayout lr = PackingProcedures.getLayout(s, binConf, tabooConf.HEIGHT_FACTOR, tabooConf.DENSITY_FACTOR);
@@ -480,12 +479,12 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 	
 	private Couple argminFillingFunctionAmongBins(List<Bin> binsA) {
 		
-		Float minFF = calculateFillingFunction(tabooConf.ALPHA, binsA.get(0).getList(), binConf, this.totPackets);
+		Float minFF = calculateFillingFunction(tabooConf.ALPHA, binsA.get(0).getPacketList(), binConf, this.totPackets);
 		int minInd = 0;
 		Couple fin = new Couple(minFF, 0);
 		
 		for (int i=1; i<binsA.size(); i++) {
-			Float currentFF = calculateFillingFunction(tabooConf.ALPHA, binsA.get(i).getList(), binConf, this.totPackets);
+			Float currentFF = calculateFillingFunction(tabooConf.ALPHA, binsA.get(i).getPacketList(), binConf, this.totPackets);
 			if (currentFF < fin.value)
 				fin = new Couple(currentFF, i);
 		}
@@ -751,7 +750,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		
 		// copy bins NewLayout
 		for (Bin b: binsLayout) {
-			TabooBin newBin = new TabooBin(b.getList());
+			TabooBin newBin = new TabooBin(b.getPacketList());
 			newSolution.add(newBin);
 		}
 			

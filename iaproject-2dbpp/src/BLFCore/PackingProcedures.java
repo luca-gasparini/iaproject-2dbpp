@@ -409,8 +409,8 @@ public class PackingProcedures {
 					inserito = coreBins.get(j).insertPacket(packets.get(i));
 
 				} catch (RuntimeException e) {
-					saveErrorLog(e, packets, bins);
 					e.printStackTrace();
+					saveErrorLog(e, packets, bins);
 				}
 				j++;
 			}
@@ -420,8 +420,8 @@ public class PackingProcedures {
 					if (!coreBins.get(j).insertPacket(packets.get(i)))
 						return null;
 				} catch (RuntimeException e) {
-					saveErrorLog(e, packets, bins);
 					e.printStackTrace();
+					saveErrorLog(e, packets, bins);
 				}
 			}
 		}
@@ -437,7 +437,6 @@ public class PackingProcedures {
 			for (int j = 0; j < coreBins.get(i).packets.size(); j++) {
 				appBin.addPacket(coreBins.get(i).packets.get(j));
 			}
-			appBin.setDensity((float) (coreBins.get(i).occupiedArea /binArea));
 			if(coreBins.get(i).occupiedArea < minOccupiedArea)
 			{
 				minOccupiedArea = coreBins.get(i).occupiedArea;
@@ -449,7 +448,7 @@ public class PackingProcedures {
 
 		
 		
-		//fitness relativa al bin pi vuoto
+		//fitness relativa al bin piï¿½ vuoto
 		double minBinFitness = alfa * (coreBins.get(minAreaIndex).higherPoint.y/bins.getHeight()) 
 				+ beta * (minOccupiedArea/binArea);
 		

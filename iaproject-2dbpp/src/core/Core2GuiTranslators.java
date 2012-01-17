@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import logic.Bin;
-import logic.Packet;
+import logic.PlaceablePacket;
 
 /**
  * Class made up by static methods each of them returning a specific
@@ -31,7 +31,7 @@ public final class Core2GuiTranslators {
 					
 					// creates the list of GUIPackets
 					List<GUIPacket> guiPkts = new ArrayList<GUIPacket>();
-					for (Packet pkt : itBin.getList()) {
+					for (PlaceablePacket pkt : itBin.getPlaceableList()) {
 						guiPkts.add(new GUIPacket(pkt.getPacketDescriptor(), 
 								pkt.getPoint(), pkt.isRotate()));
 					}
