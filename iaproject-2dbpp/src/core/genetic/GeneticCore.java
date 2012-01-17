@@ -117,14 +117,14 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 			
 			// extract the genome portion of the father and add it to the child genome
 			for (Packet fatherGene: father.getSequence().subList(p, p + q )) {
-				childGenome.add( fatherGene.clone() );
+				childGenome.add( fatherGene );
 				isGeneCopied[fatherGene.getId()] = true;
 			}
 			
 			// complete with the genome of the mother
 			for (Packet motherGene: mother.getSequence()) {
 				if ( !isGeneCopied[ motherGene.getId() ] ) {
-					childGenome.add( motherGene.clone() );
+					childGenome.add( motherGene );
 				}
 			}
 	

@@ -21,7 +21,7 @@ public class Individual implements Comparable<Individual>, Cloneable {
 	public Individual(List<Packet> packetList) {
 		this.sequence = new ArrayList<Packet>(packetList.size());
 		for (Packet gene: packetList) {
-			this.sequence.add(gene.clone());
+			this.sequence.add(gene);
 		}
 		this.layout = null;
 	}
@@ -30,9 +30,9 @@ public class Individual implements Comparable<Individual>, Cloneable {
 	public void mutate(float pRotate, float pOrder) {
 
 		// rotation based mutation
-		for (Packet gene: sequence) {
-			if (rand.nextFloat() < pRotate && gene.isRotatable()) {
-				gene.setRotate( !gene.isRotate() );
+		for (int i=0; i<sequence.size(); i++) {
+			if (rand.nextFloat() < pRotate && sequence.get(i).isRotatable()) {
+				sequence.add(i, sequence.remove(i).getRotated() );
 			}
 		}
 		

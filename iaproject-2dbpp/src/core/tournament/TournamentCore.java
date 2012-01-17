@@ -198,7 +198,7 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 		
 		// extract the genome portion of the dad and add it to the head of child genome
 		for (Packet dadGene: dad.getSequence().subList(p, p + q )) {
-			childGenome.add( dadGene.clone() );
+			childGenome.add( dadGene );
 			isGeneCopied[dadGene.getId()] = true;
 		}
 
@@ -207,10 +207,10 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 		for (Packet momGene: mom.getSequence()) {
 			if ( !isGeneCopied[ momGene.getId() ] ) {
 				if (j < p) { // add p genes to the head
-					childGenome.add( j, momGene.clone() );
+					childGenome.add( j, momGene );
 					j++;
 				} else { // add the remainder to the tail
-					childGenome.add( momGene.clone());
+					childGenome.add( momGene );
 				}
 			}
 		}
