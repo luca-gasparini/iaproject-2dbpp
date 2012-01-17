@@ -11,8 +11,9 @@ import logic.Packet;
 import BLFCore.BlfLayout;
 import BLFCore.PackingProcedures;
 
-class Individual {
+public class Individual implements Comparable<Individual>, Cloneable {
 	
+
 	private List<Packet> sequence;
 	private BlfLayout layout;
 	private final Random rand = new Random(System.currentTimeMillis());
@@ -25,8 +26,8 @@ class Individual {
 		this.layout = null;
 	}
 
-	// apply mutation to the individual
-	public void mutate(float pRotate, float pOrderMutation) {
+	// apply mutation to the individual 
+	public void mutate(float pRotate, float pOrder) {
 
 		// rotation based mutation
 		for (Packet gene: sequence) {
@@ -36,21 +37,22 @@ class Individual {
 		}
 		
 		// order based mutation
-		if (rand.nextFloat() < pOrderMutation) {
-			int geneIndex1 = rand.nextInt( sequence.size() );
-			int geneIndex2 = rand.nextInt( sequence.size() );
-			Packet tempGene = sequence.get(geneIndex1);
-			sequence.set(geneIndex1, sequence.get(geneIndex2));
-			sequence.set(geneIndex2, tempGene);
+		for (int i=0; i<sequence.size(); i++) {
+			if (rand.nextFloat() < pOrder) {
+				int geneIndex1 = i;
+				int geneIndex2 = rand.nextInt( sequence.size() );
+				Packet tempGene = sequence.get(geneIndex1);
+				sequence.set(geneIndex1, sequence.get(geneIndex2));
+				sequence.set(geneIndex2, tempGene);
+			}
 		}
-		
 		this.layout = null;
 	}
 	
 	// return the fitness of the individual
 	public float getFitness() {	
 		return this.layout.getFitness();
-	}	
+	}
 
 	public List<Bin> getBins() {
 		return this.layout.getBins();
@@ -67,5 +69,48 @@ class Individual {
 
 	public void shuffleGenome() {
 		java.util.Collections.shuffle(this.sequence, rand);
+	}
+
+	@Override
+	public String toString() {
+		String s = "";
+		for (Packet gene: sequence) {
+			s = s + gene.getId() + " ";
+		}
+		s = s + "fitness= " + this.getFitness() + " pointer= " + Integer.toHexString(hashCode());
+		return s;
+	}
+
+	@Override
+	public int compareTo(Individual o) {
+		if ( this.getFitness() < o.getFitness() ) return -1;
+		if ( this.getFitness() > o.getFitness() ) return 1;
+		return 0;
+	}
+	
+	@Override
+	public Individual clone() {
+		Individual clone = new Individual(this.getSequence());
+		clone.setLayout(this.getLayout());
+		return clone;
+	}
+
+	// metodo usato solo per la clonazione
+	private void setLayout(BlfLayout newLayout) {
+		this.layout = newLayout;
+	}
+
+	// metodo usato solo per la clonazione
+	private BlfLayout getLayout() {
+		return this.layout;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		List<Packet> objSequence = ((Individual)obj).getSequence();
+		for (int i=0; i<objSequence.size(); i++) {
+			if (sequence.get(i)!=objSequence.get(i)) return false;
+		}
+		return false;
 	}
 }

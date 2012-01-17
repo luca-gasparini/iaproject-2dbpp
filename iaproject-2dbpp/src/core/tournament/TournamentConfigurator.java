@@ -1,4 +1,4 @@
-package core.genetic;
+package core.tournament;
 
 import gui.OptimumPainter;
 import gui.common.JFloatTextField;
@@ -16,7 +16,7 @@ import core.AbstractCore;
 import core.CoreConfiguration;
 import core.DataParsingException;
 
-public class GeneticConfigurator extends AbstractConfigurator<GeneticConfiguration> {
+public class TournamentConfigurator extends AbstractConfigurator<TournamentConfiguration> {
 	
 	private static final int DEFAULT_POPULATION_SIZE = 100;
 	private static final float DEFAULT_P_ROTATION = 0.3f;
@@ -24,6 +24,8 @@ public class GeneticConfigurator extends AbstractConfigurator<GeneticConfigurati
 	private static final float DEFAULT_P_CROSSOVER = 0.9f;
 	private static final float DEFAULT_ALPHA = 0.7f;
 	private static final float DEFAULT_BETA = 0.3f;
+	private static final int DEFAULT_ELITE_SIZE = 90;
+	private static final int DEFAULT_TOURNAMENT_SIZE = 5;
 	
 	private final JIntegerTextField populationField = new JIntegerTextField();
 	private final JFloatTextField pRotationField = new JFloatTextField();
@@ -31,10 +33,12 @@ public class GeneticConfigurator extends AbstractConfigurator<GeneticConfigurati
 	private final JFloatTextField pCrossoverField = new JFloatTextField();
 	private final JFloatTextField alphaField = new JFloatTextField();
 	private final JFloatTextField betaField = new JFloatTextField();
+	private final JIntegerTextField eliteSizeField = new JIntegerTextField();
+	private final JIntegerTextField tournamentSizeField = new JIntegerTextField();
 	
 	private final JPanel completePane;
 	
-	public GeneticConfigurator() {
+	public TournamentConfigurator() {
 //		throw new IllegalArgumentException("Test Exception");
 
 		Dimension textFieldDim = new Dimension(100,30);
@@ -62,7 +66,15 @@ public class GeneticConfigurator extends AbstractConfigurator<GeneticConfigurati
 		betaField.setMinimumSize(textFieldDim);
 		betaField.setMaximumSize(textFieldDim);
 		betaField.setValue(DEFAULT_BETA);
-
+		eliteSizeField.setPreferredSize(textFieldDim);
+		eliteSizeField.setMinimumSize(textFieldDim);
+		eliteSizeField.setMaximumSize(textFieldDim);
+		eliteSizeField.setValue(DEFAULT_ELITE_SIZE);
+		tournamentSizeField.setPreferredSize(textFieldDim);
+		tournamentSizeField.setMinimumSize(textFieldDim);
+		tournamentSizeField.setMaximumSize(textFieldDim);
+		tournamentSizeField.setValue(DEFAULT_TOURNAMENT_SIZE);
+		
 
 		JLabel populationLbl = new JLabel("Population size");
 		JLabel pRotationLbl = new JLabel("<html>Mutation probability<br/>(rotation based)</html>");
@@ -70,7 +82,9 @@ public class GeneticConfigurator extends AbstractConfigurator<GeneticConfigurati
 		JLabel pCrossoverLbl = new JLabel("Crossover probability");
 		JLabel alphaLbl = new JLabel("Fitness height weight (alpha)");
 		JLabel betaLbl = new JLabel("Fitness density weight (beta)");
-
+		JLabel eliteLbl = new JLabel("<html>Number of elite individual to<br/>save at each iteration</html>");
+		JLabel tournamentLbl = new JLabel("Tournament size");
+		
 		completePane = new JPanel();
 		GroupLayout layout = new GroupLayout(completePane);
 		completePane.setLayout(layout);
@@ -85,7 +99,8 @@ public class GeneticConfigurator extends AbstractConfigurator<GeneticConfigurati
 						.addComponent(pCrossoverLbl)
 						.addComponent(alphaLbl)
 						.addComponent(betaLbl)
-
+						.addComponent(eliteLbl)
+						.addComponent(tournamentLbl)
 				)
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
 						.addComponent(populationField)
@@ -94,7 +109,8 @@ public class GeneticConfigurator extends AbstractConfigurator<GeneticConfigurati
 						.addComponent(pCrossoverField)
 						.addComponent(alphaField)
 						.addComponent(betaField)
-
+						.addComponent(eliteSizeField)
+						.addComponent(tournamentSizeField)
 				)
 		);
 		layout.setVerticalGroup(layout.createSequentialGroup()
@@ -114,13 +130,21 @@ public class GeneticConfigurator extends AbstractConfigurator<GeneticConfigurati
 						.addComponent(pCrossoverLbl)
 						.addComponent(pCrossoverField)
 				)
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(alphaLbl)
 						.addComponent(alphaField)
 				)
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(betaLbl)
 						.addComponent(betaField)
+				)
+						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(eliteLbl)
+						.addComponent(eliteSizeField)
+				)
+						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(tournamentLbl)
+						.addComponent(tournamentSizeField)
 				)
 		);
 		
@@ -132,12 +156,12 @@ public class GeneticConfigurator extends AbstractConfigurator<GeneticConfigurati
 	}
 
 	@Override
-	protected AbstractCore<GeneticConfiguration, ?> getConfiguredCore(CoreConfiguration<GeneticConfiguration> conf, OptimumPainter painter) {
-		return new GeneticCore(conf, painter);
+	protected AbstractCore<TournamentConfiguration, ?> getConfiguredCore(CoreConfiguration<TournamentConfiguration> conf, OptimumPainter painter) {
+		return new TournamentCore(conf, painter);
 	}
 
 	@Override
-	protected GeneticConfiguration createCoreConfiguration() throws DataParsingException {
+	protected TournamentConfiguration createCoreConfiguration() throws DataParsingException {
 		// parse configuration panel in order to get desired input
 		Integer ps = populationField.getValue();
 		if (ps == null) {
@@ -191,19 +215,39 @@ public class GeneticConfigurator extends AbstractConfigurator<GeneticConfigurati
 		if (b.floatValue() < 0 || b.floatValue() > 1) {
 			throw new DataParsingException("Beta should be in [0,1]");
 		}
+
+		
+		Integer es = eliteSizeField.getValue();
+		if (es == null) {
+			throw new DataParsingException("You must specify the number of elite individual");
+		}
+		if (es.intValue() < 1 || es.intValue() > ps.intValue()) {
+			throw new DataParsingException("The number of elite individual must be in [0,populationSize]");
+		}
 		
 		
-		return new GeneticConfiguration(ps,rp,op,cp,a,b);
+		Integer ts = tournamentSizeField.getValue();
+		if (ts == null) {
+			throw new DataParsingException("No tournament size specified");
+		}
+		if (ts.intValue() < 1 || ts.intValue() > ps.intValue()) {
+			throw new DataParsingException("The tournament size must be in [1,populationSize]");
+		}
+		
+		
+		return new TournamentConfiguration(ps,rp,op,cp,a,b,es,ts);
 	}
 
 	@Override
-	protected void setConfiguration(GeneticConfiguration config) {
+	protected void setConfiguration(TournamentConfiguration config) {
 		populationField.setValue(config.getPopulationSize());
 		pRotationField.setValue(config.getRotateMutationProbability());
 		pOrderField.setValue(config.getOrderMutationProbability());
 		pCrossoverField.setValue(config.getCrossoverProbability());
 		alphaField.setValue(config.getAlpha());
 		betaField.setValue(config.getBeta());
+		eliteSizeField.setValue(config.getEliteSize());
+		tournamentSizeField.setValue(config.getTournamentSize());
 	}
 
 }
