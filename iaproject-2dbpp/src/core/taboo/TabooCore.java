@@ -234,7 +234,8 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 				float penalty = Float.POSITIVE_INFINITY;
 				
 				// call BLF Layout
-				BlfLayout layout = PackingProcedures.getLayout(s, binConf, tabooConf.HEIGHT_FACTOR, tabooConf.DENSITY_FACTOR);
+				//BlfLayout layout = PackingProcedures.getLayout(s, binConf, tabooConf.HEIGHT_FACTOR, tabooConf.DENSITY_FACTOR);
+				BlfLayout layout = this.giveBestLayout(u, j);
 				List<Bin> binsLayout = layout.getBins();
 				int as = binsLayout.size(); // numero bin necessari per as
 				Couple move = this.getPenalty(binsLayout); // panalty associata alla mossa as
@@ -402,6 +403,36 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		
 		assert !mins.isEmpty() : "mins is still empty";
 		return mins.getLast().index;
+	}
+	
+	private BlfLayout giveBestLayout (List<TabooBin> bins, Packet j) {
+		/*
+		 * Crea Lista Pacchetti S
+		 * per ora, il pacchetto j viene inserito alla fine della lista
+		 * -(la posizione del pacchetto varia la soluzione prodotta dall'algoritmo BLF)
+		 * la rotazione del pacchetto viene valutata sul layout ottenuto dal BLF
+		 * sui BINS presi in esame (quelli della kupla);
+		 */
+		List<Packet> s = getPacketsFromBins(bins);
+		s.add(j);
+		
+		// layout j no rotate
+		BlfLayout lnr = PackingProcedures.getLayout(s, binConf, tabooConf.HEIGHT_FACTOR, tabooConf.DENSITY_FACTOR);
+		
+		if (!j.isRotatable()) // no ratatable, return
+			return lnr;
+
+		s.remove(s.size()-1); // rimuovo j ruotato
+		j.setRotate(true);
+		s.add(j); // aggiungo j ruotatto
+		
+		// layout j rotate
+		BlfLayout lr = PackingProcedures.getLayout(s, binConf, tabooConf.HEIGHT_FACTOR, tabooConf.DENSITY_FACTOR);
+		
+		if (lnr.getFitness() <= lr.getFitness())
+			return lnr;
+		else
+			return lr;
 	}
 	
 	private static float calculateFillingFunction(float ALPHA, List<Packet> pkts, BinConfiguration binConf, int totPkts) {
