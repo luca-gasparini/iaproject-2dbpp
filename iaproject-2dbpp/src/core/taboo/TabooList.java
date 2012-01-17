@@ -20,6 +20,8 @@ public class TabooList {
 	}
 	
 	public void addMove(float move) {
+		assert !moves.contains(Float.valueOf(move)) : "already contained move";
+		
 		if (moves.size() == tenure) {
 			moves.removeLast();
 		}

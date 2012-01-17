@@ -46,6 +46,9 @@ public class TupleIterator<E> implements Iterator<List<E>> {
 		if (collection == null) {
 			throw new IllegalArgumentException("Null collection");
 		}
+		if (T_size > collection.size()) {
+			throw new IllegalArgumentException("Cannot create " + T_size + "-uple with only " + collection.size() + " elms");
+		}
 		
 		this.collection = collection;
 		

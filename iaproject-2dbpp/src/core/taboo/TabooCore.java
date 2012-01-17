@@ -121,6 +121,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		
 		while (canContinue()) {
 			
+			
 			SearchResult sr = SEARCH(bins, targetBin, neighSize);
 			
 			// check if it is a nonChanging move
@@ -143,6 +144,8 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 					// reset variables
 					nonChangingCounter = 0;
 					d = neighSize = 1;
+				} else {
+					assert result.getBins().size() >= currentOptimum.getBins().size() : "more bins";
 				}
 				
 				// set bin list to the current move
@@ -170,8 +173,12 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 				targetBin = searchTargetBin(bins, packets.size(), 1);
 			}
 			
-			if (sr.diversify || forceDiversification) {
+			/* force diversification and check on neighSize mimic C code
+			 * behavior
+			 */
+			if (sr.diversify || forceDiversification || neighSize >= bins.size()) {
 				forceDiversification = false;
+				neighSize = 1;
 				
 				DiversificationResult dr = DIVERSIFICATION(bins, d, packets.size());
 				d = dr.d;
@@ -241,12 +248,14 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 				
 				if (as == k) { // unico caso in cui k può valere 1
 					ArrayList<TabooBin> newSolution;
-					if (!tabuLists.isTabu(k, move.value) || /*(*/target.size()==1/* && target.getPackets().get(0).getId()==j.getId())*/) {
+					if (!tabuLists.isTabu(k, move.value)) {
 						newSolution = updateSolution(u, bins, binsLayout, targetBin, j);
-					
+						
+						tabuLists.addMove(k, move.value);
+						
 						if (target.size()==1/* && target.getPackets().get(0).getId()==j.getId()*/)
 							k = Math.max(1, k-1);
-					
+						
 						return new SearchResult(false, k, newSolution);
 					}
 				}
@@ -263,7 +272,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 					List<Bin> binsLayoutat = layoutat.getBins();
 					int at = binsLayoutat.size();
 					
-					if (at==1 && !tabuLists.isTabu(k, move.value)) {
+					if (at==1) {
 						float valueFFT = calculateFillingFunction(tabooConf.ALPHA, t, binConf, totPackets);
 						
 						List<Bin> binsForMinimize = new ArrayList<Bin>();
@@ -275,9 +284,13 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 						}
 						
 						Couple minFFIlessT = argminFillingFunctionAmongBins(binsForMinimize);
-						penalty = Math.min(valueFFT, minFFIlessT.value);
 						
-						packetsMovePenalty = newSolution;
+						float newPenalty = Math.min(valueFFT, minFFIlessT.value);
+						
+						if (!tabuLists.isTabu(k, newPenalty)) {
+							penalty = newPenalty;
+							packetsMovePenalty = newSolution;
+						}
 					}
 				}
 				
@@ -290,6 +303,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		}
 		
 		if (Float.compare(penaltyStar, Float.POSITIVE_INFINITY) != 0) {
+			tabuLists.addMove(k, penaltyStar);
 			return new SearchResult(false, k, packetsMovePenaltyStar);
 		} else {
 			boolean diversify = false;
@@ -305,7 +319,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 	}
 	
 	private DiversificationResult DIVERSIFICATION(final ArrayList<TabooBin> bins, int d, final int totPkts) {
-		if ((d <= bins.size()) && (d < tabooConf.D_MAX)) {
+		if ((d < bins.size()) && (d < tabooConf.D_MAX)) {
 			d++;
 			return new DiversificationResult(d, null, false);
 		} else {
