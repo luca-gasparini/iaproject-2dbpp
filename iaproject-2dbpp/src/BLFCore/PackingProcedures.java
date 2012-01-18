@@ -452,10 +452,10 @@ public class PackingProcedures {
 		double minBinFitness = alfa * (coreBins.get(minAreaIndex).higherPoint.y/bins.getHeight()) 
 				+ beta * (minOccupiedArea/binArea);
 		
-		double newFitness = 100 * (coreBins.size()) + 49 *minBinFitness;
+		float newFitness = 100 * (coreBins.size()) + 49 * (float)minBinFitness;
 		
 		
-		return new BlfLayout(resultBins, (int) newFitness);
+		return new BlfLayout(resultBins, newFitness);
 	}
 
 }

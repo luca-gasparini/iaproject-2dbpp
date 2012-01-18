@@ -38,7 +38,7 @@ public class Population {
 			newIndividual.calculateLayout(binsDim, alpha, beta);
 			this.add(newIndividual);
 		}
-		System.out.println(this);
+		//System.out.println(this);
 	}
 	
 	public void add(Individual newIndividual) {
