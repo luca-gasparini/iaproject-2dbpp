@@ -104,10 +104,12 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		ArrayList<TabooBin> bins = new ArrayList<TabooBin>();
 		Collections.shuffle(packets);
 		for (Packet packet : packets) {
-			// use BLFLayout to pack in order to get the best placing
+			/* use BLFLayout to pack in order to get the best placing (yes,
+			 * even for one bin
+			 */
 			BlfLayout layout = giveBestLayout(Collections.<TabooBin>emptyList(), packet);
 			
-			assert layout.getBins().size() == 1 : "more than 1 bin to pack 1 packet";
+			assert layout.getBins().size() == 1 : "more than 1 bin for packing 1 packet";
 			
 			TabooBin bin = new TabooBin(layout.getBins().get(0).getPacketList());
 			bins.add(bin);
@@ -126,12 +128,11 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		
 		while (canContinue()) {
 			
-			
 			SearchResult sr = SEARCH(bins, targetBin, neighSize);
 			
 			// check if it is a nonChanging move
-			if (((sr.newStep == null) || (bins.size() == sr.newStep.size())) && 
-					(neighSize == sr.neighSize)) {
+			if (((sr.newStep == null) || (bins.size() == sr.newStep.size()) && 
+					(neighSize == sr.neighSize)) ) {
 				nonChangingCounter++;
 			} else {
 				nonChangingCounter = 0;
@@ -141,6 +142,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			if (sr.newStep != null) {
 				// check if fitness is better...
 				CoreResult<List<Bin>> result = prepareResult(sr.newStep);
+				
 				if (Float.compare(result.getFitness(), currentOptimum.getFitness()) < 0) {
 					// ... and publish & set new optimum
 					currentOptimum = result;
@@ -274,7 +276,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 					List<Packet> t = buildT(target.getPackets(), j, tsigBin.getPacketList());
 					
 					// calcolo at
-					BlfLayout layoutat = PackingProcedures.getLayout(t, binConf, tabooConf.HEIGHT_FACTOR, tabooConf.DENSITY_FACTOR);
+					BlfLayout layoutat = callBLFLayout(t);
 					List<Bin> binsLayoutat = layoutat.getBins();
 					int at = binsLayoutat.size();
 					
@@ -393,7 +395,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			/* now remove floor(bins.size()/2) bins and save contained
 			 * pkts in removedPkts: computational cost O(n) because JDK 
 			 * specification assure that remotion from tail of an ArrayList 
-			 * runs in constant time 
+			 * runs in constant time
 			 */
 			List<Packet> removedPkts = new ArrayList<Packet>();
 			for (int i = 0; i < bins.size() / 2; i++) {
@@ -469,7 +471,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		s.add(j);
 		
 		// layout j no rotate
-		BlfLayout lnr = PackingProcedures.getLayout(s, binConf, tabooConf.HEIGHT_FACTOR, tabooConf.DENSITY_FACTOR);
+		BlfLayout lnr = callBLFLayout(s);
 		
 		if (!j.isRotatable()) // no ratatable, return
 			return lnr;
@@ -478,7 +480,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		s.add(j.getRotated()); // aggiungo j ruotato
 		
 		// layout j rotate
-		BlfLayout lr = PackingProcedures.getLayout(s, binConf, tabooConf.HEIGHT_FACTOR, tabooConf.DENSITY_FACTOR);
+		BlfLayout lr = callBLFLayout(s);
 		
 		if (Float.compare(lnr.getFitness(), lr.getFitness()) <= 0) {
 			return lnr;
@@ -504,24 +506,21 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 	
 	private CoreResult<List<Bin>> prepareResult(final List<TabooBin> tabooBins) {
 		final List<Bin> binList = new LinkedList<Bin>();
-		float fitness = 0;
+		float minFitness = Float.POSITIVE_INFINITY;
 		
 		for (TabooBin bin : tabooBins) {
-			BlfLayout binLayout = PackingProcedures.getLayout(bin.getPackets(), 
-					binConf, tabooConf.HEIGHT_FACTOR, tabooConf.DENSITY_FACTOR);
+			BlfLayout binLayout = callBLFLayout(bin.getPackets());
 			
-//			// TODO remove and de-comment assertion
-//			if (binLayout.getBins().size() != 1) {
-//				System.out.println();
-//			}
-//			// ----
-			assert binLayout.getBins().size() == 1 : "A TabooBin pack in >1 bins";
+			assert binLayout.getBins().size() == 1 : "A TabooBin pack in >1 bins: " + bin;
 			
 			binList.addAll(binLayout.getBins());
-			fitness += binLayout.getFitness();
+			
+			if (Float.compare(binLayout.getFitness(), minFitness) < 0) {
+				minFitness = binLayout.getFitness();
+			}
 		}
 		
-		final float totFitness = fitness;
+		final float totFitness = 100 * binList.size() + (minFitness - 100);
 		
 		return new AbstractCoreResult<List<Bin>>() {
 			@Override
@@ -575,14 +574,20 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		
 		List<Packet> lpn = new ArrayList<Packet>();
 		
+		boolean found = false;
 		for(Packet p: s1) {
-			if (p.getId() == j.getId())
+			if (p.getId() == j.getId()) {
+				assert !found : "j already found";
+				found = true;
 				continue;
+			}
 			lpn.add(p);
 		}
+		assert found : "j not found";
 			
-		for(Packet p: s2)
-			lpn.add(p);
+		lpn.addAll(s2);
+		
+		assert lpn.size() == s1.size() + s2.size() - 1 : "wrong size on T";
 		
 		return lpn;
 	}
@@ -623,44 +628,103 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		}
 		assert writableU.isEmpty() : "not all k-uple bins have been removed";
 		
-		// copy targetBin without Packet j iif targetBin contains other packets than packet j
-		List<Packet> packTargetBin = target.getPackets();
-		if (packTargetBin.size() != 1) {
-			boolean found = false;
-			TabooBin newTargetBin = new TabooBin();
-			
-			for (Packet p: packTargetBin) {
-				if (p.getId() == j.getId()) {
-					assert !found : "j has been found twice";
-					found = true;
-					continue;
-				}
-				newTargetBin.addPacket(p);
+		// copy targetBin without Packet j iif targetBin contains other packets than packet j:
+		// - first of all create the new packet list without j
+		LinkedList<Packet> packTargetBin = new LinkedList<Packet>();
+		
+		// TODO debug line, remove
+		System.out.println("seq with j: " + target.getPackets());
+		
+		boolean found = false;
+		for (Packet packet : target.getPackets()) {
+			if (packet.getId() == j.getId()) {
+				assert !found : "j has been found twice";
+				found = true;
+				continue;
 			}
-			assert found : "j hasn't been found at all";
-			
-			newSolution.add(newTargetBin);
+			packTargetBin.add(packet);
 		}
+		assert found : "j hasn't been found at all";
+		
+		if (packTargetBin.isEmpty()) {
+			// target bin has been completely emptied: no more bin in the solution
+			return newSolution;
+		}
+		
+		/* - now we have to check that new target bin still packs into a single
+		 * bin: this may not be true due to the remotion of one packet as
+		 * below example where pkt2 remotion cause pkt4 to fall into another
+		 * bin.
+		 * 
+		 *  _____          44444
+		 * |44444|_|      |44444  |
+		 * |44444|3|  -\  |   |3| |
+		 * |___|2|3|  -/  |___|3| |
+		 * |111|2|3|      |111|3| |
+		 * ---------      ---------
+		 */
+		List<Bin> targetBins = callBLFLayout(packTargetBin).getBins();
+		if (targetBins.size() > 1) {
+			
+			// TODO debug line, remove
+			System.out.println("starting seq: " + packTargetBin);
+			
+			/* get first element of the second (aka last?) bin and try to move
+			 * it backwards, step by step, in order to make the target bin
+			 * placeable again
+			 */
+			Packet overflowPkt = targetBins.get(targetBins.size() - 1).getPacketList().get(0);
+			
+			/* first find overflowPkt into the list and keep packIterator
+			 * pointing to it
+			 */
+			found = false;
+			ListIterator<Packet> packIterator = packTargetBin.listIterator(packTargetBin.size());
+			while (packIterator.hasPrevious()) {
+				Packet p = packIterator.previous();
+				if (p == overflowPkt) {
+					assert !found : "already found";
+					found = true;
+					break;
+				}
+			}
+			assert found : "not found";
+			
+			int nIt = 0;
+			do {
+				nIt++;
+				
+				// TODO debug line -> remove
+				assert targetBins.size() == 2 : "very bad target layout";
+				
+				packIterator.remove();
+				/* there's always a previous,: otherwise means that
+				 * no matter where we place overflowPkt in the list, we
+				 * always get a layout with >1 bins.
+				 */
+				assert packIterator.hasPrevious() : "KAAAAABBOOOOOOOOOOMMMM!!!!";
+				packIterator.previous();
+				packIterator.add(overflowPkt);
+				// in order to keep packIterator pointing to overflowPkt
+				packIterator.previous();
+				
+				System.out.println(nIt + "-> " + targetBins.size() + "bins -> " + packTargetBin);
+				
+				targetBins = callBLFLayout(packTargetBin).getBins();
+			} while (targetBins.size() > 1);
+			
+			// TODO debug line, remove
+			System.out.println(nIt + " iteration to revise target bin made of " + packTargetBin.size() + " pkts");
+		}
+			
+		// - now add new target bin to the solution
+		newSolution.add(new TabooBin(packTargetBin));
 		
 		return newSolution;
 	}
 	
-//	/* evaluate binomial (n,k) - unused till now */
-//	private static int doBinomial(int n, int k) {
-//		if (n<=0 || k<0)
-//			throw new java.lang.IllegalArgumentException();
-//		
-//		if (k==0)
-//			return 1;
-//		
-//		int num=1;
-//		int den=1;
-//				
-//		for (int i=0; i<k; i++) {
-//			num = num*(n--);
-//			den = den*(k--);
-//		}
-//		return num/den;
-//	}
+	private BlfLayout callBLFLayout(List<Packet> packets) {
+		return PackingProcedures.getLayout(packets, binConf, tabooConf.HEIGHT_FACTOR, tabooConf.DENSITY_FACTOR);
+	}
 	
 }
