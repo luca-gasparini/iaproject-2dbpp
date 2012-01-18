@@ -20,6 +20,8 @@ import core.genetic.Individual;
 
 public class TournamentCore extends AbstractCore<TournamentConfiguration, List<Bin>> {
 	
+	private static final int N_TO_STOP = 10000; // stopping cond on iteration
+	private static final float PERC_TO_STOP = 0.95f; // stopping cond on equals individual
 	// core configuration fields
 	private final int populationSize;
 	private final float pRotateMutation;
@@ -73,46 +75,43 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 		
 		// controlled cycling
 		while (this.canContinue()) {
-		
+/*			puro shuffle
+			for( int i=0; i< populationSize; i++) {
+				population.get(i).shuffleGenome();
+			}
+*/		
 			// selection
 			List<Individual> matingPool =
 					population.tournamentSelection(tournamentSize,tournamentsNumber);
-/*			System.out.println("SELECTION... MATING POOL = ");
+//			System.out.println("SELECTION... MATING POOL = ");
 			for (int i=0; i<matingPool.size(); i++) {
 				System.out.println(i +": "+ matingPool.get(i));
 			}
-*/			
+			
 			// crossover
 			List<Individual> offspringPool = crossover(matingPool, pCrossover);
-/*			System.out.println("CROSSOVER... OFFSPRING POOL = ");
+//			System.out.println("CROSSOVER... OFFSPRING POOL = ");
 			for (int i=0; i<offspringPool.size(); i++) {
 				System.out.println(i +": "+ offspringPool.get(i));
 			}
-*/			
+			
 			// mutation
 			mutate(offspringPool, pRotateMutation, pOrderMutation);
-/*			System.out.println("MUTATION... OFFSPRING POOL = ");
+//			System.out.println("MUTATION... OFFSPRING POOL = ");
 			for (int i=0; i<offspringPool.size(); i++) {
 				System.out.println(i +": "+ offspringPool.get(i));
 			}
-*/			
+			
 			// make new generation	
 			population.replace( offspringPool, eliteSize);
 /*			System.out.println("MAKING NEW GENERATION... NEW POPULATION = ");
 			System.out.println(population);
-*/			
-			
+*/					
 			// find best individual in new population
 			bestIndividual = population.getBest();
 /*			System.out.println("BEST INDIVIDUAL");
 			System.out.println(bestIndividual);
 */			
-			
-/*			devo aspettare metodo di nicola!!
- * 			if ( population.reachedConvergence() ) 
-				JOptionPane.showMessageDialog(null, "Convergenza! Tutti gli individui hanno lo stesso genoma!");
-*/
-			
 			// publish results only if better
 			if ( bestIndividual.getFitness() < currentFitness) {
 				currentFitness = bestIndividual.getFitness();
@@ -222,6 +221,14 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 
 	@Override
 	protected boolean reachedStoppingCondition() {
+		if (getNIterations()==N_TO_STOP) {
+			JOptionPane.showMessageDialog(null, "Core stopped: " + N_TO_STOP + " reached!");
+			return true;
+		}
+		if (population.reachedConvergence(PERC_TO_STOP)) { // PERC_TO_STOP not used now
+			JOptionPane.showMessageDialog(null, "Core stopped: convergence reached!");
+			return true;
+		}
 		return false;
 	}
 

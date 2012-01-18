@@ -75,7 +75,7 @@ public class Individual implements Comparable<Individual>, Cloneable {
 	public String toString() {
 		String s = "";
 		for (Packet gene: sequence) {
-			s = s + gene.getId() + " ";
+			s = s + gene + " ";
 		}
 		s = s + "fitness= " + this.getFitness() + " pointer= " + Integer.toHexString(hashCode());
 		return s;
@@ -109,8 +109,8 @@ public class Individual implements Comparable<Individual>, Cloneable {
 	public boolean equals(Object obj) {
 		List<Packet> objSequence = ((Individual)obj).getSequence();
 		for (int i=0; i<objSequence.size(); i++) {
-			if (sequence.get(i)!=objSequence.get(i)) return false;
+			if (!sequence.get(i).equals(objSequence.get(i))) return false;
 		}
-		return false;
+		return true;
 	}
 }

@@ -91,8 +91,8 @@ public class Population {
 	@Override
 	public String toString() {
 		String s = "";
-		for (Individual i: population) {
-			s = s + population.indexOf(i) + ": " + i + "\n";
+		for (int i=0; i<populationSize; i++) {
+			s = s + i + ": " + population.get(i) + "\n";
 		}
 		return s;
 	}
@@ -107,10 +107,19 @@ public class Population {
 
 	}
 
-	public boolean reachedConvergence() {
+	public boolean reachedConvergence(float percToStop) {
+/*		int nEqualsIndividual = 1;
+		int convergenceBound = (int)(populationSize * percToStop);
+*/
 		for (int i=1; i<populationSize; i++) {
-			if (population.get(i-1)!=population.get(i)) return false;
+			if ( !population.get(i-1).equals( population.get(i) ) )
+				return false;
 		}
 		return true;
+	}
+
+	// debug method
+	public Individual get(int i) {
+		return population.get(i);
 	}
 }

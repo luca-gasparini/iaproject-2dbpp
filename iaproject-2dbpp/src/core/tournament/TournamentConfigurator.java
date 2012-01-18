@@ -221,7 +221,7 @@ public class TournamentConfigurator extends AbstractConfigurator<TournamentConfi
 		if (es == null) {
 			throw new DataParsingException("You must specify the number of elite individual");
 		}
-		if (es.intValue() < 1 || es.intValue() > ps.intValue()) {
+		if (es.intValue() < 0 || es.intValue() > ps.intValue()) {
 			throw new DataParsingException("The number of elite individual must be in [0,populationSize]");
 		}
 		
