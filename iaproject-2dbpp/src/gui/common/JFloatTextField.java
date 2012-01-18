@@ -13,6 +13,11 @@ public class JFloatTextField extends JFormattedTextField {
 		this.setFocusLostBehavior(JFormattedTextField.COMMIT);
 	}
 	
+	public JFloatTextField(float value) {
+		this();
+		this.setValue(Float.valueOf(value));
+	}
+	
 	@Override
 	public Float getValue()
 	{

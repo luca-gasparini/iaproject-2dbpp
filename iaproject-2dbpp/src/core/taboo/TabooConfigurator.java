@@ -17,13 +17,13 @@ import core.DataParsingException;
 
 public class TabooConfigurator extends AbstractConfigurator<TabooConfiguration> {
 	
-	public final JFloatTextField ALPHA = new JFloatTextField();
-	public final JFloatTextField DENSITY_FACTOR = new JFloatTextField();
-	public final JFloatTextField HEIGHT_FACTOR = new JFloatTextField();
-	public final JIntegerTextField MAX_NEIGH_SIZE = new JIntegerTextField();
-	public final JIntegerTextField D_MAX = new JIntegerTextField();
-	public final JIntegerTextField FIRST_LIST_TENURE = new JIntegerTextField();
-	public final JIntegerTextField OTHER_LIST_TENURE = new JIntegerTextField();
+	public final JFloatTextField ALPHA = new JFloatTextField((float) 3.5);
+	public final JFloatTextField DENSITY_FACTOR = new JFloatTextField((float) 0.9);
+	public final JFloatTextField HEIGHT_FACTOR = new JFloatTextField(0);
+	public final JIntegerTextField MAX_NEIGH_SIZE = new JIntegerTextField(4);
+	public final JIntegerTextField D_MAX = new JIntegerTextField(4);
+	public final JIntegerTextField FIRST_LIST_TENURE = new JIntegerTextField(30);
+	public final JIntegerTextField OTHER_LIST_TENURE = new JIntegerTextField(30);
 	
 	public final JPanel configurationPanel;
 	

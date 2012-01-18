@@ -15,6 +15,12 @@ public class JIntegerTextField extends JFormattedTextField
 		this.setFocusLostBehavior(JFormattedTextField.COMMIT);
 	}
 	
+	public JIntegerTextField(int value)
+	{
+		this();
+		this.setValue(Integer.valueOf(value));
+	}
+	
 	@Override
 	public Integer getValue()
 	{
