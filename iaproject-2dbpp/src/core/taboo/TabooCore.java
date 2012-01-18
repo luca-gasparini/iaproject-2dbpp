@@ -104,7 +104,12 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		ArrayList<TabooBin> bins = new ArrayList<TabooBin>();
 		Collections.shuffle(packets);
 		for (Packet packet : packets) {
-			TabooBin bin = new TabooBin(packet);
+			// use BLFLayout to pack in order to get the best placing
+			BlfLayout layout = giveBestLayout(Collections.<TabooBin>emptyList(), packet);
+			
+			assert layout.getBins().size() == 1 : "more than 1 bin to pack 1 packet";
+			
+			TabooBin bin = new TabooBin(layout.getBins().get(0).getPacketList());
 			bins.add(bin);
 		}
 		// in order to prevent further modifications to packet list
@@ -212,6 +217,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		 */
 		List<TabooBin> binsWOtarget = new LinkedList<TabooBin>(bins);
 		binsWOtarget.remove(targetBin);
+		Collections.shuffle(binsWOtarget);
 		
 		ArrayList<TabooBin> packetsMovePenaltyStar = new ArrayList<TabooBin>();
 		ArrayList<TabooBin> packetsMovePenalty = new ArrayList<TabooBin>();
@@ -222,14 +228,6 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			
 			while (ktuple.hasNext()) {
 				List<TabooBin> u = ktuple.next();
-				
-				/*
-				 * Crea Lista Pacchetti S
-				 * per ora, il pacchetto j viene inserito alla fine della lista
-				 * (la posizione del pacchetto varia la soluzione prodotta dall'algoritmo BLF)
-				 */
-				List<Packet> s = getPacketsFromBins(u);
-				s.add(j);
 				
 				float penalty = Float.POSITIVE_INFINITY;
 				
@@ -249,13 +247,21 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 				
 				if (as == k) { // unico caso in cui k può valere 1
 					ArrayList<TabooBin> newSolution;
-					if (!tabuLists.isTabu(k, move.value)) {
+					if (target.size() == 1 || !tabuLists.isTabu(k, move.value)) {
 						newSolution = updateSolution(u, bins, binsLayout, targetBin, j);
 						
-						tabuLists.addMove(k, move.value);
-						
-						if (target.size()==1/* && target.getPackets().get(0).getId()==j.getId()*/)
+						if (target.size()==1) {
+							/* the overall number of bins has been reduced by
+							 * the empty of target bin
+							 */
 							k = Math.max(1, k-1);
+						} else {
+							/* the overall number of bins is still the same:
+							 * the list isn't an improvement so should be added
+							 * to the tabu list
+							 */
+							tabuLists.addMove(k, move.value);
+						}
 						
 						return new SearchResult(false, k, newSolution);
 					}
@@ -263,10 +269,9 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 				
 				if (as == k+1 && k>1) { // mossa peggiorativa
 					
-					ArrayList<TabooBin> newSolution = updateSolution(u, bins, binsLayout, targetBin, j);
-					
 					Couple tsig = argminFillingFunctionAmongBins(binsLayout);
-					List<Packet> t = buildT(target.getPackets(), j, binsLayout.get(tsig.index).getPacketList());
+					Bin tsigBin = binsLayout.get(tsig.index);
+					List<Packet> t = buildT(target.getPackets(), j, tsigBin.getPacketList());
 					
 					// calcolo at
 					BlfLayout layoutat = PackingProcedures.getLayout(t, binConf, tabooConf.HEIGHT_FACTOR, tabooConf.DENSITY_FACTOR);
@@ -290,6 +295,50 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 						
 						if (!tabuLists.isTabu(k, newPenalty)) {
 							penalty = newPenalty;
+							
+							/* siamo riusciti ad impaccare in un unico bin gli elementi
+							 * di tsig con i pacchetti rimanenti del target (ovvero
+							 * senza j) => la soluzione sarà composta da:
+							 * - binsLayout senza tsig
+							 * - binsLayoutat (ovvero t perchè nessuno è stato girato)
+							 * - tutti gli altri bin
+							 */
+							// build newSolution:
+							ArrayList<TabooBin> newSolution = new ArrayList<TabooBin>();
+							
+							// - binsLayout without tsig
+							boolean found = false;
+							for (Bin bin : binsLayout) {
+								if (bin == tsigBin) {
+									assert !found : "tsig already found";
+									found = true;
+									continue;
+								}
+								TabooBin newBin = new TabooBin(bin.getPacketList());
+								newSolution.add(newBin);
+							}
+							assert found : "tsig not found";
+							
+							/* - binsLayoutat (we are already sure that this
+							 * packet list packs into a single bin)
+							 */
+							newSolution.add(new TabooBin(t));
+							
+							/* - all other bins, that is bins that are not part
+							 * of the k-uple 'u' and are not the target bin.
+							 */
+							LinkedList<TabooBin> writableU = new LinkedList<TabooBin>(u);
+							for (TabooBin tabooBin : bins) {
+								if (!writableU.remove(tabooBin) && tabooBin != target) {
+									/* bin is not contained in 'u' and is not target one, 
+									 * so it hasn't been modified and can be inserted 'as-is' into 
+									 * the new solution
+									 */
+									newSolution.add(tabooBin);
+								}
+							}
+							assert writableU.isEmpty() : "not all k-uple bins have been removed";
+							
 							packetsMovePenalty = newSolution;
 						}
 					}
@@ -327,7 +376,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			/* PHASE1: remove from the solution the floor(bins.size()/2) bins 
 			 * with smallest filling function value
 			 */
-			/* sort bins in ascending order (bins with lower ff at the begin):
+			/* sort bins in descending order (bins with lower ff at the end):
 			 * computational cost O(n*log(n)) due to merge sort usage
 			 */
 			ArrayList<TabooBin> newBins = new ArrayList<TabooBin>(bins);
@@ -337,17 +386,18 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 					float o1ff = calculateFillingFunction(tabooConf.ALPHA, o1.getPackets(), binConf, totPkts);
 					float o2ff = calculateFillingFunction(tabooConf.ALPHA, o2.getPackets(), binConf, totPkts);
 					
-					return Float.compare(o1ff, o2ff);
+					// reverse (desc) order is achieved here inverting o1 and o2
+					return Float.compare(o2ff, o1ff);
 				}
 			});
 			/* now remove floor(bins.size()/2) bins and save contained
 			 * pkts in removedPkts: computational cost O(n) because JDK 
-			 * specification assure that remotion from an ArrayList runs 
-			 * in constant time 
+			 * specification assure that remotion from tail of an ArrayList 
+			 * runs in constant time 
 			 */
 			List<Packet> removedPkts = new ArrayList<Packet>();
 			for (int i = 0; i < bins.size() / 2; i++) {
-				TabooBin remBin = newBins.remove(0);
+				TabooBin remBin = newBins.remove(newBins.size() - 1);
 				removedPkts.addAll(remBin.getPackets());
 			}
 			
@@ -378,6 +428,8 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		assert totPkts >= 0 : "wrong number of packets " + totPkts;
 		
 		LinkedList<Couple> mins = new LinkedList<TabooCore.Couple>();
+		
+		// first element is inserted straightway
 		float value = calculateFillingFunction(tabooConf.ALPHA, bins.get(0).getPackets(), binConf, totPkts);
 		mins.add(new Couple(value, 0));
 		
@@ -423,15 +475,16 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			return lnr;
 
 		s.remove(s.size()-1); // rimuovo j ruotato
-		s.add(j.getRotated()); // aggiungo j ruotatto
+		s.add(j.getRotated()); // aggiungo j ruotato
 		
 		// layout j rotate
 		BlfLayout lr = PackingProcedures.getLayout(s, binConf, tabooConf.HEIGHT_FACTOR, tabooConf.DENSITY_FACTOR);
 		
-		if (lnr.getFitness() <= lr.getFitness())
+		if (Float.compare(lnr.getFitness(), lr.getFitness()) <= 0) {
 			return lnr;
-		else
+		} else {
 			return lr;
+		}
 	}
 	
 	private static float calculateFillingFunction(float ALPHA, List<Packet> pkts, BinConfiguration binConf, int totPkts) {
@@ -443,7 +496,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 	private static float sumPktAreas(List<Packet> pkts) {
 		int area = 0;
 		for (Packet pkt : pkts) {
-			area += pkt.getWidth() * pkt.getHeight();
+			area += pkt.getArea();
 		}
 		
 		return area;
@@ -456,6 +509,12 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		for (TabooBin bin : tabooBins) {
 			BlfLayout binLayout = PackingProcedures.getLayout(bin.getPackets(), 
 					binConf, tabooConf.HEIGHT_FACTOR, tabooConf.DENSITY_FACTOR);
+			
+//			// TODO remove and de-comment assertion
+//			if (binLayout.getBins().size() != 1) {
+//				System.out.println();
+//			}
+//			// ----
 			assert binLayout.getBins().size() == 1 : "A TabooBin pack in >1 bins";
 			
 			binList.addAll(binLayout.getBins());
@@ -501,195 +560,6 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		return false;
 	}
 	
-//	private class Kupla {
-//		private List<Integer> singleUpla;
-//		
-//		public Kupla() {
-//			this.singleUpla = new ArrayList<Integer>();
-//		}
-//		
-//		public Kupla(List<Integer> l) {
-//			List<Integer> newList = new ArrayList<Integer>();
-//			
-//			for (Integer num: l) {
-//				newList.add(num);
-//			}
-//			this.singleUpla = newList;
-//		}
-//		
-//		public List<Integer> getList() {
-//			return this.singleUpla;
-//		}
-//		
-//		public void add(Integer num) {
-//			singleUpla.add(num);
-//		}
-//		
-//		public int getSize() {
-//			return singleUpla.size();
-//		}
-//		
-//		public Integer getIntegerAtIndex(int i) {
-//			if (singleUpla.isEmpty() || i>=this.getSize())
-//				throw new IllegalStateException();
-//			
-//			return singleUpla.get(i);
-//		}
-//		
-//		public Integer getLast() {
-//			return this.getIntegerAtIndex(singleUpla.size()-1);
-//		}
-//		
-//		public Kupla getPrefix() {
-//			
-//			if (this.getSize()==0 || this.getSize()==1)
-//				return new Kupla();
-//						
-//			return new Kupla(singleUpla.subList(0, this.getSize()-1));
-//		}
-//		
-//		public boolean equals(Kupla compareUpla) {
-//			if (singleUpla.size() != compareUpla.getSize())
-//				return false;
-//			
-//			for (int i=0; i<this.getSize(); i++) {
-//				if (this.getIntegerAtIndex(i) != compareUpla.getIntegerAtIndex(i))
-//					return false;
-//			}
-//			return true;
-//		}
-//		
-//		public boolean containsInteger(int value) {
-//			
-//			for (Integer num: this.singleUpla) {
-//				if (num==value)
-//					return true;
-//			}
-//			return false;
-//		}
-//		
-//		public String toString() {
-//			String str = new String();
-//			
-//			for (int i=0; i<singleUpla.size(); i++)
-//				str = str.concat(singleUpla.get(i).toString());
-//			
-//			return str;
-//		}
-//	}
-//	
-//	private class SetKupla {
-//	
-//		private List<Kupla> set;
-//		
-//		public SetKupla() {
-//			set = new ArrayList<Kupla>();
-//		}
-//		
-//		public void add(Kupla u) {
-//			set.add(u);
-//		}
-//		
-//		public int size() {
-//			return set.size();
-//		}
-//		
-//		public Kupla get(int index) {
-//			return set.get(index);
-//		}
-//		
-//		public List<Kupla> getList() {
-//			return this.set;
-//		}
-//		
-//		public String toString() {
-//			
-//			String printSet = new String();
-//			
-//			for (Kupla upla: set) {
-//				printSet = printSet.concat(upla.toString());
-//				printSet = printSet.concat("\n");
-//			}
-//			
-//			return printSet;
-//		}
-//	}
-//	
-//	private class ManageListUple {
-//		
-//		private List<SetKupla> subSets;
-//		
-//		public ManageListUple() {
-//			this.subSets = new ArrayList<SetKupla>();
-//		}
-//		
-//		public void addSubSets(SetKupla subset) {
-//			subSets.add(subset);
-//		}
-//		
-//		public SetKupla getKSubSet(int k) {
-//			return subSets.get(k);
-//		}
-//		
-//		public void printSets() {
-//			for (int k=0; k<subSets.size(); k++) {
-//				System.out.println("k = "+k);
-//				System.out.println(subSets.get(k).toString());
-//			}
-//		}
-//	}
-//	
-//	private SetKupla buildKupleSetWithoutTargetBin(int k, int target, ArrayList<TabooBin> bins) {
-//		if (k==0)
-//			return new SetKupla();
-//		
-//		if (target<0)
-//			return new SetKupla();
-//		
-//		ManageListUple mlp = new ManageListUple();
-//		
-//		// singleton TabooBin
-//		SetKupla singleTons = new SetKupla();
-//		
-//		for (int j=0; j<bins.size(); j++) {
-//			if (j!=target) {
-//				Kupla u = new Kupla();
-//				u.add(j);
-//				singleTons.add(u);
-//			}
-//		}
-//		mlp.addSubSets(singleTons);
-//		
-//		// nosingleton TabooBin
-//		for (int i=2; i<=k; i++) {
-//			mlp.addSubSets(buildSetKUple(i, mlp.getKSubSet(i-2)));
-//		}
-//		//mlp.printSets();
-//		return mlp.getKSubSet(k-1);
-//	}
-//	
-//	private SetKupla buildSetKUple (int k, SetKupla listSetKLessOne) {
-//		
-//		int dimList = listSetKLessOne.size();
-//		SetKupla setK = new SetKupla();
-//		
-//		for (int i=0; i<dimList-1; i++) {
-//			Kupla pre1 = listSetKLessOne.get(i).getPrefix();
-//			
-//			for (int j=i+1; j<dimList; j++) {
-//				Kupla pre2 = listSetKLessOne.get(j).getPrefix();
-//				
-//				if (pre1.equals(pre2)) {
-//					Kupla newUpla = new Kupla(pre1.getList());
-//					newUpla.add(listSetKLessOne.get(i).getLast());
-//					newUpla.add(listSetKLessOne.get(j).getLast());
-//					setK.add(newUpla);
-//				}
-//			}
-//		}
-//		return setK;		
-//	}
-//	
 	private List<Packet> getPacketsFromBins(List<TabooBin> bins) {
 		
 		List<Packet> s = new ArrayList<Packet>();
@@ -725,35 +595,53 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			ArrayList<TabooBin> bins, // tutti i bin della soluzione NON aggiornata
 			List<Bin> binsLayout, // lista di bin aggiornati
 			int targetBin, // bin target
-			Packet j) { // pacchetto j che è stato spostato
-	
-		// create new solution copying inhalterated bins
-		ArrayList<TabooBin> newSolution = new ArrayList<TabooBin>(bins);
-		newSolution.remove(targetBin);
-		newSolution.removeAll(u);
-			
-		// copy targetBin without Packet j iif targetBin contains other packets than packet j
-		List<Packet> packTargetBin = bins.get(targetBin).getPackets();
+			Packet j) { // pacchetto j (ORIGINALE - non quello eventualmente ruotato) che è stato spostato
 		
-		//if (!(packTargetBin.size()==1 && packTargetBin.get(0).getId()==j.getId())) {
-		if (packTargetBin.size()!=1) {
-			TabooBin newTargetBin = new TabooBin();
-			
-			for (Packet p: packTargetBin) {
-				if (p.getId() == j.getId())
-					continue;
-					
-				newTargetBin.addPacket(p);
-			}
-			newSolution.add(newTargetBin);
-		}
+		ArrayList<TabooBin> newSolution = new ArrayList<TabooBin>();
 		
 		// copy bins NewLayout
 		for (Bin b: binsLayout) {
 			TabooBin newBin = new TabooBin(b.getPacketList());
 			newSolution.add(newBin);
 		}
+		
+		// create a modifiable view of 'u'
+		List<TabooBin> writableU = new LinkedList<TabooBin>(u);
+		// get targetBin reference
+		TabooBin target = bins.get(targetBin);
+		/* insert all bins that haven't been modified (i.e. are not part of u
+		 * and are not the target one).
+		 */
+		for (TabooBin bin : bins) {
+			if (!writableU.remove(bin) && bin != target) {
+				/* bin is not contained in 'u' and is not target one, 
+				 * so it hasn't been modified and can be inserted 'as-is' into 
+				 * the new solution
+				 */
+				newSolution.add(bin);
+			}
+		}
+		assert writableU.isEmpty() : "not all k-uple bins have been removed";
+		
+		// copy targetBin without Packet j iif targetBin contains other packets than packet j
+		List<Packet> packTargetBin = target.getPackets();
+		if (packTargetBin.size() != 1) {
+			boolean found = false;
+			TabooBin newTargetBin = new TabooBin();
 			
+			for (Packet p: packTargetBin) {
+				if (p.getId() == j.getId()) {
+					assert !found : "j has been found twice";
+					found = true;
+					continue;
+				}
+				newTargetBin.addPacket(p);
+			}
+			assert found : "j hasn't been found at all";
+			
+			newSolution.add(newTargetBin);
+		}
+		
 		return newSolution;
 	}
 	
