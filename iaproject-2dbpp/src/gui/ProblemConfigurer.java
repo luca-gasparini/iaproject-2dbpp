@@ -117,16 +117,27 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 	private DefaultListModel packetListModel;
 	private JIntegerTextField binWidth;
 	private JIntegerTextField binHeight;
+	private TitledBorder titleBorder;
 	
 	@Override
 	protected void paintValue(ProblemConfiguration value) {
 		binWidth.setValue(Integer.valueOf(value.getBin().getWidth()));
 		binHeight.setValue(Integer.valueOf(value.getBin().getHeight()));
 		
+		int totPkts = 0;
+		int totArea = 0;
 		packetListModel.removeAllElements();
 		for (PacketConfiguration pc : value.getPackets()) {
 			packetListModel.addElement(pc);
+			totPkts += pc.getMolteplicity();
+			totArea += pc.getArea();
 		}
+		
+		updatePktTitle(totPkts, totArea);
+	}
+
+	private void updatePktTitle(int totPkts, int totArea) {
+		titleBorder.setTitle("Input packets [ #" + totPkts + " - Area:" + totArea + " ]");
 	}
 
 	@Override
@@ -241,8 +252,9 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		
 		JPanel pktPane = new JPanel(new BorderLayout());
-		TitledBorder border = BorderFactory.createTitledBorder("Input packets");
-		pktPane.setBorder(border);
+		titleBorder = BorderFactory.createTitledBorder("DEFAULT");
+		pktPane.setBorder(titleBorder);
+		updatePktTitle(0, 0);
 		pktPane.add(pktPainter, BorderLayout.CENTER);
 		pktPane.add(btnPanel, BorderLayout.SOUTH);
 		
@@ -264,7 +276,7 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		});
 		
 		Box binBox = Box.createHorizontalBox();
-		border = BorderFactory.createTitledBorder("Bin size");
+		TitledBorder border = BorderFactory.createTitledBorder("Bin size");
 		binBox.setBorder(border);
 		binBox.add(binWLbl);
 		binBox.add(Box.createHorizontalStrut(5));

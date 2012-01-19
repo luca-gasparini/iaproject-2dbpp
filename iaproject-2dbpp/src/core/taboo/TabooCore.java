@@ -8,7 +8,6 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Random;
 
 import logic.Bin;
 import logic.BinConfiguration;
@@ -66,7 +65,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 	private final TabooConfiguration tabooConf;
 	private final TabooListsManager tabuLists;
 	private int totPackets;
-	private int numberCurrentBins; // for stoppingcondition
+	private CoreResult<List<Bin>> currentOptimum;
 	
 	public TabooCore(CoreConfiguration<TabooConfiguration> configuration,
 			OptimumPainter painter, Core2GuiTranslator<List<Bin>> translator) {
@@ -77,7 +76,6 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		this.tabooConf = configuration.getCoreConfiguration();
 		this.tabuLists = new TabooListsManager(tabooConf.FIRST_LIST_TENURE, 
 				tabooConf.OTHER_LIST_TENURE);
-		this.numberCurrentBins = Integer.MAX_VALUE;
 	}
 
 	@Override
@@ -90,7 +88,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		 * this step is not done using PackingProcedures because resulting
 		 * fitness may be calculated in a different way than our one.
 		 */
-		CoreResult<List<Bin>> currentOptimum = new AbstractCoreResult<List<Bin>>() {
+		currentOptimum = new AbstractCoreResult<List<Bin>>() {
 			@Override
 			public float getFitness() {
 				return Float.POSITIVE_INFINITY;
@@ -145,27 +143,25 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			if (sr.newStep != null) {
 				// check if fitness is better...
 				CoreResult<List<Bin>> result = prepareResult(sr.newStep);
-				publishResult(result);
-//				if (Float.compare(result.getFitness(), currentOptimum.getFitness()) < 0) {
-//					// ... and publish & set new optimum
-//					currentOptimum = result;
-//					publishResult(currentOptimum);
-//					
-//					// reset variables
-//					nonChangingCounter = 0;
-//					d = neighSize = 1;
-//					numberCurrentBins = bins.size();
-//				} else {
-//					assert result.getBins().size() >= currentOptimum.getBins().size() : "more bins";
-//				}
-				numberCurrentBins = result.getBins().size();
-//				System.out.println("Bins = "+this.numberCurrentBins);
+				
+				if (Float.compare(result.getFitness(), currentOptimum.getFitness()) < 0) {
+					// ... and publish & set new optimum
+					currentOptimum = result;
+					publishResult(currentOptimum);
+					
+					// reset variables
+					nonChangingCounter = 0;
+					d = neighSize = 1;
+				} else {
+					assert result.getBins().size() >= currentOptimum.getBins().size() : "more bins";
+				}
+				
 				// set bin list to the current move
 				bins = sr.newStep;
 			}
 			
 			findNewTarget = false;
-			if (sr.neighSize <= neighSize) {
+			if (sr.neighSize <= neighSize || targetBin >= bins.size()) {
 				findNewTarget = true;
 			}
 			neighSize = sr.neighSize;
@@ -228,8 +224,6 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		
 		ArrayList<TabooBin> packetsMovePenaltyStar = new ArrayList<TabooBin>();
 		ArrayList<TabooBin> packetsMovePenalty = new ArrayList<TabooBin>();
-		
-		assert binsWOtarget.size()>0: "Optimal solution found! xD";
 		
 		for (Packet j: packetsIntoTargetBin) {
 			
@@ -366,11 +360,9 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			return new SearchResult(false, k, packetsMovePenaltyStar);
 		} else {
 			boolean diversify = false;
-//			System.out.println(k+" - "+tabooConf.MAX_NEIGH_SIZE); 
-			if (k == this.tabooConf.MAX_NEIGH_SIZE) {
+			
+			if (k == this.tabooConf.MAX_NEIGH_SIZE)
 				diversify = true;
-				assert diversify:"passa diversify";
-			}
 			else
 				k++;
 			
@@ -478,9 +470,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		 */
 		List<Packet> s = getPacketsFromBins(bins);
 		s.add(j);
-//		Collections.shuffle(s);
-//		int position = s.size()==0?0:new Random().nextInt(s.size());
-//		s.add(position, j);
+		
 		if (tabooConf.IMPROVEBLF) {
 			Collections.sort(s, new Comparator<Packet>() {
 				@Override
@@ -488,7 +478,8 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 					int p1dim = p1.getWidth();
 					int p2dim = p2.getWidth();
 					
-					return -Integer.compare(p1dim, p2dim);
+//					return -Integer.compare(p1dim, p2dim);
+					return p2dim - p1dim;
 				}
 			});
 		}
@@ -496,14 +487,13 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		// layout j no rotate
 		BlfLayout lnr = callBLFLayout(s);
 		
-		if (!j.isRotatable()) // no ratatable, return
+		if (!j.isRotatable()) // no rotatable, return
 			return lnr;
 
-//		s.remove(s.size()-1); // rimuovo j ruotato
-		s.remove(j);
+		boolean remCheck = s.remove(j);
+		assert remCheck : "j no more found";
 		s.add(j.getRotated()); // aggiungo j ruotato
 		
-//		s.add(position, j.getRotated());
 		if (tabooConf.IMPROVEBLF) {
 			Collections.sort(s, new Comparator<Packet>() {
 				@Override
@@ -511,7 +501,8 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 					int p1dim = p1.getWidth();
 					int p2dim = p2.getWidth();
 					
-					return -Integer.compare(p1dim, p2dim);
+//					return -Integer.compare(p1dim, p2dim);
+					return p2dim - p1dim;
 				}
 			});
 		}
@@ -593,7 +584,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 
 	@Override
 	protected boolean reachedStoppingCondition() {
-		return this.numberCurrentBins==1;
+		return this.currentOptimum.getBins().size() == 1;
 	}
 	
 	private List<Packet> getPacketsFromBins(List<TabooBin> bins) {
@@ -745,13 +736,14 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 				// in order to keep packIterator pointing to overflowPkt
 				packIterator.previous();
 				
+				// TODO debug line, remove
 //				System.out.println(nIt + "-> " + targetBins.size() + "bins -> " + packTargetBin);
 				
 				targetBins = callBLFLayout(packTargetBin).getBins();
 			} while (targetBins.size() > 1);
 			
 			// TODO debug line, remove
-//			System.out.println(nIt + " iteration to revise target bin made of " + packTargetBin.size() + " pkts");
+			System.out.println(nIt + " iteration to revise target bin made of " + packTargetBin.size() + " pkts");
 		}
 			
 		// - now add new target bin to the solution
