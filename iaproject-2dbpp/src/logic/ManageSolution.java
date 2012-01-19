@@ -1,6 +1,7 @@
 package logic;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import core.DataParsingException;
 
@@ -33,6 +34,7 @@ public class ManageSolution {
 				lps.add(new Packet(pd, rotInfo.mustBeRotated, rotInfo.canRotate));
 			}
 		}
+		Collections.shuffle(lps);
 		return lps;
 	}
 	

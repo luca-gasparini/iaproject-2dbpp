@@ -15,10 +15,11 @@ public class TabooConfiguration implements Serializable {
 	public final int D_MAX;
 	public final int FIRST_LIST_TENURE;
 	public final int OTHER_LIST_TENURE;
+	public final boolean IMPROVEBLF;
 	
 	public TabooConfiguration(float aLPHA, float dENSITY_FACTOR,
 			float hEIGHT_FACTOR, int mAX_NEIGH_SIZE, int d_MAX,
-			int fIRST_LIST_TENURE, int oTHER_LIST_TENURE) {
+			int fIRST_LIST_TENURE, int oTHER_LIST_TENURE, boolean iMPROBEBLF) {
 		ALPHA = aLPHA;
 		DENSITY_FACTOR = dENSITY_FACTOR;
 		HEIGHT_FACTOR = hEIGHT_FACTOR;
@@ -26,6 +27,7 @@ public class TabooConfiguration implements Serializable {
 		D_MAX = d_MAX;
 		FIRST_LIST_TENURE = fIRST_LIST_TENURE;
 		OTHER_LIST_TENURE = oTHER_LIST_TENURE;
+		IMPROVEBLF = iMPROBEBLF;
 	}
 	
 }

@@ -5,6 +5,7 @@ import gui.common.JFloatTextField;
 import gui.common.JIntegerTextField;
 
 import javax.swing.GroupLayout;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -24,6 +25,7 @@ public class TabooConfigurator extends AbstractConfigurator<TabooConfiguration> 
 	public final JIntegerTextField D_MAX = new JIntegerTextField(4);
 	public final JIntegerTextField FIRST_LIST_TENURE = new JIntegerTextField(30);
 	public final JIntegerTextField OTHER_LIST_TENURE = new JIntegerTextField(30);
+	public final JCheckBox IMPROVEBLF = new JCheckBox();
 	
 	public final JPanel configurationPanel;
 	
@@ -37,6 +39,7 @@ public class TabooConfigurator extends AbstractConfigurator<TabooConfiguration> 
 		JLabel dMaxLbl = new JLabel("<html>d_max</html>");
 		JLabel firstListTenureLbl = new JLabel("<html>First list tenure</html>");
 		JLabel otherListTenureLbl = new JLabel("<html>Other list tenure</html>");
+		JLabel improveBLF = new JLabel("<html>Adatta meglio al BLF</html>");
 		
 		GroupLayout gp = new GroupLayout(configurationPanel);
 		configurationPanel.setLayout(gp);
@@ -51,6 +54,7 @@ public class TabooConfigurator extends AbstractConfigurator<TabooConfiguration> 
 						.addComponent(dMaxLbl)
 						.addComponent(firstListTenureLbl)
 						.addComponent(otherListTenureLbl)
+						.addComponent(improveBLF)
 						)
 				.addGroup(gp.createParallelGroup(GroupLayout.Alignment.LEADING)
 						.addComponent(ALPHA)
@@ -60,6 +64,7 @@ public class TabooConfigurator extends AbstractConfigurator<TabooConfiguration> 
 						.addComponent(D_MAX)
 						.addComponent(FIRST_LIST_TENURE)
 						.addComponent(OTHER_LIST_TENURE)
+						.addComponent(IMPROVEBLF)
 						)
 		);
 		gp.setVerticalGroup(gp.createSequentialGroup()
@@ -91,6 +96,10 @@ public class TabooConfigurator extends AbstractConfigurator<TabooConfiguration> 
 						.addComponent(otherListTenureLbl)
 						.addComponent(OTHER_LIST_TENURE, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						)
+				.addGroup(gp.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(improveBLF)
+						.addComponent(IMPROVEBLF, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						)
 		);
 	}
 	
@@ -108,6 +117,7 @@ public class TabooConfigurator extends AbstractConfigurator<TabooConfiguration> 
 		D_MAX.setValue(Integer.valueOf(config.D_MAX));
 		FIRST_LIST_TENURE.setValue(Integer.valueOf(config.FIRST_LIST_TENURE));
 		OTHER_LIST_TENURE.setValue(Integer.valueOf(config.OTHER_LIST_TENURE));
+		IMPROVEBLF.setSelected(config.IMPROVEBLF);
 	}
 
 	@Override
@@ -155,8 +165,10 @@ public class TabooConfigurator extends AbstractConfigurator<TabooConfiguration> 
 			throw new DataParsingException("Other list tenure must be positive");
 		}
 		
+		boolean improve_blf = IMPROVEBLF.isSelected();
+		
 		return new TabooConfiguration(alpha, density_factor, height_factor, 
-				max_neigh_size, d_max, first_list_tenure, other_list_tenure);
+				max_neigh_size, d_max, first_list_tenure, other_list_tenure, improve_blf);
 	}
 
 }

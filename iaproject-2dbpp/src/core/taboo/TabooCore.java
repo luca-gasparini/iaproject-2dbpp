@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Random;
 
 import logic.Bin;
 import logic.BinConfiguration;
@@ -142,7 +143,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			if (sr.newStep != null) {
 				// check if fitness is better...
 				CoreResult<List<Bin>> result = prepareResult(sr.newStep);
-				
+//				publishResult(result);
 				if (Float.compare(result.getFitness(), currentOptimum.getFitness()) < 0) {
 					// ... and publish & set new optimum
 					currentOptimum = result;
@@ -359,9 +360,11 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			return new SearchResult(false, k, packetsMovePenaltyStar);
 		} else {
 			boolean diversify = false;
-			
-			if (k == this.tabooConf.MAX_NEIGH_SIZE)
+			System.out.println(k+" - "+tabooConf.MAX_NEIGH_SIZE); 
+			if (k == this.tabooConf.MAX_NEIGH_SIZE) {
 				diversify = true;
+				assert diversify:"passa diversify";
+			}
 			else
 				k++;
 			
@@ -469,6 +472,20 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		 */
 		List<Packet> s = getPacketsFromBins(bins);
 		s.add(j);
+//		Collections.shuffle(s);
+//		int position = s.size()==0?0:new Random().nextInt(s.size());
+//		s.add(position, j);
+		if (tabooConf.IMPROVEBLF) {
+			Collections.sort(s, new Comparator<Packet>() {
+				@Override
+				public int compare(Packet p1, Packet p2) {
+					int p1dim = p1.getWidth();
+					int p2dim = p2.getWidth();
+					
+					return -Integer.compare(p1dim, p2dim);
+				}
+			});
+		}
 		
 		// layout j no rotate
 		BlfLayout lnr = callBLFLayout(s);
@@ -476,8 +493,22 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		if (!j.isRotatable()) // no ratatable, return
 			return lnr;
 
-		s.remove(s.size()-1); // rimuovo j ruotato
+//		s.remove(s.size()-1); // rimuovo j ruotato
+		s.remove(j);
 		s.add(j.getRotated()); // aggiungo j ruotato
+		
+//		s.add(position, j);
+		if (tabooConf.IMPROVEBLF) {
+			Collections.sort(s, new Comparator<Packet>() {
+				@Override
+				public int compare(Packet p1, Packet p2) {
+					int p1dim = p1.getWidth();
+					int p2dim = p2.getWidth();
+					
+					return -Integer.compare(p1dim, p2dim);
+				}
+			});
+		}
 		
 		// layout j rotate
 		BlfLayout lr = callBLFLayout(s);
@@ -633,7 +664,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		LinkedList<Packet> packTargetBin = new LinkedList<Packet>();
 		
 		// TODO debug line, remove
-		System.out.println("seq with j: " + target.getPackets());
+//		System.out.println("seq with j: " + target.getPackets());
 		
 		boolean found = false;
 		for (Packet packet : target.getPackets()) {
@@ -667,7 +698,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		if (targetBins.size() > 1) {
 			
 			// TODO debug line, remove
-			System.out.println("starting seq: " + packTargetBin);
+//			System.out.println("starting seq: " + packTargetBin);
 			
 			/* get first element of the second (aka last?) bin and try to move
 			 * it backwards, step by step, in order to make the target bin
@@ -708,13 +739,13 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 				// in order to keep packIterator pointing to overflowPkt
 				packIterator.previous();
 				
-				System.out.println(nIt + "-> " + targetBins.size() + "bins -> " + packTargetBin);
+//				System.out.println(nIt + "-> " + targetBins.size() + "bins -> " + packTargetBin);
 				
 				targetBins = callBLFLayout(packTargetBin).getBins();
 			} while (targetBins.size() > 1);
 			
 			// TODO debug line, remove
-			System.out.println(nIt + " iteration to revise target bin made of " + packTargetBin.size() + " pkts");
+//			System.out.println(nIt + " iteration to revise target bin made of " + packTargetBin.size() + " pkts");
 		}
 			
 		// - now add new target bin to the solution
