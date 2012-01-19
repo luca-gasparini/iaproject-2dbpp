@@ -20,6 +20,7 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 	// core configuration fields
 	private final int populationSize;
 	private final float pRotateMutation;
+	private final float pSwapMutation;
 	private final float pOrderMutation;
 	private final float pCrossover;
 	private final float alpha;
@@ -40,6 +41,7 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 		// get core configuration
 		this.populationSize = conf.getCoreConfiguration().getPopulationSize();
 		this.pRotateMutation = conf.getCoreConfiguration().getRotateMutationProbability();
+		this.pSwapMutation = conf.getCoreConfiguration().getSwapMutationProbability();
 		this.pOrderMutation = conf.getCoreConfiguration().getOrderMutationProbability();
 		this.pCrossover = conf.getCoreConfiguration().getCrossoverProbability();
 		this.alpha = conf.getCoreConfiguration().getAlpha();
@@ -74,7 +76,7 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 			Individual father = selectIndividual();
 			Individual mother = selectIndividual();
 			Individual child = crossover(father, mother, pCrossover);
-			child.mutate(pRotateMutation, pOrderMutation);
+			child.mutate(pRotateMutation, pSwapMutation, pOrderMutation);
 			child.calculateLayout(binsDim, alpha, beta);
 			bestIndividual = replaceWorstIndividual(child);
 						
@@ -102,7 +104,7 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 		
 		if (rand.nextFloat() < pCrossover) {
 	
-			int genomeSize = father.getSequence().size();
+			int genomeSize = father.getGenome().size();
 			List<Packet> childGenome = new ArrayList<Packet>(genomeSize);
 			boolean[] isGeneCopied = new boolean[genomeSize];
 			for ( int i = 0; i < genomeSize; i++ ) {
@@ -116,13 +118,13 @@ public class GeneticCore extends AbstractCore<GeneticConfiguration, List<Bin>> {
 			int q = rand.nextInt( genomeSize + 1 - p);
 			
 			// extract the genome portion of the father and add it to the child genome
-			for (Packet fatherGene: father.getSequence().subList(p, p + q )) {
+			for (Packet fatherGene: father.getGenome().subList(p, p + q )) {
 				childGenome.add( fatherGene );
 				isGeneCopied[fatherGene.getId()] = true;
 			}
 			
 			// complete with the genome of the mother
-			for (Packet motherGene: mother.getSequence()) {
+			for (Packet motherGene: mother.getGenome()) {
 				if ( !isGeneCopied[ motherGene.getId() ] ) {
 					childGenome.add( motherGene );
 				}

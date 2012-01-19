@@ -7,6 +7,7 @@ public class TournamentConfiguration implements Serializable {
 	private static final long serialVersionUID = 8613812705544125287L;
 	private Integer populationSize;
 	private Float pRotateMutation;
+	private Float pSwapMutation;
 	private Float pOrderMutation;
 	private Float pCrossover;
 	private Float alpha;
@@ -15,9 +16,10 @@ public class TournamentConfiguration implements Serializable {
 	private Integer tournamentSize;
 
 	
-	public TournamentConfiguration(Integer ps, Float rp, Float op, Float cp, Float a,Float b, Integer es, Integer ts) {
+	public TournamentConfiguration(Integer ps, Float rp, Float sp, Float op, Float cp, Float a,Float b, Integer es, Integer ts) {
 		this.populationSize = ps;
 		this.pRotateMutation = rp;
+		this.pSwapMutation = sp;
 		this.pOrderMutation = op;
 		this.pCrossover = cp;
 		this.alpha = a;
@@ -34,6 +36,10 @@ public class TournamentConfiguration implements Serializable {
 		return pRotateMutation;
 	}
 
+	public Float getSwapMutationProbability() {
+		return pSwapMutation;
+	}
+	
 	public float getOrderMutationProbability() {
 		return pOrderMutation;
 	}
@@ -57,6 +63,5 @@ public class TournamentConfiguration implements Serializable {
 	public int getTournamentSize() {
 		return tournamentSize;
 	}
-	
 	
 }

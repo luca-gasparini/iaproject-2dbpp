@@ -7,6 +7,7 @@ public class GeneticConfiguration implements Serializable {
 	private static final long serialVersionUID = 8613812705544125287L;
 	private Integer populationSize;
 	private Float pRotateMutation;
+	private Float pSwapMutation;
 	private Float pOrderMutation;
 	private Float pCrossover;
 	private Float alpha;
@@ -14,9 +15,10 @@ public class GeneticConfiguration implements Serializable {
 	
 
 	
-	public GeneticConfiguration(Integer ps, Float rp, Float op, Float cp,Float a,Float b) {
+	public GeneticConfiguration(Integer ps, Float rp, Float sp, Float op, Float cp,Float a,Float b) {
 		this.populationSize = ps;
 		this.pRotateMutation = rp;
+		this.pSwapMutation = sp;
 		this.pOrderMutation = op;
 		this.pCrossover = cp;
 		this.alpha = a;
@@ -29,6 +31,10 @@ public class GeneticConfiguration implements Serializable {
 
 	public float getRotateMutationProbability() {
 		return pRotateMutation;
+	}
+	
+	public Float getSwapMutationProbability() {
+		return pSwapMutation;
 	}
 
 	public float getOrderMutationProbability() {

@@ -25,6 +25,7 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 	// core configuration fields
 	private final int populationSize;
 	private final float pRotateMutation;
+	private final float pSwapMutation;
 	private final float pOrderMutation;
 	private final float pCrossover;
 	private final float alpha;
@@ -50,6 +51,7 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 		// get core configuration
 		this.populationSize = conf.getCoreConfiguration().getPopulationSize();
 		this.pRotateMutation = conf.getCoreConfiguration().getRotateMutationProbability();
+		this.pSwapMutation = conf.getCoreConfiguration().getSwapMutationProbability();
 		this.pOrderMutation = conf.getCoreConfiguration().getOrderMutationProbability();
 		this.pCrossover = conf.getCoreConfiguration().getCrossoverProbability();
 		this.alpha = conf.getCoreConfiguration().getAlpha();
@@ -83,27 +85,27 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 			// selection
 			List<Individual> matingPool =
 					population.tournamentSelection(tournamentSize,tournamentsNumber);
-//			System.out.println("SELECTION... MATING POOL = ");
+/*			System.out.println("SELECTION... MATING POOL = ");
 			for (int i=0; i<matingPool.size(); i++) {
-				System.out.println(i +": "+ matingPool.get(i));
+				System.out.println( i + ": " + matingPool.get(i) );
 			}
-			
+*/			
 			// crossover
-			List<Individual> offspringPool = crossover(matingPool, pCrossover);
-//			System.out.println("CROSSOVER... OFFSPRING POOL = ");
+			List<Individual> offspringPool = crossover( matingPool );
+/*			System.out.println("CROSSOVER... OFFSPRING POOL = ");
 			for (int i=0; i<offspringPool.size(); i++) {
-				System.out.println(i +": "+ offspringPool.get(i));
+				System.out.println( i + ": " + offspringPool.get(i) );
 			}
-			
+*/			
 			// mutation
-			mutate(offspringPool, pRotateMutation, pOrderMutation);
-//			System.out.println("MUTATION... OFFSPRING POOL = ");
+			mutate( offspringPool );
+/*			System.out.println("MUTATION... MUTATED OFFSPRING POOL = ");
 			for (int i=0; i<offspringPool.size(); i++) {
-				System.out.println(i +": "+ offspringPool.get(i));
+				System.out.println( i + ": " + offspringPool.get(i) );
 			}
-			
+*/			
 			// make new generation	
-			population.replace( offspringPool, eliteSize);
+			population.replace( offspringPool, eliteSize );
 /*			System.out.println("MAKING NEW GENERATION... NEW POPULATION = ");
 			System.out.println(population);
 */					
@@ -131,21 +133,9 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 	}
 
 
-	private void mutate(List<Individual> offspringPool, float pRotateMutation,
-			float pOrderMutation) {
-		int offspringPoolSize = offspringPool.size();
-		for(int i=0; i<offspringPoolSize; i++){
-			Individual mutatedOffspring = offspringPool.get(i).clone();
-			mutatedOffspring.mutate(pRotateMutation, pOrderMutation);
-			mutatedOffspring.calculateLayout(binsDim, alpha, beta);
-			offspringPool.add(mutatedOffspring);
-		}
-	}
-
 
 	// modified Partially Matched Crossover to make a crossover in O(n)
-	private List<Individual> crossover(List<Individual> matingPool, float pCrossover) {
-		
+	private List<Individual> crossover( List<Individual> matingPool ) {
 		
 		List<Individual> offspringPool = new ArrayList<Individual>();
 //		System.out.println("mating pool size=" + matingPool.size());
@@ -161,14 +151,14 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 			
 			if (rand.nextFloat() < pCrossover) {
 				
-				int genomeSize = dad.getSequence().size();
+				int genomeSize = dad.getGenome().size();
 				// set up father genome breaking point
 				int p = rand.nextInt( genomeSize );
 				// set up number of gene to copy from father: at least 1
 				int q = rand.nextInt( genomeSize - p) + 1;
 				
 //				System.out.println("Dad: " + dad + "\nMom: " + mom);
-//				System.out.println("p=" + p + "  q=" + q +"\n");
+//				System.out.println("p=" + p + "  q=" + q + "\n");
 				
 //				System.out.println("1° Offspring:");
 				offspringPool.add( makeOffspring(dad,mom,p,q) );
@@ -177,8 +167,8 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 //				System.out.println();
 
 			} else {
-				offspringPool.add(dad.clone());
-				offspringPool.add(mom.clone());
+				offspringPool.add( dad.clone() );
+				offspringPool.add( mom.clone() );
 			}			
 			i += 2;
 		}
@@ -188,7 +178,7 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 	private Individual makeOffspring(Individual dad, Individual mom, int p,
 			int q) {
 		
-		int genomeSize = dad.getSequence().size();
+		int genomeSize = dad.getGenome().size();
 		List<Packet> childGenome = new ArrayList<Packet>(genomeSize);
 		boolean[] isGeneCopied = new boolean[genomeSize];
 		for ( int j = 0; j < genomeSize; j++ ) {
@@ -196,14 +186,14 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 		}		
 		
 		// extract the genome portion of the dad and add it to the head of child genome
-		for (Packet dadGene: dad.getSequence().subList(p, p + q )) {
+		for (Packet dadGene: dad.getGenome().subList(p, p + q )) {
 			childGenome.add( dadGene );
 			isGeneCopied[dadGene.getId()] = true;
 		}
 
 		// complete with the genome of the mother
 		int j=0;
-		for (Packet momGene: mom.getSequence()) {
+		for (Packet momGene: mom.getGenome()) {
 			if ( !isGeneCopied[ momGene.getId() ] ) {
 				if (j < p) { // add p genes to the head
 					childGenome.add( j, momGene );
@@ -218,7 +208,22 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 //		System.out.println( newOffspring );
 		return newOffspring;
 	}
-
+	
+	private void mutate(List<Individual> offspringPool) {
+		
+		int offspringPoolSize = offspringPool.size();
+		for(int i=0; i<offspringPoolSize; i++){
+			// clone the individual...
+			Individual mutatedOffspring = offspringPool.get(i).clone();
+			// mutate it ...
+			mutatedOffspring.mutate(pRotateMutation, pSwapMutation, pOrderMutation);
+			mutatedOffspring.calculateLayout(binsDim, alpha, beta);
+			// finally append it to the offspringPool
+			offspringPool.add(mutatedOffspring);	
+		}
+		
+	}
+	
 	@Override
 	protected boolean reachedStoppingCondition() {
 		if (getNIterations()==N_TO_STOP) {

@@ -20,6 +20,7 @@ public class TournamentConfigurator extends AbstractConfigurator<TournamentConfi
 	
 	private static final int DEFAULT_POPULATION_SIZE = 100;
 	private static final float DEFAULT_P_ROTATION = 0.3f;
+	private static final float DEFAULT_P_SWAP = 0.8f;	
 	private static final float DEFAULT_P_ORDER = 0.8f;
 	private static final float DEFAULT_P_CROSSOVER = 0.9f;
 	private static final float DEFAULT_ALPHA = 0.7f;
@@ -29,6 +30,7 @@ public class TournamentConfigurator extends AbstractConfigurator<TournamentConfi
 	
 	private final JIntegerTextField populationField = new JIntegerTextField();
 	private final JFloatTextField pRotationField = new JFloatTextField();
+	private final JFloatTextField pSwapField = new JFloatTextField();
 	private final JFloatTextField pOrderField = new JFloatTextField();
 	private final JFloatTextField pCrossoverField = new JFloatTextField();
 	private final JFloatTextField alphaField = new JFloatTextField();
@@ -50,6 +52,10 @@ public class TournamentConfigurator extends AbstractConfigurator<TournamentConfi
 		pRotationField.setMinimumSize(textFieldDim);
 		pRotationField.setMaximumSize(textFieldDim);
 		pRotationField.setValue(DEFAULT_P_ROTATION);
+		pSwapField.setPreferredSize(textFieldDim);
+		pSwapField.setMinimumSize(textFieldDim);
+		pSwapField.setMaximumSize(textFieldDim);
+		pSwapField.setValue(DEFAULT_P_SWAP);
 		pOrderField.setPreferredSize(textFieldDim);
 		pOrderField.setMinimumSize(textFieldDim);
 		pOrderField.setMaximumSize(textFieldDim);
@@ -77,8 +83,9 @@ public class TournamentConfigurator extends AbstractConfigurator<TournamentConfi
 		
 
 		JLabel populationLbl = new JLabel("Population size");
-		JLabel pRotationLbl = new JLabel("<html>Mutation probability<br/>(rotation based)</html>");
-		JLabel pOrderLbl = new JLabel("<html>Mutation probability<br/>(order based)</html>");
+		JLabel pRotationLbl = new JLabel("<html>I Mutation probability<br/>(rotation based)</html>");
+		JLabel pSwapLbl = new JLabel("<html>II Mutation probability<br/>(swap based)</html>");
+		JLabel pOrderLbl = new JLabel("<html>III Mutation probability<br/>(order based)</html>");
 		JLabel pCrossoverLbl = new JLabel("Crossover probability");
 		JLabel alphaLbl = new JLabel("Fitness height weight (alpha)");
 		JLabel betaLbl = new JLabel("Fitness density weight (beta)");
@@ -95,6 +102,7 @@ public class TournamentConfigurator extends AbstractConfigurator<TournamentConfi
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 						.addComponent(populationLbl)
 						.addComponent(pRotationLbl)
+						.addComponent(pSwapLbl)
 						.addComponent(pOrderLbl)
 						.addComponent(pCrossoverLbl)
 						.addComponent(alphaLbl)
@@ -105,6 +113,7 @@ public class TournamentConfigurator extends AbstractConfigurator<TournamentConfi
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
 						.addComponent(populationField)
 						.addComponent(pRotationField)
+						.addComponent(pSwapField)
 						.addComponent(pOrderField)
 						.addComponent(pCrossoverField)
 						.addComponent(alphaField)
@@ -121,6 +130,10 @@ public class TournamentConfigurator extends AbstractConfigurator<TournamentConfi
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(pRotationLbl)
 						.addComponent(pRotationField)
+				)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(pSwapLbl)
+						.addComponent(pSwapField)
 				)
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(pOrderLbl)
@@ -177,7 +190,16 @@ public class TournamentConfigurator extends AbstractConfigurator<TournamentConfi
 			throw new DataParsingException("No rotation probability specified");
 		}
 		if (rp.floatValue() < 0 || rp.floatValue() > 1) {
-			throw new DataParsingException("Probability should be in [0,1]");
+			throw new DataParsingException("Rotation probability should be in [0,1]");
+		}
+		
+		
+		Float sp = pSwapField.getValue();
+		if (sp == null) {
+			throw new DataParsingException("No swap probability specified");
+		}
+		if (sp.floatValue() < 0 || sp.floatValue() > 1) {
+			throw new DataParsingException("Swap probability should be in [0,1]");
 		}
 		
 		
@@ -186,7 +208,7 @@ public class TournamentConfigurator extends AbstractConfigurator<TournamentConfi
 			throw new DataParsingException("No order mutation probability specified");
 		}
 		if (op.floatValue() < 0 || op.floatValue() > 1) {
-			throw new DataParsingException("Probability should be in [0,1]");
+			throw new DataParsingException("Order probability should be in [0,1]");
 		}
 		
 		
@@ -235,13 +257,14 @@ public class TournamentConfigurator extends AbstractConfigurator<TournamentConfi
 		}
 		
 		
-		return new TournamentConfiguration(ps,rp,op,cp,a,b,es,ts);
+		return new TournamentConfiguration(ps,rp,sp,op,cp,a,b,es,ts);
 	}
 
 	@Override
 	protected void setConfiguration(TournamentConfiguration config) {
 		populationField.setValue(config.getPopulationSize());
 		pRotationField.setValue(config.getRotateMutationProbability());
+		pSwapField.setValue(config.getSwapMutationProbability());
 		pOrderField.setValue(config.getOrderMutationProbability());
 		pCrossoverField.setValue(config.getCrossoverProbability());
 		alphaField.setValue(config.getAlpha());

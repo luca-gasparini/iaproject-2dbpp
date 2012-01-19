@@ -11,41 +11,57 @@ import logic.Packet;
 import BLFCore.BlfLayout;
 import BLFCore.PackingProcedures;
 
+// class that rapresent 
 public class Individual implements Comparable<Individual>, Cloneable {
 	
 
-	private List<Packet> sequence;
+	private List<Packet> genome;
 	private BlfLayout layout;
 	private final Random rand = new Random(System.currentTimeMillis());
 
 	public Individual(List<Packet> packetList) {
-		this.sequence = new ArrayList<Packet>(packetList.size());
+		this.genome = new ArrayList<Packet>(packetList.size());
 		for (Packet gene: packetList) {
-			this.sequence.add(gene);
+			this.genome.add(gene);
 		}
 		this.layout = null;
 	}
 
 	// apply mutation to the individual 
-	public void mutate(float pRotate, float pOrder) {
+	public void mutate(float pRotate, float pSwap, float pOrder) {
 
 		// rotation based mutation
-		for (int i=0; i<sequence.size(); i++) {
-			if (rand.nextFloat() < pRotate && sequence.get(i).isRotatable()) {
-				sequence.add(i, sequence.remove(i).getRotated() );
+		for (int i=0; i<genome.size(); i++) {
+			if (rand.nextFloat() < pRotate && genome.get(i).isRotatable()) {
+				genome.add(i, genome.remove(i).getRotated() );
 			}
 		}
 		
-		// order based mutation
-		for (int i=0; i<sequence.size(); i++) {
-			if (rand.nextFloat() < pOrder) {
-				int geneIndex1 = i;
-				int geneIndex2 = rand.nextInt( sequence.size() );
-				Packet tempGene = sequence.get(geneIndex1);
-				sequence.set(geneIndex1, sequence.get(geneIndex2));
-				sequence.set(geneIndex2, tempGene);
+		// swap based mutation
+		for (int i=0; i<genome.size(); i++) {
+			if (rand.nextFloat() < pSwap) {
+				int swapIdx = rand.nextInt( genome.size() );
+//				System.out.println("Swap " + i + " with "+ swapIdx + " : "+ this);
+				Packet tempGene = genome.get(i);
+				genome.set(i, genome.get(swapIdx));
+				genome.set(swapIdx, tempGene);
+//				System.out.println(" --> " + this);
 			}
 		}
+
+		
+		// order based mutation
+		for (int i=0; i<genome.size(); i++) {
+			if (rand.nextFloat() < pOrder) {
+				int swapIdx = rand.nextInt( genome.size() - 1);
+//				System.out.println("Order " + i + " at "+ swapIdx + " : "+ this);
+				genome.add( swapIdx, genome.remove(i) );
+//				System.out.println(" --> " + this);
+			}
+		}
+		
+ 
+		
 		this.layout = null;
 	}
 	
@@ -54,27 +70,38 @@ public class Individual implements Comparable<Individual>, Cloneable {
 		return this.layout.getFitness();
 	}
 
+	// return the layout of the individual
 	public List<Bin> getBins() {
 		return this.layout.getBins();
 	}
 
+	/** 
+	 * calculate the layout of the individual according to the BLF
+	 * placing function
+	 * @return fitness of the related layout
+	 * @param binsDim the dimensions of the bins
+	 * @param alpha weight of the height value of the worst bin in fitness function 
+	 * @param beta weight of the density value of the worst bin in fitness function 
+	 */
 	public float calculateLayout(BinConfiguration binsDim, float alpha, float beta) {
-		this.layout = PackingProcedures.getLayout( this.sequence, binsDim, alpha, beta);
+		this.layout = PackingProcedures.getLayout( this.genome, binsDim, alpha, beta);
 		return this.layout.getFitness();
 	}
 
-	public List<Packet> getSequence() {
-		return this.sequence;
+	// return the genome sequence
+	public List<Packet> getGenome() {
+		return this.genome;
 	}
 
+	// make a shuffle of the genome 
 	public void shuffleGenome() {
-		java.util.Collections.shuffle(this.sequence, rand);
+		java.util.Collections.shuffle(this.genome, rand);
 	}
 
 	@Override
 	public String toString() {
 		String s = "";
-		for (Packet gene: sequence) {
+		for (Packet gene: genome) {
 			s = s + gene + " ";
 		}
 		s = s + "fitness= " + this.getFitness() + " pointer= " + Integer.toHexString(hashCode());
@@ -90,26 +117,26 @@ public class Individual implements Comparable<Individual>, Cloneable {
 	
 	@Override
 	public Individual clone() {
-		Individual clone = new Individual(this.getSequence());
+		Individual clone = new Individual(this.getGenome());
 		clone.setLayout(this.getLayout());
 		return clone;
 	}
-
-	// metodo usato solo per la clonazione
+	
+	// used only in clonation phase
 	private void setLayout(BlfLayout newLayout) {
 		this.layout = newLayout;
 	}
 
-	// metodo usato solo per la clonazione
+	// used only in clonation phase
 	private BlfLayout getLayout() {
 		return this.layout;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		List<Packet> objSequence = ((Individual)obj).getSequence();
+		List<Packet> objSequence = ((Individual)obj).getGenome();
 		for (int i=0; i<objSequence.size(); i++) {
-			if (!sequence.get(i).equals(objSequence.get(i))) return false;
+			if (!genome.get(i).equals(objSequence.get(i))) return false;
 		}
 		return true;
 	}
