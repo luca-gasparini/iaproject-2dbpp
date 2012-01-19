@@ -66,6 +66,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 	private final TabooConfiguration tabooConf;
 	private final TabooListsManager tabuLists;
 	private int totPackets;
+	private int numberCurrentBins; // for stoppingcondition
 	
 	public TabooCore(CoreConfiguration<TabooConfiguration> configuration,
 			OptimumPainter painter, Core2GuiTranslator<List<Bin>> translator) {
@@ -76,6 +77,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		this.tabooConf = configuration.getCoreConfiguration();
 		this.tabuLists = new TabooListsManager(tabooConf.FIRST_LIST_TENURE, 
 				tabooConf.OTHER_LIST_TENURE);
+		this.numberCurrentBins = Integer.MAX_VALUE;
 	}
 
 	@Override
@@ -143,19 +145,21 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			if (sr.newStep != null) {
 				// check if fitness is better...
 				CoreResult<List<Bin>> result = prepareResult(sr.newStep);
-//				publishResult(result);
-				if (Float.compare(result.getFitness(), currentOptimum.getFitness()) < 0) {
-					// ... and publish & set new optimum
-					currentOptimum = result;
-					publishResult(currentOptimum);
-					
-					// reset variables
-					nonChangingCounter = 0;
-					d = neighSize = 1;
-				} else {
-					assert result.getBins().size() >= currentOptimum.getBins().size() : "more bins";
-				}
-				
+				publishResult(result);
+//				if (Float.compare(result.getFitness(), currentOptimum.getFitness()) < 0) {
+//					// ... and publish & set new optimum
+//					currentOptimum = result;
+//					publishResult(currentOptimum);
+//					
+//					// reset variables
+//					nonChangingCounter = 0;
+//					d = neighSize = 1;
+//					numberCurrentBins = bins.size();
+//				} else {
+//					assert result.getBins().size() >= currentOptimum.getBins().size() : "more bins";
+//				}
+				numberCurrentBins = result.getBins().size();
+//				System.out.println("Bins = "+this.numberCurrentBins);
 				// set bin list to the current move
 				bins = sr.newStep;
 			}
@@ -224,6 +228,8 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		
 		ArrayList<TabooBin> packetsMovePenaltyStar = new ArrayList<TabooBin>();
 		ArrayList<TabooBin> packetsMovePenalty = new ArrayList<TabooBin>();
+		
+		assert binsWOtarget.size()>0: "Optimal solution found! xD";
 		
 		for (Packet j: packetsIntoTargetBin) {
 			
@@ -360,7 +366,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			return new SearchResult(false, k, packetsMovePenaltyStar);
 		} else {
 			boolean diversify = false;
-			System.out.println(k+" - "+tabooConf.MAX_NEIGH_SIZE); 
+//			System.out.println(k+" - "+tabooConf.MAX_NEIGH_SIZE); 
 			if (k == this.tabooConf.MAX_NEIGH_SIZE) {
 				diversify = true;
 				assert diversify:"passa diversify";
@@ -497,7 +503,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		s.remove(j);
 		s.add(j.getRotated()); // aggiungo j ruotato
 		
-//		s.add(position, j);
+//		s.add(position, j.getRotated());
 		if (tabooConf.IMPROVEBLF) {
 			Collections.sort(s, new Comparator<Packet>() {
 				@Override
@@ -587,7 +593,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 
 	@Override
 	protected boolean reachedStoppingCondition() {
-		return false;
+		return this.numberCurrentBins==1;
 	}
 	
 	private List<Packet> getPacketsFromBins(List<TabooBin> bins) {
