@@ -48,4 +48,9 @@ public class TabooBin {
 		return "TabooBin@" + this.hashCode() + pkts.toString();
 	}
 	
+	@Override
+	protected void finalize() throws Throwable {
+		super.finalize();
+		this.pkts.clear();
+	}
 }

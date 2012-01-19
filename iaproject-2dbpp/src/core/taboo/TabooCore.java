@@ -469,51 +469,88 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		 * sui BINS presi in esame (quelli della kupla);
 		 */
 		List<Packet> s = getPacketsFromBins(bins);
+		
 		s.add(j);
+		BlfLayout lsStd = callBLFLayout(s);
 		
-		if (tabooConf.IMPROVEBLF) {
-			Collections.sort(s, new Comparator<Packet>() {
-				@Override
-				public int compare(Packet p1, Packet p2) {
-					int p1dim = p1.getWidth();
-					int p2dim = p2.getWidth();
-					
-//					return -Integer.compare(p1dim, p2dim);
-					return p2dim - p1dim;
-				}
-			});
+		if (j.isRotatable()) {
+			// j is in the last position, so remove it and add rotated counterpart
+			s.remove(s.size() - 1);
+			s.add(j.getRotated());
+			BlfLayout lsRotStd = callBLFLayout(s);
+			
+			if (Float.compare(lsRotStd.getFitness(), lsStd.getFitness()) < 0) {
+				lsStd = lsRotStd;
+			}
+			
+			// place non-rotated j for next steps
+			s.remove(s.size() - 1);
+			s.add(j);
 		}
 		
-		// layout j no rotate
-		BlfLayout lnr = callBLFLayout(s);
-		
-		if (!j.isRotatable()) // no rotatable, return
-			return lnr;
-
-		boolean remCheck = s.remove(j);
-		assert remCheck : "j no more found";
-		s.add(j.getRotated()); // aggiungo j ruotato
-		
-		if (tabooConf.IMPROVEBLF) {
-			Collections.sort(s, new Comparator<Packet>() {
-				@Override
-				public int compare(Packet p1, Packet p2) {
-					int p1dim = p1.getWidth();
-					int p2dim = p2.getWidth();
-					
-//					return -Integer.compare(p1dim, p2dim);
-					return p2dim - p1dim;
-				}
-			});
+		if (!tabooConf.IMPROVEBLF) {
+			return lsStd;
 		}
 		
-		// layout j rotate
-		BlfLayout lr = callBLFLayout(s);
+		/* IMPROVEBLF is true: we try to improve BLF placing results by 
+		 * sorting in a width-ascendent way all packets.
+		 */
 		
-		if (Float.compare(lnr.getFitness(), lr.getFitness()) <= 0) {
-			return lnr;
+		// tells if p1 is wider than p2
+		Comparator<Packet> pktComp = new Comparator<Packet>() {
+			@Override
+			public int compare(Packet p1, Packet p2) {
+				int p1dim = p1.getWidth();
+				int p2dim = p2.getWidth();
+				
+//				return -Integer.compare(p1dim, p2dim);
+				return p2dim - p1dim;
+			}
+		};
+		
+		// sort s in descending width order
+		Collections.sort(s, pktComp);
+		BlfLayout lsImp = callBLFLayout(s);
+		
+		if (j.isRotatable()) {
+			// find j, remove it and insert its rotation in the correct place
+			/* we use such a long way in order to avoid another sort: following
+			 * algorithm has O(s.size) complexity because it scans each element
+			 * in the list at most once.
+			 */
+			boolean removed = false, insertionStop = false;
+			Packet jRot = j.getRotated();
+			ListIterator<Packet> pIt = s.listIterator();
+			while(pIt.hasNext() && (!removed || !insertionStop)) {
+				Packet p = pIt.next();
+				if (p.getId() == j.getId()) {
+					pIt.remove();
+					removed = true;
+				} else if (pktComp.compare(jRot, p) < 0) {
+					insertionStop = true;
+				}
+			}
+			if (insertionStop) { pIt.previous(); }
+			pIt.add(jRot);
+			while(pIt.hasNext() && (!removed)) {
+				Packet p = pIt.next();
+				if (p.getId() == j.getId()) {
+					pIt.remove();
+					removed = true;
+				}
+			}
+			assert removed : "not removed";
+			
+			BlfLayout lsRotImp = callBLFLayout(s);
+			if (Float.compare(lsRotImp.getFitness(), lsImp.getFitness()) < 0) {
+				lsImp = lsRotImp;
+			}
+		}
+		
+		if (Float.compare(lsStd.getFitness(), lsImp.getFitness()) <= 0) {
+			return lsStd;
 		} else {
-			return lr;
+			return lsImp;
 		}
 	}
 	
