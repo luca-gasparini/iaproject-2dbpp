@@ -6,7 +6,7 @@ import java.awt.Color;
  * Mutable class!!
  */
 public class Packet {
-
+	
 	private final PacketDescriptor pac;
 	private final boolean isRotatable;
 	private final boolean rotate;
@@ -116,6 +116,10 @@ public class Packet {
 			return false;
 		}
 		return true;
+	}
+
+	public int getPerimeter() {
+		return 2 * (pac.getHeight() + pac.getWidth());
 	}
 	
 	

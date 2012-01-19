@@ -1,6 +1,8 @@
 package core.genetic;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -14,19 +16,24 @@ import BLFCore.PackingProcedures;
 // class that rapresent 
 public class Individual implements Comparable<Individual>, Cloneable {
 	
-
+	public static final int WIDTH_DESCENDING = 0;
+	public static final int HEIGHT_DESCENDING = 1;
+	public static final int AREA_DESCENDING = 2;
+	public static final int PERIMETER_DESCENDING = 3;
+	public static final int N_SORTING_TYPES = 4;
+	
 	private List<Packet> genome;
 	private BlfLayout layout;
 	private final Random rand = new Random(System.currentTimeMillis());
 
 	public Individual(List<Packet> packetList) {
-		this.genome = new ArrayList<Packet>(packetList.size());
-		for (Packet gene: packetList) {
-			this.genome.add(gene);
-		}
-		this.layout = null;
+			this.genome = new ArrayList<Packet>(packetList.size());
+			for (Packet gene: packetList) {
+				this.genome.add(gene);
+			}
+			this.layout = null;
 	}
-
+	
 	// apply mutation to the individual 
 	public void mutate(float pRotate, float pSwap, float pOrder) {
 
@@ -96,6 +103,54 @@ public class Individual implements Comparable<Individual>, Cloneable {
 	// make a shuffle of the genome 
 	public void shuffleGenome() {
 		java.util.Collections.shuffle(this.genome, rand);
+	}
+	
+	public void orderGenome(int sortingType) {
+		switch (sortingType) {
+		case WIDTH_DESCENDING:
+			Collections.sort(genome, new Comparator<Packet>() {
+				@Override
+				public int compare(Packet p1, Packet p2) {
+					if (p1.getWidth()<p2.getWidth()) return 1;
+					if (p1.getWidth()>p2.getWidth()) return -1;
+					return 0;
+				}
+			});
+			break;
+		
+		case HEIGHT_DESCENDING:
+			Collections.sort(genome, new Comparator<Packet>() {
+				@Override
+				public int compare(Packet p1, Packet p2) {
+					if (p1.getHeight()<p2.getHeight()) return 1;
+					if (p1.getHeight()>p2.getHeight()) return -1;
+					return 0;
+				}
+			});
+			break;
+		
+		case AREA_DESCENDING:
+			Collections.sort(genome, new Comparator<Packet>() {
+				@Override
+				public int compare(Packet p1, Packet p2) {
+					if (p1.getArea()<p2.getArea()) return 1;
+					if (p1.getArea()>p2.getArea()) return -1;
+					return 0;
+				}
+			});
+			break;
+		
+		case PERIMETER_DESCENDING:
+			Collections.sort(genome, new Comparator<Packet>() {
+				@Override
+				public int compare(Packet p1, Packet p2) {
+					if (p1.getPerimeter() < p2.getPerimeter()) return 1;
+					if (p1.getPerimeter() > p2.getPerimeter()) return -1;
+					return 0;
+				}
+			});
+			break;
+		}
 	}
 
 	@Override

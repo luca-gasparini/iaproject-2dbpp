@@ -7,6 +7,7 @@ import gui.common.JIntegerTextField;
 import java.awt.Dimension;
 
 import javax.swing.GroupLayout;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -27,6 +28,7 @@ public class TournamentConfigurator extends AbstractConfigurator<TournamentConfi
 	private static final float DEFAULT_BETA = 0.3f;
 	private static final int DEFAULT_ELITE_SIZE = 90;
 	private static final int DEFAULT_TOURNAMENT_SIZE = 5;
+	private static final boolean DEFAULT_START = true;
 	
 	private final JIntegerTextField populationField = new JIntegerTextField();
 	private final JFloatTextField pRotationField = new JFloatTextField();
@@ -37,6 +39,7 @@ public class TournamentConfigurator extends AbstractConfigurator<TournamentConfi
 	private final JFloatTextField betaField = new JFloatTextField();
 	private final JIntegerTextField eliteSizeField = new JIntegerTextField();
 	private final JIntegerTextField tournamentSizeField = new JIntegerTextField();
+	private final JCheckBox startField = new JCheckBox();
 	
 	private final JPanel completePane;
 	
@@ -80,7 +83,7 @@ public class TournamentConfigurator extends AbstractConfigurator<TournamentConfi
 		tournamentSizeField.setMinimumSize(textFieldDim);
 		tournamentSizeField.setMaximumSize(textFieldDim);
 		tournamentSizeField.setValue(DEFAULT_TOURNAMENT_SIZE);
-		
+		startField.setSelected(DEFAULT_START);
 
 		JLabel populationLbl = new JLabel("Population size");
 		JLabel pRotationLbl = new JLabel("<html>I Mutation probability<br/>(rotation based)</html>");
@@ -91,6 +94,8 @@ public class TournamentConfigurator extends AbstractConfigurator<TournamentConfi
 		JLabel betaLbl = new JLabel("Fitness density weight (beta)");
 		JLabel eliteLbl = new JLabel("<html>Number of elite individual to<br/>save at each iteration</html>");
 		JLabel tournamentLbl = new JLabel("Tournament size");
+		JLabel startLbl = new JLabel("Intelligent start");
+
 		
 		completePane = new JPanel();
 		GroupLayout layout = new GroupLayout(completePane);
@@ -109,6 +114,7 @@ public class TournamentConfigurator extends AbstractConfigurator<TournamentConfi
 						.addComponent(betaLbl)
 						.addComponent(eliteLbl)
 						.addComponent(tournamentLbl)
+						.addComponent(startLbl)
 				)
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
 						.addComponent(populationField)
@@ -120,6 +126,7 @@ public class TournamentConfigurator extends AbstractConfigurator<TournamentConfi
 						.addComponent(betaField)
 						.addComponent(eliteSizeField)
 						.addComponent(tournamentSizeField)
+						.addComponent(startField)
 				)
 		);
 		layout.setVerticalGroup(layout.createSequentialGroup()
@@ -158,6 +165,10 @@ public class TournamentConfigurator extends AbstractConfigurator<TournamentConfi
 						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
 						.addComponent(tournamentLbl)
 						.addComponent(tournamentSizeField)
+				)
+						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(startLbl)
+						.addComponent(startField)
 				)
 		);
 		
@@ -256,8 +267,9 @@ public class TournamentConfigurator extends AbstractConfigurator<TournamentConfi
 			throw new DataParsingException("The tournament size must be in [1,populationSize]");
 		}
 		
+		Boolean is = startField.isSelected();
 		
-		return new TournamentConfiguration(ps,rp,sp,op,cp,a,b,es,ts);
+		return new TournamentConfiguration(ps,rp,sp,op,cp,a,b,es,ts,is);
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package core.tournament;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -19,7 +20,7 @@ public class Population {
 	private final Random rand = new Random(System.currentTimeMillis());
 
 	public Population(int populationSize, List<Packet> packetList,
-			BinConfiguration binsDim, float alpha, float beta) {
+			BinConfiguration binsDim, float alpha, float beta, boolean intelligentInit) {
 		
 		this.binsDim = binsDim;
 		this.alpha = alpha;
@@ -27,20 +28,23 @@ public class Population {
 		this.populationSize = populationSize;
 		this.population = new ArrayList<Individual>(populationSize);
 		
-		// the first individual is initialized as the sequence of packets comes
-		Individual newIndividual = new Individual(packetList);
-		newIndividual.calculateLayout(binsDim, alpha, beta);
-		this.population.add(newIndividual);		// TODO Auto-generated method stub
-
-		for( int i=1 ; i < populationSize; i++ ) {
+		Individual newIndividual;
+		for( int i=0 ; i < populationSize; i++ ) {
+			// make an individual as the sequence comes
 			newIndividual = new Individual(packetList);
-			newIndividual.shuffleGenome();
+			if (intelligentInit && i<Individual.N_SORTING_TYPES) {
+				// apply some sorting if intelligent init is setted
+				newIndividual.orderGenome(i);
+			} else {
+				// make a shuffle of the packet
+				newIndividual.shuffleGenome();				
+			}
 			newIndividual.calculateLayout(binsDim, alpha, beta);
 			this.add(newIndividual);
 		}
 		//System.out.println(this);
 	}
-	
+
 	public void add(Individual newIndividual) {
 /*		newIndividual.calculateLayout(binsDim, alpha, beta);
 		System.out.println(population.size());

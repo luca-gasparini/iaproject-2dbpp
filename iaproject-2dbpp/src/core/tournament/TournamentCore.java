@@ -20,7 +20,7 @@ import core.genetic.Individual;
 
 public class TournamentCore extends AbstractCore<TournamentConfiguration, List<Bin>> {
 	
-	private static final int N_TO_STOP = 10000; // stopping cond on iteration
+	private static final int N_TO_STOP = 1000; // stopping cond on iteration
 	private static final float PERC_TO_STOP = 0.95f; // stopping cond on equals individual
 	// core configuration fields
 	private final int populationSize;
@@ -33,6 +33,7 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 	private final int eliteSize;
 	private final int tournamentSize;
 	private final int tournamentsNumber;
+	private final boolean intelligentStart;
 	
 	// problem fields
 	private final BinConfiguration binsDim;
@@ -59,6 +60,8 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 		this.eliteSize = conf.getCoreConfiguration().getEliteSize();
 		this.tournamentSize = conf.getCoreConfiguration().getTournamentSize();
 		this.tournamentsNumber = populationSize - eliteSize;
+		this.intelligentStart = conf.getCoreConfiguration().getIntelligentStart();
+
 		
 		// get problem configuration
 		this.binsDim = conf.getProblemConfiguration().getBin();
@@ -66,7 +69,7 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 				conf.getProblemConfiguration().getPackets() , binsDim );
 		
 		// initialize core
-		population = new Population(populationSize,packetList,binsDim,alpha,beta);
+		population = new Population(populationSize,packetList,binsDim,alpha,beta,intelligentStart);
 		this.bestIndividual = population.getBest();
 		this.currentFitness = Float.MAX_VALUE;
 	}
@@ -77,11 +80,13 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 		
 		// controlled cycling
 		while (this.canContinue()) {
-/*			puro shuffle
+/*			puro shuffle		
 			for( int i=0; i< populationSize; i++) {
 				population.get(i).shuffleGenome();
+				population.get(i).calculateLayout(binsDim, alpha, beta);
 			}
-*/		
+*/
+		
 			// selection
 			List<Individual> matingPool =
 					population.tournamentSelection(tournamentSize,tournamentsNumber);
@@ -230,10 +235,10 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 			JOptionPane.showMessageDialog(null, "Core stopped: " + N_TO_STOP + " reached!");
 			return true;
 		}
-		if (population.reachedConvergence(PERC_TO_STOP)) { // PERC_TO_STOP not used now
-			JOptionPane.showMessageDialog(null, "Core stopped: convergence reached!");
-			return true;
-		}
+//		if (population.reachedConvergence(PERC_TO_STOP)) { // PERC_TO_STOP not used now
+//			JOptionPane.showMessageDialog(null, "Core stopped: convergence reached!");
+//			return true;
+//		}
 		return false;
 	}
 

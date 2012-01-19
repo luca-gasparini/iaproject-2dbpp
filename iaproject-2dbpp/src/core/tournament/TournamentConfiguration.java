@@ -14,9 +14,10 @@ public class TournamentConfiguration implements Serializable {
 	private Float beta;
 	private Integer eliteSize;
 	private Integer tournamentSize;
+	private Boolean intelligentStart;
 
 	
-	public TournamentConfiguration(Integer ps, Float rp, Float sp, Float op, Float cp, Float a,Float b, Integer es, Integer ts) {
+	public TournamentConfiguration(Integer ps, Float rp, Float sp, Float op, Float cp, Float a,Float b, Integer es, Integer ts, Boolean is) {
 		this.populationSize = ps;
 		this.pRotateMutation = rp;
 		this.pSwapMutation = sp;
@@ -26,6 +27,7 @@ public class TournamentConfiguration implements Serializable {
 		this.beta = b;
 		this.eliteSize = es;
 		this.tournamentSize = ts;
+		this.intelligentStart = is;
 	}
 
 	public int getPopulationSize() {
@@ -62,6 +64,10 @@ public class TournamentConfiguration implements Serializable {
 
 	public int getTournamentSize() {
 		return tournamentSize;
+	}
+
+	public boolean getIntelligentStart() {
+		return intelligentStart;
 	}
 	
 }
