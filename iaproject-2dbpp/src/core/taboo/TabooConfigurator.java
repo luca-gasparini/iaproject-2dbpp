@@ -39,7 +39,7 @@ public class TabooConfigurator extends AbstractConfigurator<TabooConfiguration> 
 		JLabel dMaxLbl = new JLabel("<html>d_max</html>");
 		JLabel firstListTenureLbl = new JLabel("<html>First list tenure</html>");
 		JLabel otherListTenureLbl = new JLabel("<html>Other list tenure</html>");
-		JLabel improveBLF = new JLabel("<html>Adatta meglio al BLF</html>");
+		JLabel improveBLF = new JLabel("<html>BLF adaptation</html>");
 		
 		GroupLayout gp = new GroupLayout(configurationPanel);
 		configurationPanel.setLayout(gp);

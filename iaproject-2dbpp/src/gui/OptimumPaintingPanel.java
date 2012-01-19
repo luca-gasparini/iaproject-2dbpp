@@ -167,7 +167,7 @@ public class OptimumPaintingPanel extends JPanel {
 
 		@Override
 		public boolean getScrollableTracksViewportWidth() {
-			return true;
+			return false;
 		}
 
 		@Override

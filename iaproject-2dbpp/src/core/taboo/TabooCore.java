@@ -565,13 +565,12 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 	
 	private Couple argminFillingFunctionAmongBins(List<Bin> binsA) {
 		
-		Float minFF = calculateFillingFunction(tabooConf.ALPHA, binsA.get(0).getPacketList(), binConf, this.totPackets);
-		int minInd = 0;
+		float minFF = calculateFillingFunction(tabooConf.ALPHA, binsA.get(0).getPacketList(), binConf, this.totPackets);
 		Couple fin = new Couple(minFF, 0);
 		
 		for (int i=1; i<binsA.size(); i++) {
-			Float currentFF = calculateFillingFunction(tabooConf.ALPHA, binsA.get(i).getPacketList(), binConf, this.totPackets);
-			if (currentFF < fin.value)
+			float currentFF = calculateFillingFunction(tabooConf.ALPHA, binsA.get(i).getPacketList(), binConf, this.totPackets);
+			if (Float.compare(currentFF, fin.value) < 0)
 				fin = new Couple(currentFF, i);
 		}
 		return fin;
@@ -695,13 +694,22 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		if (targetBins.size() > 1) {
 			
 			// TODO debug line, remove
-//			System.out.println("starting seq: " + packTargetBin);
+			System.out.println("starting seq: " + packTargetBin);
 			
-			/* get first element of the second (aka last?) bin and try to move
+			// TODO debug line -> remove
+			assert targetBins.size() == 2 : "very bad target layout";
+			
+			/* get the biggest pkt of the second (aka last?) bin and try to move
 			 * it backwards, step by step, in order to make the target bin
 			 * placeable again
 			 */
-			Packet overflowPkt = targetBins.get(targetBins.size() - 1).getPacketList().get(0);
+			List<Packet> overflowPkts = targetBins.get(targetBins.size() - 1).getPacketList();
+			Packet overflowPkt = overflowPkts.get(0);
+			for (Packet packet : overflowPkts) {
+				if (packet.getArea() > overflowPkt.getArea()) {
+					overflowPkt = packet;
+				}
+			}
 			
 			/* first find overflowPkt into the list and keep packIterator
 			 * pointing to it
@@ -722,9 +730,6 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			do {
 				nIt++;
 				
-				// TODO debug line -> remove
-				assert targetBins.size() == 2 : "very bad target layout";
-				
 				packIterator.remove();
 				/* there's always a previous,: otherwise means that
 				 * no matter where we place overflowPkt in the list, we
@@ -737,7 +742,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 				packIterator.previous();
 				
 				// TODO debug line, remove
-//				System.out.println(nIt + "-> " + targetBins.size() + "bins -> " + packTargetBin);
+				System.out.println(nIt + "-> " + targetBins.size() + "bins -> " + packTargetBin);
 				
 				targetBins = callBLFLayout(packTargetBin).getBins();
 			} while (targetBins.size() > 1);
