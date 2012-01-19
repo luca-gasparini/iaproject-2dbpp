@@ -114,6 +114,7 @@ public class OptimumPaintingPanel extends JPanel {
 	
 	private class BinDisplayerPane extends JPanel implements Scrollable {
 		private static final long serialVersionUID = -2032186887504479184L;
+		private boolean noHScroll = true;
 		
 		private static final int FRACTION = 2;
 		
@@ -165,9 +166,13 @@ public class OptimumPaintingPanel extends JPanel {
 			}
 		}
 
+		public void setHScroll(boolean enable) {
+			this.noHScroll = !enable;
+		}
+		
 		@Override
 		public boolean getScrollableTracksViewportWidth() {
-			return false;
+			return noHScroll;
 		}
 
 		@Override
@@ -195,7 +200,7 @@ public class OptimumPaintingPanel extends JPanel {
 	 * This means that {@link JPanel#getComponent(int) binDisplayer.getComponent(i)}
 	 * returns the component that displays GUIOptimum.getBins().get(i).
 	 */
-	private JPanel binDisplayer;
+	private BinDisplayerPane binDisplayer;
 	private TokenPainter lastToken = null;
 	
 	private List<Box> boxList = new LinkedList<Box>();
@@ -456,6 +461,12 @@ public class OptimumPaintingPanel extends JPanel {
 			int magnificationFactorW = Math.max(widthAvailable / binSize.width, 1);
 			int magnificationFactorH = Math.max(paneSize.height / binSize.height, 1);
 			magnificationFactor = Math.min(magnificationFactorW, magnificationFactorH);
+			
+			if (binSize.width * magnificationFactor >= widthAvailable) {
+				binDisplayer.setHScroll(true);
+			} else {
+				binDisplayer.setHScroll(false);
+			}
 			
 			// set layout manager (revalidation is automatically performed by setLayout)
 			binDisplayer.setLayout(new GridLayout(0, binPerRow, hSpace, vSpace));
