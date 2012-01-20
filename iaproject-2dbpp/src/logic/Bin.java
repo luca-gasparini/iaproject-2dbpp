@@ -7,7 +7,7 @@ import java.util.List;
 public class Bin { // il nome non è il massimo;
 
 	private final BinConfiguration binConf;
-	private final int id;
+	private int id;
 	private final List<PlaceablePacket> placeablePktList;
 	private final List<Packet> packetList;
 	
@@ -53,5 +53,9 @@ public class Bin { // il nome non è il massimo;
 	
 	public List<Packet> getPacketList() {
 		return Collections.unmodifiableList(this.packetList);
+	}
+
+	public void setID(int i) {
+		this.id = i;
 	}
 }

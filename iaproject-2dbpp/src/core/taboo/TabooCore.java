@@ -570,15 +570,18 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 	}
 	
 	private CoreResult<List<Bin>> prepareResult(final List<TabooBin> tabooBins) {
-		final List<Bin> binList = new LinkedList<Bin>();
+		final List<Bin> binList = new ArrayList<Bin>();
 		float minFitness = Float.POSITIVE_INFINITY;
 		
+		int binID = 0;
 		for (TabooBin bin : tabooBins) {
 			BlfLayout binLayout = callBLFLayout(bin.getPackets());
 			
 			assert binLayout.getBins().size() == 1 : "A TabooBin pack in >1 bins: " + bin;
 			
-			binList.addAll(binLayout.getBins());
+			Bin newBin = binLayout.getBins().get(0);
+			newBin.setID(binID++);
+			binList.add(newBin);
 			
 			if (Float.compare(binLayout.getFitness(), minFitness) < 0) {
 				minFitness = binLayout.getFitness();
