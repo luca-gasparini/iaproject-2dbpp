@@ -1,11 +1,11 @@
-\documentclass[a4paper,12pt]{article}
+\documentclass[a4paper,12pt,draft]{article}
 
 \usepackage{enumitem}
 \usepackage[utf8]{inputenc}
 \usepackage{textcomp}
 \usepackage{xspace}
 \usepackage[italian]{babel}
-\usepackage[pdftex]{graphicx}
+\usepackage[pdftex,final]{graphicx}
 \usepackage{fullpage}
 \usepackage{amsmath}
 \usepackage{subfig}
@@ -29,11 +29,13 @@
 \usepackage{color}
 \definecolor{gray}{gray}{0.9}
 
-\usepackage{hyperref}
+\usepackage[final]{hyperref}
 \hypersetup{
 	colorlinks=true
 }
 \usepackage{hypcap}
+
+\include{commonUtils}
 
 \begin{document}
 
@@ -50,9 +52,18 @@
 \section{Introduzione}
 \input{section/introduzione.tex}
 
+\cite{lmvTabu}
 
+\section{Framework di esecuzione}
+\input{section/execution_framework}
 
 \section{Conclusione}
 \input{section/conclusione.tex}
+
+
+\phantomsection
+\addcontentsline{toc}{section}{Bibliografia}
+\bibliographystyle{plain}
+\bibliography{IABibliography}
 
 \end{document}

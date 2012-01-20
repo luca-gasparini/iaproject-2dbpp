@@ -1,0 +1,6 @@
+@Article{lmvTabu,
+ author = {A. Lodi, S. Martello, D. Vigo},
+ title = {Heuristic and Metaheuristic Approaches for a Class of Two-Dimensional Bin Packing Problem},
+ journal = {INFORMS Journal on Computing},
+ year = {1999}
+}
