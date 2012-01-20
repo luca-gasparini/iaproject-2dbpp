@@ -5,6 +5,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -19,7 +21,9 @@ import javax.swing.Box;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.GroupLayout;
+import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -29,6 +33,9 @@ import javax.swing.ListSelectionModel;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
+
+import logic.OptimumExporter;
+import util.Constants;
 
 public class OptimumPaintingPanel extends JPanel {
 
@@ -278,7 +285,7 @@ public class OptimumPaintingPanel extends JPanel {
 				if (e.getClickCount() == 2) {
 					GUIOptimum opt = (GUIOptimum) optimumJList.getSelectedValue();
 					if (opt == null) return;
-					OptimumPaintingPanel.this.paintOptimum(opt);
+					OptimumPaintingPanel.this.paintOptimum(opt, false);
 				}
 			}
 		});
@@ -315,6 +322,59 @@ public class OptimumPaintingPanel extends JPanel {
 		nBinsLbl.setHorizontalAlignment(SwingConstants.RIGHT);
 		nBins = new JTextField(10);
 		nBins.setEditable(false);
+		
+		final JFileChooser fileChooser = new JFileChooser(Constants.CURRENT_DIR);
+		final OptimumExporter optimumExporter = new OptimumExporter();
+		
+		JButton exportBtn = new JButton("EXPORT OPTIMUM");
+		exportBtn.setFont(GUIUtils.BUTTON_FONT);
+		exportBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				GUIOptimum selOpt = (GUIOptimum) optimumJList.getSelectedValue();
+				
+				if (selOpt == null) {
+					GUIUtils.showErrorMessage(OptimumPaintingPanel.this, "Please select an optimum first");
+					return;
+				}
+				
+				int ret = fileChooser.showSaveDialog(OptimumPaintingPanel.this);
+				
+				if (ret != JFileChooser.APPROVE_OPTION) {
+					return;
+				}
+				
+				try {
+					optimumExporter.saveOptimum(fileChooser.getSelectedFile(), selOpt);
+				} catch (Exception ex1) {
+					GUIUtils.showErrorMessage(OptimumPaintingPanel.this, ex1.toString());
+					return;
+				}
+			}
+		});
+		
+		JButton loadBtn = new JButton("LOAD OPTIMUM");
+		loadBtn.setFont(GUIUtils.BUTTON_FONT);
+		loadBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int ret = fileChooser.showOpenDialog(OptimumPaintingPanel.this);
+				
+				if (ret != JFileChooser.APPROVE_OPTION) {
+					return;
+				}
+				
+				GUIOptimum loadOpt;
+				try {
+					loadOpt = optimumExporter.loadOptimum(fileChooser.getSelectedFile());
+				} catch (Exception ex1) {
+					GUIUtils.showErrorMessage(OptimumPaintingPanel.this, ex1.toString());
+					return;
+				}
+				
+				OptimumPaintingPanel.this.paintOptimum(loadOpt, true);
+			}
+		});
 		
 		binDisplayer = new BinDisplayerPane();
 		final JScrollPane scrollPane = new JScrollPane(binDisplayer, 
@@ -359,23 +419,37 @@ public class OptimumPaintingPanel extends JPanel {
 						.addComponent(fitnessValue, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(nBins, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 				)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(exportBtn)
+						.addComponent(loadBtn)
+				)
 		);
 		layout.setVerticalGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-						.addComponent(nIterationLbl)
-						.addComponent(nIteration, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+										.addComponent(nIterationLbl)
+										.addComponent(nIteration, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+								)
+								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+										.addComponent(elapsedTimeLbl)
+										.addComponent(elapsedTime, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+								)
+						)
+						.addComponent(exportBtn)
 				)
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-						.addComponent(elapsedTimeLbl)
-						.addComponent(elapsedTime, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-				)
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-						.addComponent(fitnessValueLbl)
-						.addComponent(fitnessValue, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-				)
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-						.addComponent(nBinsLbl)
-						.addComponent(nBins, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+										.addComponent(fitnessValueLbl)
+										.addComponent(fitnessValue, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+								)
+								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+										.addComponent(nBinsLbl)
+										.addComponent(nBins, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+								)
+						)
+						.addComponent(loadBtn)
 				)
 		);
 		
@@ -408,12 +482,12 @@ public class OptimumPaintingPanel extends JPanel {
 		this.optimumList.addAll(newOptimums);
 		
 		// ...but print only the last one!
-		paintOptimum(newOptimums.get(newOptimums.size() - 1));
+		paintOptimum(newOptimums.get(newOptimums.size() - 1), false);
 	}
 	
 	private GUIOptimum lastPaintedOpt;
 	
-	public void paintOptimum(GUIOptimum newOptimum) {
+	public void paintOptimum(GUIOptimum newOptimum, boolean isLoaded) {
 		
 		List<GUIBin> bins = newOptimum.getBins();
 		assert bins.size() > 0 : "NO BINS NO PARTY";
@@ -438,10 +512,13 @@ public class OptimumPaintingPanel extends JPanel {
 		 * than the previous one (this last case should happens only during
 		 * testing)
 		 */
-		if (firstPrint || bins.size() < binPerRow || 
+		if (firstPrint || isLoaded || bins.size() < binPerRow || 
 				bins.size() > lastPaintedOpt.getBins().size()) {
 			
 			firstPrint = false;
+			if (isLoaded) {
+				firstPrint = true;
+			}
 			
 			Dimension binSize = bins.get(0).getBaseDimension();
 			// use dimension of binDisplayer ScrollPane

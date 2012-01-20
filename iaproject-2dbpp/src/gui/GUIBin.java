@@ -199,7 +199,17 @@ public class GUIBin extends ResizableRawGraphics {
 		
 		return true;
 	}
+
+	public float getDensity() {
+		return this.density;
+	}
+
+	public BinConfiguration getBinConfiguration() {
+		return this.binConf;
+	}
 	
-	
+	public List<GUIPacket> getPackets() {
+		return this.packets;
+	}
 	
 }
