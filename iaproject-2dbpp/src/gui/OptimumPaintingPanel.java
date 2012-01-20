@@ -7,6 +7,7 @@ import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.AbstractAction;
 import javax.swing.AbstractListModel;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -29,6 +31,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
@@ -283,10 +286,17 @@ public class OptimumPaintingPanel extends JPanel {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
-					GUIOptimum opt = (GUIOptimum) optimumJList.getSelectedValue();
-					if (opt == null) return;
-					OptimumPaintingPanel.this.paintOptimum(opt, false);
+					paintSelectedOptimum(optimumJList);
 				}
+			}
+		});
+		optimumJList.getInputMap(JList.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).
+				put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "_printSelOpt");
+		optimumJList.getActionMap().put("_printSelOpt", new AbstractAction() {
+			private static final long serialVersionUID = 5405232541977075728L;
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				paintSelectedOptimum(optimumJList);
 			}
 		});
 		optimumJList.setVisibleRowCount(7);
@@ -466,6 +476,12 @@ public class OptimumPaintingPanel extends JPanel {
 		
 		this.add(centerPane, BorderLayout.CENTER);
 		
+	}
+	
+	private void paintSelectedOptimum(JList optimumList) {
+		GUIOptimum opt = (GUIOptimum) optimumList.getSelectedValue();
+		if (opt == null) return;
+		this.paintOptimum(opt, false);
 	}
 	
 	public void askPaint(List<GUIOptimum> newOptimums, OptimumPainter painter) {
