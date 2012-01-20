@@ -775,7 +775,9 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 				 * no matter where we place overflowPkt in the list, we
 				 * always get a layout with >1 bins.
 				 */
-				assert packIterator.hasPrevious() : "KAAAAABBOOOOOOOOOOMMMM!!!!";
+				if (!packIterator.hasPrevious()) {
+					throw new IllegalStateException("Target bin says: KAAAAABBOOOOOOOOOOMMMM!!!!");
+				}
 				packIterator.previous();
 				packIterator.add(overflowPkt);
 				// in order to keep packIterator pointing to overflowPkt
