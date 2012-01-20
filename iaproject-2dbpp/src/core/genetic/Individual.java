@@ -19,8 +19,7 @@ public class Individual implements Comparable<Individual>, Cloneable {
 	public static final int WIDTH_DESCENDING = 0;
 	public static final int HEIGHT_DESCENDING = 1;
 	public static final int AREA_DESCENDING = 2;
-	public static final int PERIMETER_DESCENDING = 3;
-	public static final int N_SORTING_TYPES = 4;
+	public static final int N_SORTING_TYPES = 3;
 	
 	private List<Packet> genome;
 	private BlfLayout layout;
@@ -135,17 +134,6 @@ public class Individual implements Comparable<Individual>, Cloneable {
 				public int compare(Packet p1, Packet p2) {
 					if (p1.getArea()<p2.getArea()) return 1;
 					if (p1.getArea()>p2.getArea()) return -1;
-					return 0;
-				}
-			});
-			break;
-		
-		case PERIMETER_DESCENDING:
-			Collections.sort(genome, new Comparator<Packet>() {
-				@Override
-				public int compare(Packet p1, Packet p2) {
-					if (p1.getPerimeter() < p2.getPerimeter()) return 1;
-					if (p1.getPerimeter() > p2.getPerimeter()) return -1;
 					return 0;
 				}
 			});

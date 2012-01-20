@@ -33,7 +33,7 @@ public class Population {
 			// make an individual as the sequence comes
 			newIndividual = new Individual(packetList);
 			if (intelligentInit && i<Individual.N_SORTING_TYPES) {
-				// apply some sorting if intelligent init is setted
+				// apply some sorting if intelligent stat is setted
 				newIndividual.orderGenome(i);
 			} else {
 				// make a shuffle of the packet

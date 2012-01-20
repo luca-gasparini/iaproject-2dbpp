@@ -20,7 +20,7 @@ import core.genetic.Individual;
 
 public class TournamentCore extends AbstractCore<TournamentConfiguration, List<Bin>> {
 	
-	private static final int N_TO_STOP = 500; // stopping cond on iteration
+	private static final int N_TO_STOP = 1000; // stopping cond on iteration
 	private static final float PERC_TO_STOP = 0.95f; // stopping cond on equals individual
 	// core configuration fields
 	private final int populationSize;
@@ -215,16 +215,14 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 		int k = (genomeSize==q)? 0: rand.nextInt(genomeSize - q);
 		for (Packet momGene: mom.getGenome()) {
 			if ( !isGeneCopied[ momGene.getId() ] ) {
-				if (j < k) { // add p genes to the head
+				if (j < k) { // add k genes to the head
 					childGenome.add( j, momGene );
 					j++;
-				} else { // add the remainder to the tail
+				} else { // add the others to the tail
 					childGenome.add( momGene );
 				}
 			}
 		}
-		
-		
 		
 		Individual newOffspring = new Individual(childGenome);
 		newOffspring.calculateLayout(binsDim, alpha, beta);
@@ -253,10 +251,10 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 			JOptionPane.showMessageDialog(null, "Core stopped: " + N_TO_STOP + " reached!");
 			return true;
 		}
-//		if (population.reachedConvergence(PERC_TO_STOP)) { // PERC_TO_STOP not used now
-//			JOptionPane.showMessageDialog(null, "Core stopped: convergence reached!");
-//			return true;
-//		}
+		if (population.reachedConvergence(PERC_TO_STOP)) { // PERC_TO_STOP not used now
+			JOptionPane.showMessageDialog(null, "Core stopped: convergence reached!");
+			return true;
+		}
 		return false;
 	}
 
