@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BPP-2D_OptimumFile>
+  <nIterations>682</nIterations>
+  <elapsedTime>154063</elapsedTime>
+  <fitnessValue>1418.5612</fitnessValue>
+  <bins nBins="14">
+    <bin id="1" density="0.9304" width="50" height="50">
+      <packet id="30" x="0" y="0" width="25" height="8" color="-26215" />
+      <packet id="66" x="25" y="0" width="22" height="11" color="-16532935" />
+      <packet id="109" x="0" y="8" width="13" height="17" color="-7353667" />
+      <packet id="108" x="13" y="11" width="13" height="17" color="-7353667" />
+      <packet id="92" x="26" y="11" width="11" height="23" color="-10066177" />
+      <packet id="86" x="37" y="11" width="11" height="23" color="-10066177" />
+      <packet id="81" x="0" y="25" width="11" height="23" color="-10066177" />
+      <packet id="49" x="11" y="28" width="7" height="21" color="-65536" />
+      <packet id="45" x="18" y="28" width="7" height="21" color="-65536" />
+      <packet id="58" x="25" y="34" width="21" height="7" color="-65536" />
+      <packet id="42" x="25" y="41" width="21" height="7" color="-65536" />
+      <packet id="139" x="47" y="0" width="2" height="3" color="-5070091" />
+      <packet id="142" x="47" y="3" width="2" height="3" color="-5070091" />
+      <packet id="148" x="47" y="6" width="2" height="3" color="-5070091" />
+      <packet id="154" x="13" y="8" width="2" height="3" color="-5070091" />
+      <packet id="161" x="15" y="8" width="2" height="3" color="-5070091" />
+      <packet id="140" x="17" y="8" width="2" height="3" color="-5070091" />
+      <packet id="164" x="19" y="8" width="2" height="3" color="-5070091" />
+      <packet id="150" x="21" y="8" width="2" height="3" color="-5070091" />
+      <packet id="118" x="46" y="34" width="4" height="5" color="-3342388" />
+      <packet id="198" x="46" y="39" width="3" height="5" color="-1" />
+      <packet id="248" x="0" y="48" width="6" height="1" color="-3407872" />
+      <packet id="225" x="49" y="0" width="1" height="6" color="-3407872" />
+    </bin>
+    <bin id="2" density="0.992" width="50" height="50">
+      <packet id="96" x="0" y="0" width="50" height="8" color="-154" />
+      <packet id="99" x="0" y="8" width="50" height="8" color="-154" />
+      <packet id="95" x="0" y="16" width="50" height="8" color="-154" />
+      <packet id="22" x="0" y="24" width="40" height="13" color="-3407668" />
+      <packet id="21" x="0" y="37" width="40" height="13" color="-3407668" />
+      <packet id="14" x="40" y="24" width="10" height="10" color="-5739975" />
+      <packet id="5" x="40" y="34" width="10" height="10" color="-5739975" />
+      <packet id="127" x="40" y="44" width="5" height="4" color="-3342388" />
+      <packet id="120" x="45" y="44" width="5" height="4" color="-3342388" />
+    </bin>
+    <bin id="3" density="0.9968" width="50" height="50">
+      <packet id="69" x="0" y="0" width="33" height="21" color="-6711040" />
+      <packet id="73" x="0" y="21" width="33" height="21" color="-6711040" />
+      <packet id="29" x="0" y="42" width="25" height="8" color="-26215" />
+      <packet id="28" x="25" y="42" width="25" height="8" color="-26215" />
+      <packet id="7" x="33" y="0" width="10" height="10" color="-5739975" />
+      <packet id="11" x="33" y="10" width="10" height="10" color="-5739975" />
+      <packet id="2" x="33" y="20" width="10" height="10" color="-5739975" />
+      <packet id="12" x="33" y="30" width="10" height="10" color="-5739975" />
+      <packet id="51" x="43" y="0" width="7" height="21" color="-65536" />
+      <packet id="46" x="43" y="21" width="7" height="21" color="-65536" />
+      <packet id="169" x="33" y="40" width="3" height="2" color="-5070091" />
+      <packet id="212" x="36" y="40" width="6" height="1" color="-3407872" />
+    </bin>
+    <bin id="4" density="0.9984" width="50" height="50">
+      <packet id="98" x="0" y="0" width="50" height="8" color="-154" />
+      <packet id="100" x="0" y="8" width="50" height="8" color="-154" />
+      <packet id="19" x="0" y="16" width="40" height="13" color="-3407668" />
+      <packet id="72" x="0" y="29" width="33" height="21" color="-6711040" />
+      <packet id="111" x="33" y="29" width="13" height="17" color="-7353667" />
+      <packet id="6" x="40" y="16" width="10" height="10" color="-5739975" />
+      <packet id="130" x="33" y="46" width="5" height="4" color="-3342388" />
+      <packet id="113" x="38" y="46" width="5" height="4" color="-3342388" />
+      <packet id="125" x="43" y="46" width="5" height="4" color="-3342388" />
+      <packet id="211" x="46" y="26" width="3" height="5" color="-1" />
+      <packet id="181" x="46" y="31" width="3" height="5" color="-1" />
+      <packet id="183" x="46" y="36" width="3" height="5" color="-1" />
+      <packet id="190" x="46" y="41" width="3" height="5" color="-1" />
+      <packet id="144" x="40" y="26" width="2" height="3" color="-5070091" />
+      <packet id="141" x="42" y="26" width="2" height="3" color="-5070091" />
+      <packet id="156" x="44" y="26" width="2" height="3" color="-5070091" />
+      <packet id="133" x="48" y="46" width="2" height="3" color="-5070091" />
+      <packet id="241" x="49" y="26" width="1" height="6" color="-3407872" />
+      <packet id="233" x="49" y="32" width="1" height="6" color="-3407872" />
+      <packet id="242" x="49" y="38" width="1" height="6" color="-3407872" />
+    </bin>
+    <bin id="5" density="0.9876" width="50" height="50">
+      <packet id="24" x="0" y="0" width="13" height="40" color="-3407668" />
+      <packet id="17" x="13" y="0" width="13" height="40" color="-3407668" />
+      <packet id="20" x="26" y="0" width="13" height="40" color="-3407668" />
+      <packet id="94" x="39" y="0" width="11" height="23" color="-10066177" />
+      <packet id="82" x="39" y="23" width="11" height="23" color="-10066177" />
+      <packet id="8" x="0" y="40" width="10" height="10" color="-5739975" />
+      <packet id="54" x="10" y="40" width="21" height="7" color="-65536" />
+      <packet id="162" x="31" y="40" width="2" height="3" color="-5070091" />
+      <packet id="215" x="33" y="40" width="1" height="6" color="-3407872" />
+      <packet id="222" x="34" y="40" width="1" height="6" color="-3407872" />
+      <packet id="250" x="35" y="40" width="1" height="6" color="-3407872" />
+      <packet id="236" x="36" y="40" width="1" height="6" color="-3407872" />
+      <packet id="232" x="37" y="40" width="1" height="6" color="-3407872" />
+      <packet id="235" x="38" y="40" width="1" height="6" color="-3407872" />
+      <packet id="219" x="31" y="43" width="1" height="6" color="-3407872" />
+      <packet id="131" x="32" y="46" width="5" height="4" color="-3342388" />
+      <packet id="124" x="37" y="46" width="5" height="4" color="-3342388" />
+      <packet id="119" x="42" y="46" width="5" height="4" color="-3342388" />
+      <packet id="152" x="47" y="46" width="2" height="3" color="-5070091" />
+      <packet id="167" x="10" y="47" width="2" height="3" color="-5070091" />
+      <packet id="155" x="12" y="47" width="2" height="3" color="-5070091" />
+      <packet id="160" x="14" y="47" width="2" height="3" color="-5070091" />
+      <packet id="138" x="16" y="47" width="2" height="3" color="-5070091" />
+      <packet id="146" x="18" y="47" width="3" height="2" color="-5070091" />
+      <packet id="239" x="21" y="47" width="6" height="1" color="-3407872" />
+      <packet id="243" x="21" y="48" width="6" height="1" color="-3407872" />
+    </bin>
+    <bin id="6" density="0.9268" width="50" height="50">
+      <packet id="34" x="0" y="0" width="25" height="8" color="-26215" />
+      <packet id="35" x="25" y="0" width="25" height="8" color="-26215" />
+      <packet id="88" x="0" y="8" width="23" height="11" color="-10066177" />
+      <packet id="61" x="23" y="8" width="22" height="11" color="-16532935" />
+      <packet id="64" x="0" y="19" width="22" height="11" color="-16532935" />
+      <packet id="62" x="22" y="19" width="22" height="11" color="-16532935" />
+      <packet id="60" x="0" y="30" width="22" height="11" color="-16532935" />
+      <packet id="65" x="22" y="30" width="22" height="11" color="-16532935" />
+      <packet id="41" x="0" y="41" width="21" height="7" color="-65536" />
+      <packet id="55" x="21" y="41" width="21" height="7" color="-65536" />
+      <packet id="217" x="45" y="8" width="1" height="6" color="-3407872" />
+      <packet id="123" x="45" y="14" width="5" height="4" color="-3342388" />
+      <packet id="129" x="45" y="18" width="5" height="4" color="-3342388" />
+      <packet id="199" x="46" y="8" width="3" height="5" color="-1" />
+      <packet id="184" x="44" y="22" width="3" height="5" color="-1" />
+      <packet id="204" x="47" y="22" width="3" height="5" color="-1" />
+      <packet id="197" x="44" y="27" width="3" height="5" color="-1" />
+      <packet id="189" x="47" y="27" width="3" height="5" color="-1" />
+      <packet id="209" x="44" y="32" width="3" height="5" color="-1" />
+      <packet id="244" x="49" y="8" width="1" height="6" color="-3407872" />
+      <packet id="245" x="47" y="32" width="1" height="6" color="-3407872" />
+      <packet id="226" x="48" y="32" width="1" height="6" color="-3407872" />
+      <packet id="214" x="49" y="32" width="1" height="6" color="-3407872" />
+    </bin>
+    <bin id="7" density="0.9972" width="50" height="50">
+      <packet id="70" x="0" y="0" width="33" height="21" color="-6711040" />
+      <packet id="77" x="0" y="21" width="33" height="21" color="-6711040" />
+      <packet id="37" x="0" y="42" width="25" height="8" color="-26215" />
+      <packet id="27" x="25" y="42" width="25" height="8" color="-26215" />
+      <packet id="10" x="33" y="0" width="10" height="10" color="-5739975" />
+      <packet id="1" x="33" y="10" width="10" height="10" color="-5739975" />
+      <packet id="40" x="43" y="0" width="7" height="21" color="-65536" />
+      <packet id="48" x="33" y="20" width="7" height="21" color="-65536" />
+      <packet id="38" x="40" y="21" width="7" height="21" color="-65536" />
+      <packet id="194" x="47" y="21" width="3" height="5" color="-1" />
+      <packet id="210" x="47" y="26" width="3" height="5" color="-1" />
+      <packet id="191" x="47" y="31" width="3" height="5" color="-1" />
+      <packet id="176" x="47" y="36" width="3" height="5" color="-1" />
+      <packet id="240" x="33" y="41" width="6" height="1" color="-3407872" />
+    </bin>
+    <bin id="8" density="0.994" width="50" height="50">
+      <packet id="79" x="0" y="0" width="33" height="21" color="-6711040" />
+      <packet id="80" x="0" y="21" width="23" height="11" color="-10066177" />
+      <packet id="83" x="23" y="21" width="23" height="11" color="-10066177" />
+      <packet id="67" x="0" y="32" width="22" height="11" color="-16532935" />
+      <packet id="59" x="22" y="32" width="22" height="11" color="-16532935" />
+      <packet id="52" x="0" y="43" width="21" height="7" color="-65536" />
+      <packet id="47" x="21" y="43" width="21" height="7" color="-65536" />
+      <packet id="4" x="33" y="0" width="10" height="10" color="-5739975" />
+      <packet id="3" x="33" y="10" width="10" height="10" color="-5739975" />
+      <packet id="43" x="43" y="0" width="7" height="21" color="-65536" />
+      <packet id="128" x="44" y="32" width="5" height="4" color="-3342388" />
+      <packet id="202" x="44" y="36" width="5" height="3" color="-1" />
+      <packet id="195" x="46" y="21" width="3" height="5" color="-1" />
+      <packet id="207" x="46" y="26" width="3" height="5" color="-1" />
+      <packet id="187" x="44" y="39" width="3" height="5" color="-1" />
+      <packet id="179" x="47" y="39" width="3" height="5" color="-1" />
+      <packet id="143" x="42" y="43" width="2" height="3" color="-5070091" />
+      <packet id="165" x="44" y="44" width="2" height="3" color="-5070091" />
+      <packet id="158" x="46" y="44" width="2" height="3" color="-5070091" />
+      <packet id="166" x="48" y="44" width="2" height="3" color="-5070091" />
+      <packet id="137" x="42" y="46" width="2" height="3" color="-5070091" />
+      <packet id="157" x="44" y="47" width="2" height="3" color="-5070091" />
+      <packet id="135" x="46" y="47" width="2" height="3" color="-5070091" />
+      <packet id="159" x="48" y="47" width="2" height="3" color="-5070091" />
+      <packet id="230" x="49" y="21" width="1" height="6" color="-3407872" />
+      <packet id="228" x="49" y="27" width="1" height="6" color="-3407872" />
+      <packet id="237" x="49" y="33" width="1" height="6" color="-3407872" />
+    </bin>
+    <bin id="9" density="0.9868" width="50" height="50">
+      <packet id="101" x="0" y="0" width="50" height="8" color="-154" />
+      <packet id="78" x="0" y="8" width="33" height="21" color="-6711040" />
+      <packet id="68" x="0" y="29" width="33" height="21" color="-6711040" />
+      <packet id="104" x="33" y="8" width="13" height="17" color="-7353667" />
+      <packet id="91" x="33" y="25" width="11" height="23" color="-10066177" />
+      <packet id="126" x="44" y="25" width="5" height="4" color="-3342388" />
+      <packet id="121" x="44" y="29" width="5" height="4" color="-3342388" />
+      <packet id="116" x="44" y="33" width="5" height="4" color="-3342388" />
+      <packet id="115" x="44" y="37" width="5" height="4" color="-3342388" />
+      <packet id="122" x="44" y="41" width="5" height="4" color="-3342388" />
+      <packet id="112" x="44" y="45" width="5" height="4" color="-3342388" />
+      <packet id="182" x="46" y="8" width="3" height="5" color="-1" />
+      <packet id="175" x="46" y="13" width="3" height="5" color="-1" />
+      <packet id="174" x="46" y="18" width="3" height="5" color="-1" />
+      <packet id="247" x="49" y="8" width="1" height="6" color="-3407872" />
+      <packet id="221" x="49" y="14" width="1" height="6" color="-3407872" />
+      <packet id="218" x="49" y="20" width="1" height="6" color="-3407872" />
+      <packet id="216" x="49" y="26" width="1" height="6" color="-3407872" />
+      <packet id="223" x="49" y="32" width="1" height="6" color="-3407872" />
+      <packet id="249" x="49" y="38" width="1" height="6" color="-3407872" />
+      <packet id="246" x="49" y="44" width="1" height="6" color="-3407872" />
+    </bin>
+    <bin id="10" density="0.9888" width="50" height="50">
+      <packet id="16" x="0" y="0" width="40" height="13" color="-3407668" />
+      <packet id="23" x="0" y="13" width="40" height="13" color="-3407668" />
+      <packet id="25" x="0" y="26" width="40" height="13" color="-3407668" />
+      <packet id="84" x="0" y="39" width="23" height="11" color="-10066177" />
+      <packet id="63" x="23" y="39" width="22" height="11" color="-16532935" />
+      <packet id="9" x="40" y="0" width="10" height="10" color="-5739975" />
+      <packet id="33" x="40" y="10" width="8" height="25" color="-26215" />
+      <packet id="185" x="45" y="35" width="3" height="5" color="-1" />
+      <packet id="205" x="45" y="40" width="3" height="5" color="-1" />
+      <packet id="173" x="45" y="45" width="3" height="5" color="-1" />
+      <packet id="145" x="48" y="10" width="2" height="3" color="-5070091" />
+      <packet id="151" x="48" y="13" width="2" height="3" color="-5070091" />
+      <packet id="168" x="48" y="16" width="2" height="3" color="-5070091" />
+      <packet id="134" x="48" y="19" width="2" height="3" color="-5070091" />
+      <packet id="153" x="48" y="22" width="2" height="3" color="-5070091" />
+      <packet id="170" x="48" y="25" width="2" height="3" color="-5070091" />
+      <packet id="224" x="48" y="28" width="1" height="6" color="-3407872" />
+      <packet id="234" x="49" y="28" width="1" height="6" color="-3407872" />
+      <packet id="251" x="48" y="34" width="1" height="6" color="-3407872" />
+      <packet id="238" x="49" y="34" width="1" height="6" color="-3407872" />
+      <packet id="229" x="48" y="40" width="1" height="6" color="-3407872" />
+      <packet id="213" x="49" y="40" width="1" height="6" color="-3407872" />
+    </bin>
+    <bin id="11" density="0.9944" width="50" height="50">
+      <packet id="102" x="0" y="0" width="50" height="8" color="-154" />
+      <packet id="103" x="0" y="8" width="50" height="8" color="-154" />
+      <packet id="97" x="0" y="16" width="50" height="8" color="-154" />
+      <packet id="18" x="0" y="24" width="40" height="13" color="-3407668" />
+      <packet id="15" x="0" y="37" width="40" height="13" color="-3407668" />
+      <packet id="13" x="40" y="24" width="10" height="10" color="-5739975" />
+      <packet id="0" x="40" y="34" width="10" height="10" color="-5739975" />
+      <packet id="117" x="40" y="44" width="5" height="4" color="-3342388" />
+      <packet id="114" x="45" y="44" width="5" height="4" color="-3342388" />
+      <packet id="136" x="40" y="48" width="3" height="2" color="-5070091" />
+    </bin>
+    <bin id="12" density="0.9988" width="50" height="50">
+      <packet id="74" x="0" y="0" width="33" height="21" color="-6711040" />
+      <packet id="76" x="0" y="21" width="33" height="21" color="-6711040" />
+      <packet id="26" x="0" y="42" width="25" height="8" color="-26215" />
+      <packet id="36" x="25" y="42" width="25" height="8" color="-26215" />
+      <packet id="106" x="33" y="0" width="17" height="13" color="-7353667" />
+      <packet id="107" x="33" y="13" width="17" height="13" color="-7353667" />
+      <packet id="110" x="33" y="26" width="17" height="13" color="-7353667" />
+      <packet id="180" x="33" y="39" width="5" height="3" color="-1" />
+      <packet id="188" x="38" y="39" width="5" height="3" color="-1" />
+      <packet id="149" x="43" y="39" width="2" height="3" color="-5070091" />
+      <packet id="171" x="45" y="39" width="2" height="3" color="-5070091" />
+      <packet id="147" x="47" y="39" width="2" height="3" color="-5070091" />
+    </bin>
+    <bin id="13" density="0.988" width="50" height="50">
+      <packet id="71" x="0" y="0" width="33" height="21" color="-6711040" />
+      <packet id="75" x="0" y="21" width="33" height="21" color="-6711040" />
+      <packet id="31" x="0" y="42" width="25" height="8" color="-26215" />
+      <packet id="32" x="25" y="42" width="25" height="8" color="-26215" />
+      <packet id="105" x="33" y="0" width="13" height="17" color="-7353667" />
+      <packet id="85" x="33" y="17" width="11" height="23" color="-10066177" />
+      <packet id="177" x="46" y="0" width="3" height="5" color="-1" />
+      <packet id="201" x="46" y="5" width="3" height="5" color="-1" />
+      <packet id="203" x="46" y="10" width="3" height="5" color="-1" />
+      <packet id="186" x="46" y="15" width="3" height="5" color="-1" />
+      <packet id="196" x="44" y="20" width="3" height="5" color="-1" />
+      <packet id="172" x="47" y="20" width="3" height="5" color="-1" />
+      <packet id="193" x="44" y="25" width="3" height="5" color="-1" />
+      <packet id="208" x="47" y="25" width="3" height="5" color="-1" />
+      <packet id="192" x="44" y="30" width="3" height="5" color="-1" />
+      <packet id="200" x="47" y="30" width="3" height="5" color="-1" />
+      <packet id="206" x="44" y="35" width="3" height="5" color="-1" />
+      <packet id="178" x="47" y="35" width="3" height="5" color="-1" />
+      <packet id="163" x="44" y="17" width="2" height="3" color="-5070091" />
+      <packet id="220" x="49" y="0" width="1" height="6" color="-3407872" />
+      <packet id="231" x="49" y="6" width="1" height="6" color="-3407872" />
+      <packet id="227" x="49" y="12" width="1" height="6" color="-3407872" />
+      <packet id="132" x="33" y="40" width="3" height="2" color="-5070091" />
+    </bin>
+    <bin id="14" density="0.7576" width="50" height="50">
+      <packet id="93" x="0" y="0" width="11" height="23" color="-10066177" />
+      <packet id="89" x="11" y="0" width="11" height="23" color="-10066177" />
+      <packet id="87" x="22" y="0" width="11" height="23" color="-10066177" />
+      <packet id="90" x="33" y="0" width="11" height="23" color="-10066177" />
+      <packet id="39" x="0" y="23" width="7" height="21" color="-65536" />
+      <packet id="50" x="7" y="23" width="7" height="21" color="-65536" />
+      <packet id="53" x="14" y="23" width="7" height="21" color="-65536" />
+      <packet id="57" x="21" y="23" width="7" height="21" color="-65536" />
+      <packet id="56" x="28" y="23" width="7" height="21" color="-65536" />
+      <packet id="44" x="35" y="23" width="7" height="21" color="-65536" />
+    </bin>
+  </bins>
+</BPP-2D_OptimumFile>
+
