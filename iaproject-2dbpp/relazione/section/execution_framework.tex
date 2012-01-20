@@ -25,14 +25,13 @@ Da un punto di vista esclusivamente di \emph{user experience} la rappresentazion
 \subsection{Classi essenziali}
 L'aggiunta di nuovi \emph{Core} da parte di uno sviluppatore comincia con la comprensione dello schema UML presentato in figura \ref{fig:uml_classi}.
 \begin{description}
-	\item[\texttt{MainWindow}]
-	\item[\texttt{ProblemConfiguration}] La creazione e gestione di questa classe è demandata 
-	\item[\texttt{GUISignaler}]
-	\item[\texttt{OptimumPainter}]
-	\item[\texttt{CoreDescriptor}]
-	\item[\texttt{CoreController}]
-	\item[\texttt{AbstractCore \& SwingWorker}]
-	\item[\texttt{AbstractConfigurator}]
+	\item[\texttt{MainWindow}] gestisce la videata iniziale del programma, nonchè smista i flussi di informazioni provenienti dagli algoritmi in esecuzione e le interazioni con l'utente. Si incarica inoltre di gestire la configurazione dell'istanza del problema, fornendo questi dati ai \emph{Core} al momento opportuno.
+	\item[\texttt{ProblemConfiguration}] definisce l'istanza specifica del problema: la gestione di questa classe è tutta a carico del framework e gli sviluppatori non dovranno far altro che usarla per attingere ai dati di cui hanno bisogno.
+	\item[\texttt{GUISignaler}] fornisce ai \emph{Core} un modo per segnalare informazioni e anomalie nell'esecuzione.
+	\item[\texttt{OptimumPainter}] è l'interfaccia che definisce qual'è il formato in cui i risultati dei \emph{Core} devono venir costruiti per essere visualizzati a video. Ciò non deve essere visto come una limitazione in quanto il framework prevede che gli sviluppatori possano usare i propri tipi di dato, avendo cura di creare una sorta di ``traduttore'' che converta i tipi specifici in quelli attesi dal metodo \texttt{paint} dell'interfaccia.
+	\item[\texttt{CoreController}] mette a disposizione della \texttt{MainWindow} - e quindi dell'utente finale - gli strumenti per controllare e interagire con l'esecuzione dell'algoritmo.
+	\item[\texttt{CoreDescriptor}] definisce le funzioni necessarie alla \texttt{MainWindow} per gestire i parametri di configurazione specifici di ogni \emph{Core} piuttosto che istanziarli fornendo loro le informazioni di cui hanno bisogno.
+	\item[\texttt{AbstractConfigurator \& AbstractCore}] sono le due classi astratte che uno sviluppatore deve estendere per poter annettere il proprio core al framework. A seconda delle richieste della \texttt{MainWindow} \texttt{AbstractConfigurator} crea e restituisce il componente visuale contenente i parametri di configurazione del \emph{Core}, oppure istanzia la classe che implementa l'algoritmo vero e proprio, ritornandone il \texttt{CoreController} associato. \texttt{AbstractCore}, invece, è la classe da estendere per implementare l'algoritmo stesso. I vincoli a cui richiede di sottostare sono che l'algoritmo abbia una struttura ciclica, in cui ogni ciclo non richieda un eccessivo tempo di elaborazione, e che si fornisca il traduttore dai tipi di dato che rappresentano l'ottimo all'interno del \emph{Core} a quelli richiesti da \texttt{OptimumPainter}.
 \end{description}
 
 
