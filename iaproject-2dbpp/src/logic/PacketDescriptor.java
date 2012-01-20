@@ -65,6 +65,6 @@ public final class PacketDescriptor extends AbstractPacket {
 	
 	@Override
 	public String toString() {
-		return id + ":" +super.toString();
+		return ""+id;// + ":" +super.toString();
 	}
 }
