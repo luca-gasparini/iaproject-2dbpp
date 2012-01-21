@@ -1,0 +1,62 @@
+Lo scopo di tale relazione è quello di illustrare alcuni algoritmi
+metaeuristici per risolvere il problema del 2D Bin Packing; in particolare
+attraverso l'euristica Bottom-Left-Fill (BLF) si sono scelti i seguenti:
+\begin{itemize}
+\item Genetico;
+\item Genetico basato su torneo
+\item Tabu Search.
+\end{itemize}
+Inoltre si è realizzata l'interfaccia grafica per ottere un supporto che
+evidenziasse il comportamento di tali algoritmi.
+
+\subsection{Descrizione del problema}
+Il 2-D Bin Packing Problem (2-DBPP) con rotazioni è definito come
+segue: 
+\begin{itemize}
+\item dato un insieme di n oggetti rettangolari di dimensioni h_{i} e w_{i}
+che rappresentano rispettivamente l'altezza e la larghezza dell’oggetto
+i-esimo;
+\item dato un insieme illimitato di contenitori, ognuno dei quali ha altezza
+H e larghezza W;
+\end{itemize}
+Minimizzare il numero dei contenitori (nBin) utilizzati a seguito
+dell'inserimento di tutti gli oggetti senza sovrapposizione (nBIN) è
+l'obbiettivo del problema. Gli oggetti possono essere ruotati di 90 gradi,
+questo aumenta le dimensioni dello spazio di ricerca e quindi la difficolta’ per
+raggiungere la soluzione ottima, ma produce il vantaggio di ridurre il numero di
+contenitori necessari.
+I vincoli cui devono sottostare gli algoritmi risolutivi sono i seguenti:
+\begin{itemize}
+ \item ogni oggetto deve essere inserito in un solo bin;
+ \item le dimensioni di ogni singolo oggetto devono essere minori delle
+dimensioni del bin;
+ \item le dimensioni dell'area totale occupata dalla somma degli oggetti in un
+bin deve essere inferiore all'area del bin.
+\end{itemize}
+Tali vincoli sono necessari altrimenti la soluzione del problema è triviale,
+infatti il problema non avrebbe alcuna soluzione.
+
+\subsection{Descrizione generale di un algoritmo per 2-DBPP}
+Ogni algoritmo utilizzato in questa relazione ha la seguente struttura.
+
+INPUT:
+\begin{itemize}
+  \item H e W dimensioni di tutti i bin;
+  \item h_{i} e w_{i} dimensioni dell’oggetto i-esimo;
+\end{itemize}
+
+OUTPUT:
+\begin{itemize}
+ \item nBIN numero di bin necessari per contenere gli oggetti;
+ \item posizionamento degli oggetti in ogni bin con rappresentazione grafica;
+ \item numero delle soluzioni ottime;
+ \item tempo di esecuzione;
+\end{itemize}
+
+Il 2-DBPP è un problema NP-Completo, ovvero fa parte di quella classe di
+problemi per i quali non è possibile, in tempo polimoniale, ottenere una o più
+soluzioni ottime.
+Proprio da questo aspetto nasce l'esigenza di ottenere buone soluzioni
+approssimate che siano ragionevolmente vicine all'ottimo; tali soluzioni si
+possono ottenere attraverso la coniugazione di euristiche particolari e
+algoritmi metaeuristici. 
