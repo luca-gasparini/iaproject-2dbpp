@@ -1,0 +1,27 @@
+\paragraph{}
+Il \textit{Tabu search} é un algoritmo meta euristico di ricerca locale. La differenza principale rispetto all'algoritmo genetico é che, durante la sua esecuzione, tiene traccia delle soluzioni calcolate e non solo dell'ultima trovata. Da questo si può intuire come la memoria e la sua gestione giochi un ruolo chiave in questo tipo di approccio. Ad ogni iterazione, l'algoritmo cerca di trovare la soluzione più conveniente, anche se questa é una mossa peggiorativa rispetto all'ultima soluzione trovata. Il motivo per la quale si accettano soluzioni peggiori è per evitare che l'algorimo si soffermi in un ottimo locale; tuttavia, così facendo, c'è il pericolo che l'algoritmo vada in stallo a causa di cicli: per questo motivo viene introdotta una lista tabu all'interno della quale vengono memorizzate le mosse proibite, ovvero le ultime mosse calcolate. Indicando con $l_t$ la lunghezza della lista tabù, così facendo si evitano cicli di dimensioni $\le l_t$. Quindi nel \textit{tabu search}, l'ultima soluzione trovata dipende dalle soluzioni precedenti e dall'intorno della soluzione stessa.
+   
+Di seguito verrà esposto come é stata implementata questa strategia per risolvere il problema del \textit{2D Bin Packing}.
+
+\subsection{Algoritmo}
+In questa sezione verrà esposto lo pseudocodice utilizzato e verranno spiegate le funzionalità.
+L'algoritmo inizia la sua esecuzione partendo da una soluzione ammissibile del problema: la soluzione ammissibile scelta corrisponde a inserire ciascun pacchetto in un bin diverso, di conseguenza inizialmente il numero di contenitori totale equivale al numero di pacchetti. Successivamente, ad ogni iterazione l'algoritmo cerca di migliorare la soluzione corrente effettuando una mossa migliorativa cercando tra le soluzioni vicine.
+
+La mossa migliorativa viene scelta secondo il seguente criterio: l'algoritmo deve determinare il bin che é più facilmente svuotabile (\textit{bin target}) e, preso un pacchetto $j$ appartenente al \textit{bin target}, si cerca di modificare un insieme S di pacchetti in modo tale da aggiungere il pacchetto $j$ a $S$. Il sottoinsieme $S$ viene creato prendendo i pacchetti presenti nei $k$ bin iniziali ecluso il \textit{bin target}. L'intero $k$ determina la dimensione dei vicini; per esempio, con $k=1$, l'insieme $S$ é formato dal contenuto di un altro bin e il pacchetto $j$, con $k=2$, l'insieme $S$ é formato dai pacchetti presenti in due bin più e il pacchetto $j$, e così via.
+
+La dimensione del valore $k$ é importante per due motivi:
+\begin{enumerate}[noitemsep]
+\item indica la dimensione delle soluzioni vicini da navigare;
+\item influisce sulla velocità di esecuzione dell'algoritmo: con $k=t$, al caso pessimo si dovranno creare al più $2^{t}$ insiemi;
+\end{enumerate}
+
+
+
+L'algoritmo di placing utilizzato per posizionare i pacchetti all'interno del bin é BLF (Bottom Left Fill); 
+
+\texttt{\footnotesize
+   \begin{tabbing}
+   \=~~~\=~~~\=~~~\\
+   \>\%pseudocodice
+   \end{tabbing}
+}
