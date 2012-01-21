@@ -455,7 +455,7 @@ public class PackingProcedures {
 		float newFitness = 100 * (coreBins.size()) + 49 * (float)minBinFitness;
 		
 		
-		return new BlfLayout(resultBins, newFitness);
+		return new BlfLayout(resultBins, newFitness,(float)minBinFitness);
 	}
 
 }
