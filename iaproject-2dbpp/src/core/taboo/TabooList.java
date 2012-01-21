@@ -1,14 +1,11 @@
 package core.taboo;
 
-import java.math.BigDecimal;
 import java.util.LinkedList;
 
 public class TabooList {
 	
 	private final int tenure;
-	//private final LinkedList<Float> moves = new LinkedList<Float>();
-	private final LinkedList<BigDecimal> moves = new LinkedList<BigDecimal>();
-	private final int precision = 4;
+	private final LinkedList<Float> moves = new LinkedList<Float>();
 	
 	public TabooList(int tenure) {
 		if (tenure <= 0) {
@@ -19,25 +16,20 @@ public class TabooList {
 	}
 	
 	public boolean isTabu(float move) {
-		//return moves.contains(Float.valueOf(move));
-		return moves.contains(BigDecimal.valueOf(move).setScale(precision, BigDecimal.ROUND_HALF_UP));
+		return moves.contains(Float.valueOf(move));
 	}
 	
 	public void addMove(float move) {
-		BigDecimal moveBD = BigDecimal.valueOf(move).setScale(precision, BigDecimal.ROUND_HALF_UP);
-		
-		assert !moves.contains(moveBD) : "already contained move";
+		assert !moves.contains(Float.valueOf(move)) : "already contained move";
 		
 		if (moves.size() == tenure) {
 			moves.removeLast();
 		}
 		
-		//moves.addFirst(Float.valueOf(move));
-		moves.addFirst(moveBD);
+		moves.addFirst(Float.valueOf(move));
 	}
 	
 	public void clear() {
 		moves.clear();
 	}
-
 }

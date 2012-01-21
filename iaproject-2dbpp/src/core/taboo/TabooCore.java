@@ -583,12 +583,12 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			newBin.setID(binID++);
 			binList.add(newBin);
 			
-			if (Float.compare(binLayout.getFitness(), minFitness) < 0) {
-				minFitness = binLayout.getFitness();
+			if (Float.compare(binLayout.getMinBinFitness(), minFitness) < 0) {
+				minFitness = binLayout.getMinBinFitness();
 			}
 		}
 		
-		final float totFitness = 100 * binList.size() + (minFitness - 100);
+		final float totFitness = 100 * binList.size() + 49 * minFitness;
 		
 		return new AbstractCoreResult<List<Bin>>() {
 			@Override
