@@ -1,6 +1,6 @@
 Il \textit{Tabu search} é un algoritmo meta euristico di ricerca locale. La differenza principale rispetto all'algoritmo genetico é che, durante la sua esecuzione, tiene traccia delle soluzioni calcolate e non solo dell'ultima trovata. Da questo si può intuire come la memoria e la sua gestione giochi un ruolo chiave in questo tipo di approccio. Ad ogni iterazione, l'algoritmo cerca di trovare la soluzione più conveniente, anche se questa é una mossa peggiorativa rispetto all'ultima soluzione trovata. Il motivo per la quale si accettano soluzioni peggiori è per evitare che l'algorimo si soffermi in un ottimo locale; tuttavia, così facendo, c'è il pericolo che l'algoritmo vada in stallo a causa di cicli: per questo motivo viene introdotta una lista tabu all'interno della quale vengono memorizzate le mosse proibite, ovvero le ultime mosse calcolate. Indicando con $l_t$ la lunghezza della lista tabù, così facendo si evitano cicli di dimensioni $\le l_t$. Quindi nel \textit{tabu search}, l'ultima soluzione trovata dipende dalle soluzioni precedenti e dall'intorno della soluzione stessa.
    
-Di seguito verrà esposto come é stata implementata questa strategia per risolvere il problema del \textit{2D Bin Packing}.
+Di seguito verrà esposto come é stata implementata questa strategia per risolvere il problema del \ddbp
 
 \subsection{Algoritmo}
 In questa sezione verrà esposto lo pseudocodice utilizzato e verranno spiegate le funzionalità. L'algoritmo sviluppato é una piccola variante di quello proposto nei paper \cite{lmvTabu} e \cite{lmvTspack}.
