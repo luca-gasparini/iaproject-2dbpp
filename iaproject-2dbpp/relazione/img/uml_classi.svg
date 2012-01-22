@@ -40,13 +40,13 @@
      inkscape:window-height="724"
      id="namedview1744"
      showgrid="false"
-     inkscape:zoom="0.7620438"
-     inkscape:cx="695.78969"
-     inkscape:cy="553.91444"
+     inkscape:zoom="0.53884634"
+     inkscape:cx="633.63341"
+     inkscape:cy="429.44017"
      inkscape:window-x="0"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
-     inkscape:current-layer="surface40623" />
+     inkscape:current-layer="surface14402" />
   <defs
      id="defs4">
     <g
@@ -750,7 +750,7 @@
     </g>
   </defs>
   <g
-     id="surface40623">
+     id="surface14402">
     <rect
        x="0"
        y="0"
@@ -4224,12 +4224,12 @@
        id="path1668" />
     <path
        style="fill:none;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%,0%,0%);stroke-opacity:1;stroke-miterlimit:10;"
-       d="M 55.760938 14.839531 L 55.760938 16.049688 "
+       d="M 55.760938 13.580938 L 55.760938 14.791094 "
        transform="matrix(20,0,0,20,-263,90.725)"
        id="path1670" />
     <path
        style="fill-rule:evenodd;fill:rgb(0%,0%,0%);fill-opacity:1;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%,0%,0%);stroke-opacity:1;stroke-miterlimit:10;"
-       d="M 55.760938 13.580938 L 56.000977 14.280938 L 55.760938 14.980938 L 55.521094 14.280938 Z M 55.760938 13.580938 "
+       d="M 55.760938 16.049688 L 55.521094 15.349688 L 55.760938 14.649688 L 56.000977 15.349688 Z M 55.760938 16.049688 "
        transform="matrix(20,0,0,20,-263,90.725)"
        id="path1672" />
     <path
