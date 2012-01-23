@@ -81,11 +81,14 @@ public class Population {
 				new ArrayList<Individual>(tournamentsNumber);
 		for(int i=0; i<tournamentsNumber; i++) {
 			// make a tournament
-			int winner = Integer.MAX_VALUE;
+			
+			int winner = rand.nextInt(population.size());
 			int player;
-			for(int j=0; j<tournamentSize; j++) {
+			for(int j=0; j<tournamentSize-1; j++) {
 				player = rand.nextInt(population.size());
-				if (player < winner) winner = player;
+				if (population.get(player).getFitness() < population.get(winner).getFitness()) {
+					winner = player;
+				}
 			}
 			selectedIndividuals.add( population.get(winner) );
 		}
