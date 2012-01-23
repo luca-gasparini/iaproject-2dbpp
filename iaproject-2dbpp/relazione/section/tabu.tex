@@ -159,8 +159,8 @@ Questo é lo pseudocodice:
    \end{tabbing}
 }
 
-\subsection{Incoveniente}
-Seguendo l'approccio menzionato dai paper precedenti, durante lo sviluppo del nostro algoritmo tabu é apparso un incoveniente, derivante dall'utilizzo del \textit{BLF} come algoritmo di placing.
+\subsection{Inconveniente}
+Seguendo l'approccio menzionato dai paper precedenti, durante lo sviluppo del nostro algoritmo tabu é apparso un inconveniente, derivante dall'utilizzo del \textit{BLF} come algoritmo di placing.
 
 Nella procedura \texttt{SEARCH}, qual'ora \texttt{A(S)} risultasse pari a $k$, significa che un pacchetto é stato rimosso dal target bin ed é stato aggiunto ad un altro contenitore. Questo porterebbe a dire che i pacchetti presenti nel target bin, essendo in numero inferiore rispetto a prima, possono nuovamente essere riposizionati all'interno del loro contenitore. Il problema é collegato a questo punto: vediamo con un esempio:
 
@@ -205,7 +205,7 @@ Ora, supponiamo che la procedura \texttt{SEARCH} rimuova il pacchetto $j=1$ dal 
 
 Come si può notare dall'immagine di figura \ref{img:inconv2}, nonostante sia stato eliminato un pacchetto dal target, il BLF ha richiesto un nuovo contenitore per collocare tutti i pacchetti residui. Questo problema deriva dal fatto che in input il BLF vuole una lista di pacchetti, il cui \textit{ordine} é importante al fine della loro allocazione all'interno del bin.
 
-Dopo diversi test con istanze di problema comuni, é stato scelto che, qual'ora si verificasse questo incoveniente, il programma termini la ricerca dell'ottima avvisando l'utente del motivo dell'interruzione. L'alternativa sarebbe stata quella di trovare una lista di pacchetti tale per cui il BLF ritornasse un solo contenitore con un posizionamento ottimo dei pacchetti: il motivo per la quale questa scelta é stata scartata, deriva dalla possibile durata nel cercare tale lista; infatti, oltre a considerare l'ordine dei pacchetti all'interno della lista, bisogna valutare la possibilità che ciascun pacchetto può essere o meno ruotato. Di conseguenza, indicando con $n = \#$ pacchetti presenti in un bin, le possibili liste sono pari a $\binom{2n}{n}!$ e, essendo la complessità temporale del BLF $O(n^2)$, la complessità per trovare la lista migliore sarebbe stata $O\left((\binom{2n}{n}!)^2\right)$, almeno utilizzando un approccio del tipo \textit{brute force}.
+Dopo diversi test con istanze di problema comuni, é stato scelto che, qual'ora si verificasse questo inconveniente, il programma termini la ricerca dell'ottima avvisando l'utente del motivo dell'interruzione. L'alternativa sarebbe stata quella di trovare una lista di pacchetti tale per cui il BLF ritornasse un solo contenitore con un posizionamento ottimo dei pacchetti: il motivo per la quale questa scelta é stata scartata, deriva dalla possibile durata nel cercare tale lista; infatti, oltre a considerare l'ordine dei pacchetti all'interno della lista, bisogna valutare la possibilità che ciascun pacchetto può essere o meno ruotato. Di conseguenza, indicando con $n = \#$ pacchetti presenti in un bin, le possibili liste sono pari a $\binom{2n}{n}!$ e, essendo la complessità temporale del BLF $O(n^2)$, la complessità per trovare la lista migliore sarebbe stata $O\left((\binom{2n}{n}!)^2\right)$, almeno utilizzando un approccio del tipo \textit{brute force}.
 
 \subsection{Miglioramento per il BLF}
 Al fine di migliorare le soluzioni trovate dal tabu search in combinazione con l'algoritmo di placing BLF, é stata introdotta una semplice miglioria: durante la creazione dell'insieme $S$, i pacchetti vengono ordinati per larghezza in modo decrescente: l'introduzione di questa funzionalità deriva dall'idea che un pacchetto grande é più difficile da spostare rispetto ad un pacchetto piccolo.
