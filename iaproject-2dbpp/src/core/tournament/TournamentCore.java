@@ -20,7 +20,7 @@ import core.genetic.Individual;
 
 public class TournamentCore extends AbstractCore<TournamentConfiguration, List<Bin>> {
 	
-	private static final int N_TO_STOP = 1000; // stopping cond on iteration
+	private static final int N_TO_STOP = 10000; // stopping cond on iteration
 	private static final float PERC_TO_STOP = 0.95f; // stopping cond on equals individual
 	// core configuration fields
 	private final int populationSize;
@@ -253,7 +253,7 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 		}
 		if (population.reachedConvergence(PERC_TO_STOP)) { // PERC_TO_STOP not used now
 			JOptionPane.showMessageDialog(null, "Core stopped: convergence reached!");
-			return false;
+			return true;
 		}
 		return false;
 	}
