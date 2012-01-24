@@ -141,6 +141,8 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 				this.totArea += pc.getArea() * pc.getMolteplicity();
 				this.packets.add(pc);
 			}
+			
+			fireIntervalAdded(this, 0, this.packets.size() - 1);
 		}
 
 		public int getTotPackets() {
@@ -156,12 +158,21 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 			this.totPkts -= rem.getMolteplicity();
 			this.totArea -= rem.getArea() * rem.getMolteplicity();
 			
+			fireIntervalRemoved(this, selIndex, selIndex);
+			
 			return rem;
 		}
 
 		public void removeAll() {
+			if (packets.isEmpty()) {
+				return;
+			}
+			
 			this.totArea = this.totPkts = 0;
+			int size = packets.size();
 			this.packets.clear();
+			
+			fireIntervalRemoved(this, 0, size - 1);
 		}
 		
 		
