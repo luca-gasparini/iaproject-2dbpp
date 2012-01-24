@@ -253,7 +253,7 @@ public class TournamentCore extends AbstractCore<TournamentConfiguration, List<B
 		}
 		if (population.reachedConvergence(PERC_TO_STOP)) { // PERC_TO_STOP not used now
 			JOptionPane.showMessageDialog(null, "Core stopped: convergence reached!");
-			return true;
+			return false;
 		}
 		return false;
 	}
