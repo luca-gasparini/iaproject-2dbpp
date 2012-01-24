@@ -16,13 +16,15 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.AbstractAction;
+import javax.swing.AbstractListModel;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -109,35 +111,86 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		
 	}
 	
+	private class PacketListModel extends AbstractListModel {
+		private static final long serialVersionUID = 6765900019347114328L;
+		
+		private final List<PacketConfiguration> packets = new ArrayList<PacketConfiguration>();
+		
+		private int totPkts = 0;
+		private int totArea = 0;
+		
+		@Override
+		public int getSize() {
+			return packets.size();
+		}
+
+		@Override
+		public Object getElementAt(int index) {
+			return packets.get(index);
+		}
+
+		public List<PacketConfiguration> getPackets() {
+			return Collections.unmodifiableList(packets);
+		}
+
+		public void setPackets(List<PacketConfiguration> newPackets) {
+			removeAll();
+			
+			for (PacketConfiguration pc : newPackets) {
+				this.totPkts += pc.getMolteplicity();
+				this.totArea += pc.getArea() * pc.getMolteplicity();
+				this.packets.add(pc);
+			}
+		}
+
+		public int getTotPackets() {
+			return this.totPkts;
+		}
+
+		public int getTotArea() {
+			return this.totArea;
+		}
+
+		public PacketConfiguration remove(int selIndex) {
+			PacketConfiguration rem = this.packets.remove(selIndex);
+			this.totPkts -= rem.getMolteplicity();
+			this.totArea -= rem.getArea() * rem.getMolteplicity();
+			
+			return rem;
+		}
+
+		public void removeAll() {
+			this.totArea = this.totPkts = 0;
+			this.packets.clear();
+		}
+		
+		
+		
+	}
+	
 	public ProblemConfigurer(Window parent,
 			ProblemConfiguration oldValue) {
 		super(parent, "Problem configuration", oldValue);
 	}
 	
-	private DefaultListModel packetListModel;
+	private PacketListModel packetListModel;
 	private JIntegerTextField binWidth;
 	private JIntegerTextField binHeight;
-	private TitledBorder titleBorder;
+	private JPanel pktPane;
 	
 	@Override
 	protected void paintValue(ProblemConfiguration value) {
 		binWidth.setValue(Integer.valueOf(value.getBin().getWidth()));
 		binHeight.setValue(Integer.valueOf(value.getBin().getHeight()));
-		
-		int totPkts = 0;
-		int totArea = 0;
-		packetListModel.removeAllElements();
-		for (PacketConfiguration pc : value.getPackets()) {
-			packetListModel.addElement(pc);
-			totPkts += pc.getMolteplicity();
-			totArea += pc.getArea();
-		}
-		
-		updatePktTitle(totPkts, totArea);
+		packetListModel.setPackets(value.getPackets());
+		updatePktTitle();
 	}
 
-	private void updatePktTitle(int totPkts, int totArea) {
-		titleBorder.setTitle("Input packets [ #" + totPkts + " - Area:" + totArea + " ]");
+	private void updatePktTitle() {
+		int totPkts = packetListModel.getTotPackets();
+		int totArea = packetListModel.getTotArea();
+		TitledBorder title = BorderFactory.createTitledBorder("Input packets [ #" + totPkts + " - Area:" + totArea + " ]");
+		pktPane.setBorder(title);
 	}
 
 	@Override
@@ -150,27 +203,15 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		}
 		BinConfiguration bc = new BinConfiguration(binW.intValue(), binH.intValue());
 		
-		PacketConfiguration[] tmp = new PacketConfiguration[packetListModel.size()];
-		
-		packetListModel.copyInto(tmp);
+		List<PacketConfiguration> packets = packetListModel.getPackets();
 		
 		/*
 		 * check if packet can be inserted into the Bin, rotated or not.
 		 */
-		for (int i=0; i<tmp.length; i++) {
-			/*boolean widthErr = pc.getWidth() > bc.getWidth() && pc.getWidth() > bc.getHeight();
-			boolean heightErr = pc.getHeight() > bc.getHeight() && pc.getHeight() > bc.getWidth();
-			
-			if (widthErr || heightErr) {
-				throw new DataParsingException("Packet " + i + ": unplaceable "
-						+ ((widthErr) ? "width" : "height"));
-			}*/
-			PacketConfiguration pc = tmp[i];
+		for (PacketConfiguration pc : packets) {
 			if (!ManageSolution.canInsert(pc, bc))
-				throw new DataParsingException("Packet " + i + ": unplaceable: too big ");
+				throw new DataParsingException("Packet " + pc + " unplaceable: too big");
 		}
-		
-		List<PacketConfiguration> packets = Arrays.asList(tmp);
 		
 		return new ProblemConfiguration(bc, packets);
 	}
@@ -180,8 +221,7 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 	 * @param selectedRow can be negative that means no selection.
 	 */
 	private void modifyPacketList(int selectedRow) {
-		PacketConfiguration[] tmp = new PacketConfiguration[packetListModel.size()];
-		packetListModel.copyInto(tmp);
+		PacketConfiguration[] tmp = packetListModel.getPackets().toArray(new PacketConfiguration[] {});
 		
 		PacketsConfigurer packConf = new PacketsConfigurer(ProblemConfigurer.this, tmp);
 		if (selectedRow >= 0) {
@@ -189,10 +229,8 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		}
 		PacketConfiguration[] newPackets = packConf.askUser();
 		
-		packetListModel.removeAllElements();
-		for (PacketConfiguration pc : newPackets) {
-			packetListModel.addElement(pc);
-		}
+		packetListModel.setPackets(Arrays.asList(newPackets));
+		updatePktTitle();
 	}
 
 	@Override
@@ -212,7 +250,8 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		dropAllBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				packetListModel.removeAllElements();
+				packetListModel.removeAll();
+				updatePktTitle();
 			}
 		});
 		
@@ -223,7 +262,7 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 		btnPanel.add(editBtn);
 		btnPanel.add(Box.createHorizontalGlue());
 		
-		packetListModel = new DefaultListModel();
+		packetListModel = new PacketListModel();
 		final JList pktList = new JList(packetListModel);
 		pktList.setCellRenderer(new PacketListRender());
 		pktList.getInputMap(JList.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).
@@ -236,6 +275,7 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 				if (selIndex < 0) return;
 				packetListModel.remove(selIndex);
 				pktList.setSelectedIndex(selIndex);
+				updatePktTitle();
 			}
 		});
 		pktList.addMouseListener(new MouseAdapter() {
@@ -251,10 +291,9 @@ public class ProblemConfigurer extends AbstractDialog<ProblemConfiguration> {
 				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, 
 				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		
-		JPanel pktPane = new JPanel(new BorderLayout());
-		titleBorder = BorderFactory.createTitledBorder("DEFAULT");
+		pktPane = new JPanel(new BorderLayout());
+		TitledBorder titleBorder = BorderFactory.createTitledBorder("DEFAULT");
 		pktPane.setBorder(titleBorder);
-		updatePktTitle(0, 0);
 		pktPane.add(pktPainter, BorderLayout.CENTER);
 		pktPane.add(btnPanel, BorderLayout.SOUTH);
 		

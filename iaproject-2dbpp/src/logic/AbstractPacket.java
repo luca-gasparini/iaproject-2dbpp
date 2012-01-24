@@ -8,6 +8,7 @@ public abstract class AbstractPacket implements Serializable {
 	private static final long serialVersionUID = -3719533933391235589L;
 	private final int width;
 	private final int height;
+	private final int area;
 	
 	public AbstractPacket (int width, int height) {
 		if (width <= 0 || height <= 0) {
@@ -15,6 +16,7 @@ public abstract class AbstractPacket implements Serializable {
 		}
 		this.width = width;
 		this.height = height;
+		this.area = width * height;
 	}
 	
 	public int getWidth() {
@@ -26,7 +28,7 @@ public abstract class AbstractPacket implements Serializable {
 	}
 	
 	public int getArea() {
-		return this.height * this.width;
+		return this.area;
 	}
 	
 	public Dimension getSize() {

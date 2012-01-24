@@ -492,66 +492,130 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 			return lsStd;
 		}
 		
+		/* *************** PART ONE **************** */
 		/* IMPROVEBLF is true: we try to improve BLF placing results by 
-		 * sorting in a width-ascendent way all packets.
+		 * sorting in a width-descendant way all packets.
 		 */
 		
 		// tells if p1 is wider than p2
-		Comparator<Packet> pktComp = new Comparator<Packet>() {
+		Comparator<Packet> pktCompWD = new Comparator<Packet>() {
 			@Override
 			public int compare(Packet p1, Packet p2) {
 				int p1dim = p1.getWidth();
 				int p2dim = p2.getWidth();
 				
-//				return -Integer.compare(p1dim, p2dim);
 				return p2dim - p1dim;
 			}
 		};
 		
-		// sort s in descending width order
-		Collections.sort(s, pktComp);
-		BlfLayout lsImp = callBLFLayout(s);
+		// sort s in width descending order
+		Collections.sort(s, pktCompWD);
+		BlfLayout lsImpWD = callBLFLayout(s);
 		
 		if (j.isRotatable()) {
-			// find j, remove it and insert its rotation in the correct place
-			/* we use such a long way in order to avoid another sort: following
-			 * algorithm has O(s.size) complexity because it scans each element
-			 * in the list at most once.
-			 */
-			boolean removed = false, insertionStop = false;
 			Packet jRot = j.getRotated();
-			ListIterator<Packet> pIt = s.listIterator();
-			while(pIt.hasNext() && (!removed || !insertionStop)) {
-				Packet p = pIt.next();
-				if (p.getId() == j.getId()) {
-					pIt.remove();
-					removed = true;
-				} else if (pktComp.compare(jRot, p) < 0) {
-					insertionStop = true;
-				}
-			}
-			if (insertionStop) { pIt.previous(); }
-			pIt.add(jRot);
-			while(pIt.hasNext() && (!removed)) {
-				Packet p = pIt.next();
-				if (p.getId() == j.getId()) {
-					pIt.remove();
-					removed = true;
-				}
-			}
-			assert removed : "not removed";
+			// find j, remove it and insert its rotation in the correct place
+			boolean found = this.<Packet>sortedReplace(s, j, jRot, pktCompWD);
+			assert found : "j has not been found";
 			
 			BlfLayout lsRotImp = callBLFLayout(s);
-			if (Float.compare(lsRotImp.getFitness(), lsImp.getFitness()) < 0) {
-				lsImp = lsRotImp;
+			if (Float.compare(lsRotImp.getFitness(), lsImpWD.getFitness()) < 0) {
+				lsImpWD = lsRotImp;
 			}
+			
+			/* this way we "standardize" variable name usage by each following
+			 * improvement: you have to perform a sort and create the 
+			 * layout with j, then replace j with j.getRotated and create 
+			 * the second layout. Don't worry about the fact that the j you
+			 * use is (maybe) rotated compared to one given to the method  
+			 */
+			j = jRot;
 		}
 		
+		/* *************** PART TWO **************** */
+		/* IMPROVEBLF is true: we try to improve BLF placing results by 
+		 * sorting in an area-descendant way all packets.
+		 */
+		Comparator<Packet> pktCompAD = new Comparator<Packet>() {
+			@Override
+			public int compare(Packet o1, Packet o2) {
+				return o2.getArea() - o1.getArea();
+			}
+		};
+		// sort collection in area descendant order
+		Collections.sort(s, pktCompAD);
+		BlfLayout lsImpAD = callBLFLayout(s);
+		
+		if (j.isRotatable()) {
+			Packet jRot = j.getRotated();
+			// find j, remove it and insert its rotation in the correct place
+			boolean found = this.<Packet>sortedReplace(s, j, jRot, pktCompAD);
+			assert found : "j has not been found";
+			
+			BlfLayout lsRotImp = callBLFLayout(s);
+			if (Float.compare(lsRotImp.getFitness(), lsImpAD.getFitness()) < 0) {
+				lsImpAD = lsRotImp;
+			}
+			
+			j = jRot;
+		}
+		
+		// search best layout between improved ones...
+		BlfLayout lsImp = lsImpWD;
+		if (Float.compare(lsImpAD.getFitness(), lsImpWD.getFitness()) < 0) {
+			lsImp = lsImpAD;
+		}
+		
+		/* ... then return best layout between standard and improved
+		 * (if equals standard layout will be chosen)
+		 */
 		if (Float.compare(lsStd.getFitness(), lsImp.getFitness()) <= 0) {
 			return lsStd;
 		} else {
 			return lsImp;
 		}
+	}
+	
+	/**
+	 * Given a list of items sorted according to <code>comp</code>, removes
+	 * <code>toFind</code> (found using Object#equals() method) and 
+	 * inserts <code>toInsert</code> in the correct
+	 * place all in at most <tt>sortedList.size()</tt> iterations.
+	 * 
+	 * @param sortedList
+	 * @param toFind
+	 * @param toInsert
+	 * @param sortComp
+	 * @return
+	 */
+	private <T> boolean sortedReplace(List<T> sortedList, T toFind, T toInsert, Comparator<? super T> sortComp) {
+		/* we use such a long way in order to avoid another sort: following
+		 * algorithm has O(s.size) complexity because it scans each element
+		 * in the list at most once.
+		 */
+		boolean removed = false, insertionStop = false;
+		
+		ListIterator<T> pIt = sortedList.listIterator();
+		while(pIt.hasNext() && (!removed || !insertionStop)) {
+			T p = pIt.next();
+			if (p.equals(toFind)) {
+				pIt.remove();
+				removed = true;
+			} else if (sortComp.compare(toInsert, toFind) < 0) {
+				insertionStop = true;
+			}
+		}
+		if (insertionStop) { pIt.previous(); }
+		pIt.add(toInsert);
+		while(pIt.hasNext() && (!removed)) {
+			T p = pIt.next();
+			if (p.equals(toFind)) {
+				pIt.remove();
+				removed = true;
+			}
+		}
+		
+		return removed;
 	}
 	
 	private static float calculateFillingFunction(float ALPHA, List<Packet> pkts, BinConfiguration binConf, int totPkts) {
@@ -719,9 +783,12 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		}
 		
 		/* - now we have to check that new target bin still packs into a single
-		 * bin: this may not be true due to the remotion of one packet as
-		 * below example where pkt2 remotion cause pkt4 to fall into another
-		 * bin.
+		 * bin: this condition may not hold anymore (even if it packed into 
+		 * a single bin with an additional pakcet). This may happen because
+		 * BLF is an order-dependent heuristic and the remotion of a packet
+		 * may result in a completely different layout, as shown in
+		 * example below: initial packet sequence where 1,2,3,4 but pkt2 
+		 * remotion cause pkt4 to overflow.
 		 * 
 		 *  _____          44444
 		 * |44444|_|      |44444  |
@@ -771,7 +838,7 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 				nIt++;
 				
 				packIterator.remove();
-				/* there's always a previous,: otherwise means that
+				/* there's always a previous: otherwise means that
 				 * no matter where we place overflowPkt in the list, we
 				 * always get a layout with >1 bins.
 				 */
