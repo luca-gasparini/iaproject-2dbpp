@@ -218,15 +218,15 @@ public class TabooCore extends AbstractCore<TabooConfiguration, List<Bin>> {
 		/* create the collection of all bins without target one (needed to
 		 * build k-tuples)
 		 */
-		List<TabooBin> binsWOtarget = new LinkedList<TabooBin>(bins);
+		List<TabooBin> binsWOtarget = new ArrayList<TabooBin>(bins);
 		binsWOtarget.remove(targetBin);
-		Collections.shuffle(binsWOtarget);
 		
 		ArrayList<TabooBin> packetsMovePenaltyStar = new ArrayList<TabooBin>();
 		ArrayList<TabooBin> packetsMovePenalty = new ArrayList<TabooBin>();
 		
 		for (Packet j: packetsIntoTargetBin) {
 			
+			Collections.shuffle(binsWOtarget);
 			TupleIterator<TabooBin> ktuple = new TupleIterator<TabooBin>(k, binsWOtarget);
 			
 			while (ktuple.hasNext()) {
